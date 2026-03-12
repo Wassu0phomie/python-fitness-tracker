@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная | FitnessApp{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Добро пожаловать, {{ user.username|default:"Атлет" }}! 👋</h2>
+            <p class="text-muted">Сегодня {{ date|default:"отличный день для тренировки" }}.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-calendar3 me-2"></i>Мои текущие планы</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if active_plans %}
+                        <div class="list-group list-group-flush">
+                            {% for plan in active_plans %}
+                                <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ plan.title }}</h6>
+                                        <small class="text-muted">Начат: {{ plan.start_date|date:"d.m.Y" }}</small>
+                                    </div>
+                                    <span class="badge bg-light text-primary border border-primary rounded-pill">В процессе</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-clipboard-x text-muted display-4"></i>
+                            <p class="text-muted mt-2">У вас пока нет активных тренировочных планов.</p>
+                            <a href="#" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-1"></i> Создать первый план
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h5 class="card-title mb-0"><i class="bi bi-camera me-2"></i>Последний прогресс</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for photo in recent_photos %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 border-0 shadow-sm text-center">
+                                    <img src="{{ photo.photo.url }}" class="card-img-top" alt="Прогресс" style="height: 150px; object-fit: cover;">
+                                    <div class="card-footer bg-white small text-muted">
+                                        {{ photo.date|date:"d M Y" }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-center py-5">
+                                <i class="bi bi-images text-muted fs-1"></i>
+                                <p class="text-muted mt-2">Загрузите первое фото в календарь, чтобы следить за изменениями!</p>
+                                <a href="#" class="btn btn-outline-dark btn-sm">Добавить фото</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">Быстрые действия</h5>
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'exercise_list' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-search text-primary"></i>
+                                </div>
+                                <span>Найти упражнение</span>
+                            </div>
+                        </a>
+
+                        <a href="#" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-plus-square text-success"></i>
+                                </div>
+                                <span>Новая тренировка</span>
+                            </div>
+                        </a>
+
+                        <a href="#" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-graph-up text-warning"></i>
+                                </div>
+                                <span>Замеры тела</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-info bg-opacity-10 border-0 p-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-info fs-4 me-3"></i>
+                    <div>
+                        <small class="fw-bold d-block text-info">Совет дня</small>
+                        <small class="text-dark">Не забывайте пить воду во время тренировки!</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

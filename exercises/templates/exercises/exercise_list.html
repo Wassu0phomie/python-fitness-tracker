@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Упражнения | FitnessApp{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">База упражнений</h1>
+        <p class="lead text-muted">Изучайте технику выполнения и находите новые упражнения</p>
+    </div>
+
+    <div class="row g-3 mb-4 text-center">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-primary">{{ exercises.count }}</div>
+                    <div class="small text-muted">Упражнений</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-success">{{ muscle_groups.count }}</div>
+                    <div class="small text-muted">Групп мышц</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-info">{{ equipment.count }}</div>
+                    <div class="small text-muted">Оборудования</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-warning">4</div>
+                    <div class="small text-muted">Уровня сложности</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-3"><i class="bi bi-sliders me-2"></i>Фильтры</h5>
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small">Поиск</label>
+                    <input type="text" name="q" value="{{ filter_params.q }}" class="form-control" placeholder="Название...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Тип</label>
+                    <select name="exercise_type" class="form-select">
+                        <option value="">Все типы</option>
+                        {% for value, label in exercise_types %}
+                        <option value="{{ value }}" {% if filter_params.exercise_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Сложность</label>
+                    <select name="difficulty" class="form-select">
+                        <option value="">Любая</option>
+                        {% for value, label in difficulties %}
+                        <option value="{{ value }}" {% if filter_params.difficulty == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">Мышцы</label>
+                    <select name="muscle" class="form-select">
+                        <option value="">Все группы</option>
+                        {% for muscle in muscle_groups %}
+                        <option value="{{ muscle.id }}" {% if filter_params.muscle == muscle.id|stringformat:"s" %}selected{% endif %}>{{ muscle.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 text-end mt-3">
+                    <a href="{% url 'exercise_list' %}" class="btn btn-light border">Сбросить</a>
+                    <button type="submit" class="btn btn-primary px-4">Применить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for exercise in exercises %}
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0">
+                {% if exercise.main_image %}
+                    <img src="{{ exercise.main_image}}" class="card-img-top" alt="{{ exercise.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-image text-muted fs-1"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-primary-soft text-primary border border-primary small">{{ exercise.get_exercise_type_display }}</span>
+                        <span class="badge bg-secondary small">{{ exercise.get_difficulty_display }}</span>
+                    </div>
+                    <h5 class="card-title fw-bold">{{ exercise.name }}</h5>
+                    <p class="card-text text-muted small">{{ exercise.description|truncatechars:100 }}</p>
+
+                    <div class="mt-3">
+                        {% for muscle in exercise.primary_muscles.all|slice:":3" %}
+                            <span class="badge bg-light text-dark border">{{ muscle.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3">
+                    <a href="#" class="btn btn-outline-primary w-100">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">Упражнения не найдены.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
