@@ -6,15 +6,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
-
+from django.contrib.auth import views as auth_views
+from main import views as main_views
 
 urlpatterns = [
     # Админка
     path('admin/', admin.site.urls),
     # Главная страница
-    path('', include('main.urls')),
-
+    path('', main_views.welcome, name='welcome'),
+    path('', include('main.urls')), #Не забыть изменить
     path('exercises/', include('exercises.urls')),
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
 ]
 
 # Для медиа-файлов в режиме разработки

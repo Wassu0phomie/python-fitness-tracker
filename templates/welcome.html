@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добро пожаловать | FITAPP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/welcome_style.css' %}">
+</head>
+<body class="light-theme">
+    <header class="main-header border-bottom py-3">
+        <div class="container d-flex flex-wrap align-items-center justify-content-between">
+            <a href="/" class="header-logo text-decoration-none">
+                FIT<span>APP</span>
+            </a>
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li><a href="#" class="nav-link px-3">Упражнения</a></li>
+                <li><a href="#" class="nav-link px-3">Рецепты</a></li>
+            </ul>
+            <div class="col-md-auto text-end d-flex align-items-center">
+                <a href="{% url 'login' %}?signup=true" class="btn-fitstars">Начать тренироваться</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="welcome-wrapper vh-100 d-flex align-items-center">
+        <div class="container text-center">
+            <main class="content-box">
+                <h1 class="display-1 fw-black main-title mb-4">
+                    ТВОЕ ТЕЛО <br><span class="outline-text">ТВОИ ПРАВИЛА</span>
+                </h1>
+                <p class="lead subtitle mb-5 mx-auto" style="max-width: 700px;">
+                    Отслеживай тренировки, контролируй прогресс и достигай новых высот с персональным фитнес-помощником.
+                </p>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'login' %}" class="btn-main-dark">Войти в профиль</a>
+                    <a href="{% url 'login' %}?signup=true" class="btn-main-outline">Регистрация</a>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>

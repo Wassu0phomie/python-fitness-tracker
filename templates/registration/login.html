@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход и Регистрация | FitnessApp</title>
+    <link rel="stylesheet" href="{% static 'css/login_style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form action="#"> <h1>Создать аккаунт</h1>
+                <span>используйте email для регистрации</span>
+                <input type="text" placeholder="Имя" />
+                <input type="email" placeholder="Email" />
+                <input type="password" placeholder="Пароль" />
+                <button type="button">Зарегистрироваться</button>
+            </form>
+        </div>
+
+        <div class="form-container sign-in-container">
+            <form action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <h1>Войти</h1>
+                <div class="social-container">
+                    <a href="#" class="social"><i class="ri-google-fill"></i></a>
+                    <a href="#" class="social"><i class="ri-facebook-fill"></i></a>
+                </div>
+                <span>или используйте свой аккаунт</span>
+
+                {% if form.errors %}
+                    <p class="error-msg">Ошибка входа</p>
+                {% endif %}
+
+                <input type="text" name="username" placeholder="Логин" required />
+                <input type="password" name="password" placeholder="Пароль" required />
+                <a href="#">Забыли пароль?</a>
+                <button type="submit">Войти</button>
+            </form>
+        </div>
+
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>С возвращением!</h1>
+                    <p>Чтобы оставаться на связи, пожалуйста, войдите под своими данными</p>
+                    <button class="ghost" id="signIn">Войти</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>Привет, Атлет!</h1>
+                    <p>Заполни личные данные и начни свой путь к идеальному телу</p>
+                    <button class="ghost" id="signUp">Регистрация</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const container = document.getElementById('container');
+
+        signUpButton.addEventListener('click', () => {
+            container.classList.add("right-panel-active");
+        });
+
+        signInButton.addEventListener('click', () => {
+            container.classList.remove("right-panel-active");
+        });
+    </script>
+</body>
+</html>
