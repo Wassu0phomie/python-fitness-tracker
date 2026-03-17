@@ -13,24 +13,31 @@
 
     <header id="main-header" class="main-header">
         <div class="container">
-            <nav class="header__menu">
-                <ul class="header__menu-content">
-                    <li class="header__menu-item">
-                        <a href="{% url 'exercise_list' %}" class="nav-link">Программы</a>
-                    </li>
-                    <li class="header__menu-item">
-                        <a href="#" class="nav-link">Рецепты</a>
-                    </li>
-                </ul>
-            </nav>
+            <div class="header__left-group">
+                <a href="/" class="header-logo">FIT<span>APP</span></a>
 
-            <a href="/" class="header-logo">FIT<span>APP</span></a>
+                <input type="checkbox" id="menu-bar">
+                <label for="menu-bar" class="burger-label">
+                    <i class="bi bi-list"></i>
+                </label>
+
+                <nav class="header__menu">
+                    <ul class="header__menu-content">
+                        <li class="header__menu-item">
+                            <a href="{% url 'exercise_list' %}" class="nav-link">Программы</a>
+                        </li>
+                        <li class="header__menu-item">
+                            <a href="#" class="nav-link">Рецепты</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
             <div class="header__right">
                 {% if user.is_authenticated %}
                     <a href="{% url 'index' %}" class="btn-fitstars">Профиль</a>
                 {% else %}
-                    <a href="{% url 'login' %}?signup=true" class="btn-fitstars">Начать тренироваться</a>
+                    <a href="{% url 'login' %}?signup=true" class="btn-fitstars">Начать</a>
                 {% endif %}
             </div>
         </div>

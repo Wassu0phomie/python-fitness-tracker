@@ -143,3 +143,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'index'  # Имя пути из main/urls.py
 LOGOUT_REDIRECT_URL = 'login' # Куда идти после выхода
+
+LOGIN_URL = 'login'

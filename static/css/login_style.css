@@ -1,130 +1,344 @@
-/* Базовые переменные для хедера */
+/* login_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
 :root {
-    --fs-header-bg: #ffffff;
-    --fs-accent: #D7FD51; /* Твой неон */
-    --fs-dark: #242424;
-    --fs-border: #f2f2f2;
+    --accent-neon: #D7FD51;      /* Твой фирменный лайм */
+    --accent-dark: #b5d930;      /* Темный лайм для ховера */
+    --bg-dark: #121212;          /* Глубокий черный для панели */
+    --bg-panel: #1e1e1e;         /* Графитовый для градиента */
+    --text-main: #242424;
+    --text-muted: #777777;
+    --bg-white: #ffffff;
+    --border-light: #f2f2f2;
 }
 
-/* Основной контейнер */
-.header {
-    height: 72px;
-    background-color: var(--fs-header-bg);
-    border-bottom: 1px solid var(--fs-border);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #fcfcfc radial-gradient(circle at top right, rgba(215, 253, 81, 0.08), transparent 40%);
     display: flex;
+    justify-content: center;
     align-items: center;
-}
-
-.header .container {
-    max-width: 1280px;
-    margin: 0 auto;
-    width: 100%;
-    padding: 0 20px;
-}
-
-.header__content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-/* Логотип */
-.header__logo {
-    font-size: 24px;
-    font-weight: 900;
-    text-decoration: none;
-    letter-spacing: -1px;
-    display: flex;
-}
-.logo-fit { color: var(--fs-dark); }
-.logo-app { color: var(--fs-accent); }
-
-/* Навигация по центру */
-.header__menu {
-    display: flex;
-    align-items: center;
-}
-
-.header__menu-content {
-    list-style: none;
-    display: flex;
-    gap: 24px;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
     margin: 0;
-    padding: 0;
+    color: var(--text-main);
 }
 
-.header__menu-link {
-    text-decoration: none;
-    color: var(--fs-dark);
-    font-weight: 600;
-    font-size: 15px;
-    transition: opacity 0.2s;
+h1 {
+    font-weight: 900;
+    margin: 0;
+    letter-spacing: -1px;
 }
 
-.header__menu-link:hover {
-    opacity: 0.6;
+p {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    margin: 20px 0 30px;
 }
 
-/* Правая часть: Кнопки */
-.header__right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+span {
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
-.login {
-    text-decoration: none;
-    color: var(--fs-dark);
-    font-weight: 600;
-    font-size: 15px;
-}
-
-/* Кнопка-таблетка */
-.button-accent-2 {
-    background-color: var(--fs-accent);
-    color: #000;
-    padding: 12px 24px;
-    border-radius: 100px; /* Эффект таблетки */
-    font-weight: 700;
+a {
+    color: var(--text-main);
     font-size: 14px;
     text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: none;
-    display: inline-block;
+    margin: 15px 0;
+    font-weight: 600;
+    transition: 0.2s;
 }
 
-.button-accent-2:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(215, 253, 81, 0.4);
+a:hover {
+    color: var(--accent-dark);
 }
 
-/* Бургер для мобилок (скрыт на десктопе) */
-.header__burger {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    background: none;
+/* КНОПКИ */
+button {
+    border-radius: 50px;
     border: none;
+    background-color: var(--accent-neon);
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(215, 253, 81, 0.15);
+    margin-top: 15px;
 }
 
-.header__burger span {
-    width: 24px;
-    height: 2px;
-    background-color: var(--fs-dark);
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(215, 253, 81, 0.3);
 }
 
-/* Адаптивность */
-@media (max-width: 992px) {
-    .header__menu {
-        display: none; /* Скрываем меню на планшетах/телефонах */
+button:active {
+    transform: scale(0.95);
+}
+
+/* Кнопка на темном фоне (Ghost) */
+button.ghost {
+    background-color: transparent;
+    border: 2px solid var(--accent-neon);
+    color: var(--accent-neon);
+    box-shadow: none;
+}
+
+button.ghost:hover {
+    background-color: var(--accent-neon);
+    color: #000;
+}
+
+/* ФОРМЫ */
+form {
+    background-color: var(--bg-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 50px;
+    height: 100%;
+    text-align: center;
+}
+
+input {
+    background-color: var(--border-light);
+    border: 2px solid transparent;
+    padding: 14px 15px;
+    margin: 8px 0;
+    width: 100%;
+    border-radius: 12px;
+    font-family: inherit;
+    transition: 0.2s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-neon);
+    background-color: #fff;
+}
+
+/* КОНТЕЙНЕР */
+.container {
+    background-color: var(--bg-white);
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+    width: 850px;
+    max-width: 100%;
+    min-height: 550px;
+}
+
+.form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+
+.sign-in-container {
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+
+.container.right-panel-active .sign-in-container {
+    transform: translateX(100%);
+}
+
+.sign-up-container {
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+}
+
+.container.right-panel-active .sign-up-container {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: show 0.6s;
+}
+
+@keyframes show {
+    0%, 49.99% { opacity: 0; z-index: 1; }
+    50%, 100% { opacity: 1; z-index: 5; }
+}
+
+/* OVERLAY (Темная панель) */
+.overlay-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 100;
+}
+
+.container.right-panel-active .overlay-container {
+    transform: translateX(-100%);
+}
+
+.overlay {
+    background: var(--bg-dark);
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-panel) 100%);
+    color: #fff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+}
+
+.container.right-panel-active .overlay {
+    transform: translateX(50%);
+}
+
+.overlay-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel h1 { color: #fff; }
+.overlay-panel p { color: #aaa; }
+
+.overlay-left {
+    transform: translateX(-20%);
+}
+
+.container.right-panel-active .overlay-left {
+    transform: translateX(0);
+}
+
+.overlay-right {
+    right: 0;
+    transform: translateX(0);
+}
+
+.container.right-panel-active .overlay-right {
+    transform: translateX(20%);
+}
+
+/* СОЦИАЛЬНЫЕ КНОПКИ */
+.social-container {
+    margin: 20px 0;
+}
+
+.social-container a {
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 5px;
+    height: 45px;
+    width: 45px;
+    transition: 0.3s;
+}
+
+.social-container a:hover {
+    background-color: var(--border-light);
+    transform: scale(1.1);
+}
+
+.error-msg {
+    color: #ff4d4d;
+    font-size: 13px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* Адаптивность для мобильных */
+/* =========================================
+   ПОЛНАЯ МОБИЛЬНАЯ АДАПТИВНОСТЬ
+   ========================================= */
+
+@media (max-width: 768px) {
+    /* 1. Изменяем размер основного контейнера */
+    .container {
+        width: 95%;
+        min-height: 500px;
+        margin: 20px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
-    .header__burger {
+
+    /* 2. Полностью скрываем боковую панель (overlay) */
+    /* Она слишком тяжелая для мобильного интерфейса */
+    .overlay-container {
+        display: none;
+    }
+
+    /* 3. Растягиваем формы на всю ширину */
+    .form-container {
+        width: 100% !important;
+        position: relative; /* Убираем абсолютное позиционирование для стека */
+    }
+
+    /* 4. Логика переключения между Входом и Регистрацией */
+    /* Когда панель НЕ активна, показываем только Вход */
+    .sign-up-container {
+        display: none;
+        opacity: 0;
+    }
+
+    /* Когда добавляется класс .right-panel-active, показываем Регистрацию */
+    .container.right-panel-active .sign-in-container {
+        display: none;
+    }
+
+    .container.right-panel-active .sign-up-container {
         display: flex;
+        opacity: 1;
+        transform: none; /* Убираем сдвиг, так как панель теперь на весь экран */
     }
+
+    /* 5. Настройка отступов внутри форм */
+    form {
+        padding: 0 25px;
+    }
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    /* 6. Добавляем мобильную кнопку переключения */
+    /* Т.к. оверлей скрыт, нам нужно дать пользователю ссылку "Создать аккаунт" */
+    .mobile-switch {
+        display: block !important;
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--text-muted);
+        cursor: pointer;
+        text-decoration: underline;
+    }
+}
+
+/* Скрываем мобильную переключалку на десктопе */
+.mobile-switch {
+    display: none;
 }

@@ -1,0 +1,118 @@
+/* --- DASHBOARD STYLE --- */
+
+:root {
+    --accent-neon: #D7FD51;
+    --accent-dark: #b5d930;
+    --bg-dark: #1a1a1a;
+    --text-main: #242424;
+    --border-radius: 20px;
+}
+
+/* Общий фон страницы в стиле приложения */
+body {
+    background: #f8f9fa radial-gradient(circle at top right, rgba(215, 253, 81, 0.05), transparent 30%);
+}
+
+/* Карточки: делаем их мягче и убираем границы */
+.card {
+    border-radius: var(--border-radius) !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card.shadow-sm {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Перекрашиваем стандартный синий (bg-primary) в твой темный графит */
+.bg-primary {
+    background-color: var(--bg-dark) !important;
+}
+
+/* Заголовки карточек */
+.card-header {
+    border-top-left-radius: var(--border-radius) !important;
+    border-top-right-radius: var(--border-radius) !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Списки планов: выделяем активный элемент твоим неоном */
+.list-group-item {
+    border: none !important;
+    margin-bottom: 8px;
+    border-radius: 12px !important;
+    transition: 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f1f1f1 !important;
+    transform: translateX(5px);
+}
+
+.badge.bg-light.text-primary {
+    background-color: var(--accent-neon) !important;
+    color: #000 !important;
+    border: none !important;
+    font-weight: 700;
+}
+
+/* Кнопки "Быстрые действия" */
+.btn-light.border {
+    border-radius: 15px !important;
+    border: 1px solid #eee !important;
+    background: #fff !important;
+    transition: 0.3s;
+}
+
+.btn-light.border:hover {
+    border-color: var(--accent-neon) !important;
+    box-shadow: 0 5px 15px rgba(215, 253, 81, 0.2) !important;
+    transform: translateY(-2px);
+}
+
+/* Иконки в быстрых действиях */
+.bg-primary.bg-opacity-10 { background-color: rgba(26, 26, 26, 0.05) !important; }
+.bg-success.bg-opacity-10 { background-color: rgba(215, 253, 81, 0.2) !important; }
+.bg-warning.bg-opacity-10 { background-color: rgba(255, 193, 7, 0.1) !important; }
+
+.text-primary { color: var(--bg-dark) !important; }
+.text-success { color: #28a745 !important; }
+
+/* Основные кнопки действий */
+.btn-primary {
+    background-color: var(--accent-neon) !important;
+    border: none !important;
+    color: #000 !important;
+    font-weight: 700;
+    border-radius: 50px !important;
+    padding: 10px 25px !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-dark) !important;
+    box-shadow: 0 4px 15px rgba(215, 253, 81, 0.4);
+}
+
+/* Фото прогресса */
+.card-img-top {
+    border-top-left-radius: 15px !important;
+    border-top-right-radius: 15px !important;
+}
+
+/* Совет дня: делаем его неоновым */
+.bg-info.bg-opacity-10 {
+    background-color: var(--accent-neon) !important;
+    border-radius: var(--border-radius) !important;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+.text-info {
+    color: #000 !important;
+}
+
+/* Адаптивность для мобилок */
+@media (max-width: 768px) {
+    .main-title { font-size: 1.5rem; }
+    .card-body { padding: 1.5rem !important; }
+}
