@@ -1,16 +1,18 @@
 /* --- DASHBOARD STYLE --- */
 
 :root {
-    --accent-neon: #D7FD51;
-    --accent-dark: #b5d930;
-    --bg-dark: #1a1a1a;
-    --text-main: #242424;
-    --border-radius: 20px;
+    /* Основной акцент: глубокий серо-синий или мягкий изумруд */
+    --accent-main: #3A506B;      /* Спокойный синий */
+    --accent-soft: #E1E8F0;      /* Светлый фон для акцентов */
+    --bg-global: #F4F7F9;        /* Очень светлый серо-голубой фон */
+    --text-main: #1C252E;        /* Почти черный, но мягче */
+    --text-muted: #6C757D;
+    --card-shadow: 0 10px 30px rgba(58, 80, 107, 0.04);
 }
 
-/* Общий фон страницы в стиле приложения */
 body {
-    background: #f8f9fa radial-gradient(circle at top right, rgba(215, 253, 81, 0.05), transparent 30%);
+    background-color: var(--bg-global);
+    color: var(--text-main);
 }
 
 /* Карточки: делаем их мягче и убираем границы */

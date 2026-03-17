@@ -4,75 +4,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход и Регистрация | FitnessApp</title>
-    <link rel="stylesheet" href="{% static 'css/login_style.css' %}">
+    <title>Вход и Регистрация | FITAPP</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-</head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="{% static 'css/welcome_style.css' %}"> <link rel="stylesheet" href="{% static 'css/login_style.css' %}">   </head>
 <body>
-    <div class="container" id="container">
-        <div class="form-container sign-up-container">
-            <form action="#">
-                <h1>Создать аккаунт</h1>
-                <span>используйте email для регистрации</span>
-                <input type="text" placeholder="Имя" />
-                <input type="email" placeholder="Email" />
-                <input type="password" placeholder="Пароль" />
-                <button type="button">Зарегистрироваться</button>
 
-                <p class="mobile-switch" onclick="document.getElementById('container').classList.remove('right-panel-active')">
-                    Уже есть аккаунт? <span>Войти</span>
-                </p>
-            </form>
-        </div>
+    <header id="main-header" class="main-header">
+        <div class="container header-wrap">
+            <div class="header__left-group">
+                <a href="/" class="header-logo">FIT<span>APP</span></a>
 
-        <div class="form-container sign-in-container">
-            <form action="{% url 'login' %}" method="post">
-                {% csrf_token %}
-                <h1>Войти</h1>
-                <div class="social-container">
-                    <a href="#" class="social"><i class="ri-google-fill"></i></a>
-                    <a href="#" class="social"><i class="ri-facebook-fill"></i></a>
-                </div>
-                <span>или используйте свой аккаунт</span>
+                <input type="checkbox" id="menu-bar" class="menu-bar-input">
+                <label for="menu-bar" class="burger-label">
+                    <i class="bi bi-list open-menu"></i>
+                </label>
 
-                {% if form.errors %}
-                    <p class="error-msg">Ошибка входа</p>
-                {% endif %}
+                <nav class="header__menu">
+                    <ul class="header__menu-content">
+                        <li class="header__menu-item">
+                            <a href="{% url 'exercise_list' %}" class="nav-link">Программы</a>
+                        </li>
+                        <li class="header__menu-item">
+                            <a href="#" class="nav-link">Рецепты</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
-                <input type="text" name="username" placeholder="Логин" required />
-                <input type="password" name="password" placeholder="Пароль" required />
-                <a href="#">Забыли пароль?</a>
-                <button type="submit">Войти</button>
-
-                <p class="mobile-switch" onclick="document.getElementById('container').classList.add('right-panel-active')">
-                    Нет аккаунта? <span>Регистрация</span>
-                </p>
-            </form>
-        </div>
-
-        <div class="overlay-container">
-            <div class="overlay">
-                <div class="overlay-panel overlay-left">
-                    <h1>С возвращением!</h1>
-                    <p>Чтобы оставаться на связи, войти под своими данными</p>
-                    <button class="ghost" id="signIn">Войти</button>
-                </div>
-                <div class="overlay-panel overlay-right">
-                    <h1>Привет, Атлет!</h1>
-                    <p>Начни свой путь к идеальному телу вместе с нами</p>
-                    <button class="ghost" id="signUp">Регистрация</button>
-                </div>
+            <div class="header__right">
+                <a href="/" class="btn-fitstars">На главную</a>
             </div>
         </div>
-    </div>
+    </header>
 
-    <script>
+    <div class="auth-wrapper">
+        <div class="auth-card" id="auth-card">
+
+            <div class="form-container sign-up-container">
+                <form action="#">
+                    <h1>Создать аккаунт</h1>
+                    <span>используйте email для регистрации</span>
+                    <input type="text" placeholder="Имя" required />
+                    <input type="email" placeholder="Email" required />
+                    <input type="password" placeholder="Пароль" required />
+                    <button type="button">Зарегистрироваться</button>
+
+                    <p class="mobile-switch" onclick="toggleAuth(false)">
+                        Уже есть аккаунт? <span>Войти</span>
+                    </p>
+                </form>
+            </div>
+
+            <div class="form-container sign-in-container">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    <h1>Войти</h1>
+                    <div class="social-container">
+                        <a href="#" class="social"><i class="ri-google-fill"></i></a>
+                        <a href="#" class="social"><i class="ri-facebook-fill"></i></a>
+                    </div>
+                    <span>или используйте свой аккаунт</span>
+
+                    {% if form.errors %}
+                        <p class="error-msg">Неверный логин или пароль</p>
+                    {% endif %}
+
+                    <input type="text" name="username" placeholder="Логин" required />
+                    <input type="password" name="password" placeholder="Пароль" required />
+                    <a href="#" class="forgot-pass">Забыли пароль?</a>
+                    <button type="submit">Войти</button>
+
+                    <p class="mobile-switch" onclick="toggleAuth(true)">
+                        Нет аккаунта? <span>Регистрация</span>
+                    </p>
+                </form>
+            </div>
+
+            <div class="overlay-container">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-left">
+                        <h1>С возвращением!</h1>
+                        <p>Чтобы оставаться на связи, войдите под своими данными</p>
+                        <button class="ghost" id="signIn">Войти</button>
+                    </div>
+                    <div class="overlay-panel overlay-right">
+                        <h1>Привет, Атлет!</h1>
+                        <p>Начни свой путь к идеальному телу вместе с нами</p>
+                        <button class="ghost" id="signUp">Регистрация</button>
+                    </div>
+                </div>
+            </div>
+
+        </div> </div> <script>
         const signUpButton = document.getElementById('signUp');
         const signInButton = document.getElementById('signIn');
-        const container = document.getElementById('container');
+        const authCard = document.getElementById('auth-card');
 
-        signUpButton.addEventListener('click', () => container.classList.add("right-panel-active"));
-        signInButton.addEventListener('click', () => container.classList.remove("right-panel-active"));
+        // Для десктопных кнопок в оверлее
+        signUpButton.addEventListener('click', () => authCard.classList.add("right-panel-active"));
+        signInButton.addEventListener('click', () => authCard.classList.remove("right-panel-active"));
+
+        // Функция для мобильных переключателей
+        function toggleAuth(isSignUp) {
+            if (isSignUp) {
+                authCard.classList.add("right-panel-active");
+            } else {
+                authCard.classList.remove("right-panel-active");
+            }
+        }
     </script>
 </body>
 </html>

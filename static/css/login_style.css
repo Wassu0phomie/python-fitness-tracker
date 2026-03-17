@@ -1,101 +1,45 @@
 /* login_style.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
 :root {
-    --accent-neon: #D7FD51;      /* Твой фирменный лайм */
-    --accent-dark: #b5d930;      /* Темный лайм для ховера */
-    --bg-dark: #121212;          /* Глубокий черный для панели */
-    --bg-panel: #1e1e1e;         /* Графитовый для градиента */
+    --accent-neon: #D7FD51;
+    --accent-dark: #b5d930;
+    --bg-dark: #121212;
+    --bg-panel: #1e1e1e;
     --text-main: #242424;
     --text-muted: #777777;
     --bg-white: #ffffff;
     --border-light: #f2f2f2;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
+    margin: 0;
     background: #fcfcfc radial-gradient(circle at top right, rgba(215, 253, 81, 0.08), transparent 40%);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+/* Обертка для центрирования карточки */
+.auth-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    font-family: 'Inter', sans-serif;
-    height: 100vh;
-    margin: 0;
-    color: var(--text-main);
+    min-height: 100vh;
+    width: 100%;
+    padding: 100px 20px 40px; /* 100px сверху, чтобы не залезть под хедер */
 }
 
-h1 {
-    font-weight: 900;
-    margin: 0;
-    letter-spacing: -1px;
-}
-
-p {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-    margin: 20px 0 30px;
-}
-
-span {
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-a {
-    color: var(--text-main);
-    font-size: 14px;
-    text-decoration: none;
-    margin: 15px 0;
-    font-weight: 600;
-    transition: 0.2s;
-}
-
-a:hover {
-    color: var(--accent-dark);
-}
-
-/* КНОПКИ */
-button {
-    border-radius: 50px;
-    border: none;
-    background-color: var(--accent-neon);
-    color: #000;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 14px 45px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(215, 253, 81, 0.15);
-    margin-top: 15px;
-}
-
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(215, 253, 81, 0.3);
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-/* Кнопка на темном фоне (Ghost) */
-button.ghost {
-    background-color: transparent;
-    border: 2px solid var(--accent-neon);
-    color: var(--accent-neon);
-    box-shadow: none;
-}
-
-button.ghost:hover {
-    background-color: var(--accent-neon);
-    color: #000;
+/* САМА КАРТОЧКА (Узкая) */
+.auth-card {
+    background-color: var(--bg-white);
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+    width: 850px;
+    max-width: 100%;
+    min-height: 550px;
 }
 
 /* ФОРМЫ */
@@ -108,6 +52,27 @@ form {
     padding: 0 50px;
     height: 100%;
     text-align: center;
+}
+
+h1 { font-weight: 900; margin: 0; letter-spacing: -1px; font-size: 2rem; color: var(--text-main); }
+span { font-size: 12px; color: var(--text-muted); margin: 10px 0; }
+
+.header-logo span {
+    font-size: inherit;      /* Наследует размер 24px от родителя .header-logo */
+    color: var(--accent-dark);
+    margin: 0;               /* Сбрасываем отступ 10px от обычных span */
+    font-weight: 900;
+    display: inline;         /* Гарантируем, что он в одну строку с FIT */
+}
+
+/* Сам текст логотипа */
+.header-logo {
+    font-size: 24px;         /* Устанавливаем размер здесь */
+    font-weight: 900;
+    text-decoration: none;
+    color: #000;
+    display: flex;           /* Чтобы FIT и APP всегда были на одной линии */
+    align-items: center;
 }
 
 input {
@@ -127,18 +92,34 @@ input:focus {
     background-color: #fff;
 }
 
-/* КОНТЕЙНЕР */
-.container {
-    background-color: var(--bg-white);
-    border-radius: 30px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-    position: relative;
-    overflow: hidden;
-    width: 850px;
-    max-width: 100%;
-    min-height: 550px;
+button {
+    border-radius: 50px;
+    border: none;
+    background-color: var(--accent-neon);
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 45px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 15px;
 }
 
+button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(215, 253, 81, 0.2); }
+
+button.ghost {
+    background-color: transparent;
+    border: 2px solid var(--accent-neon);
+    color: var(--accent-neon);
+}
+
+button.ghost:hover {
+    background-color: var(--accent-neon);
+    color: #000;
+}
+
+/* ДЕСТОПНАЯ АНИМАЦИЯ */
 .form-container {
     position: absolute;
     top: 0;
@@ -146,24 +127,11 @@ input:focus {
     transition: all 0.6s ease-in-out;
 }
 
-.sign-in-container {
-    left: 0;
-    width: 50%;
-    z-index: 2;
-}
+.sign-in-container { left: 0; width: 50%; z-index: 2; }
+.auth-card.right-panel-active .sign-in-container { transform: translateX(100%); opacity: 0; }
 
-.container.right-panel-active .sign-in-container {
-    transform: translateX(100%);
-}
-
-.sign-up-container {
-    left: 0;
-    width: 50%;
-    opacity: 0;
-    z-index: 1;
-}
-
-.container.right-panel-active .sign-up-container {
+.sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
+.auth-card.right-panel-active .sign-up-container {
     transform: translateX(100%);
     opacity: 1;
     z-index: 5;
@@ -175,7 +143,7 @@ input:focus {
     50%, 100% { opacity: 1; z-index: 5; }
 }
 
-/* OVERLAY (Темная панель) */
+/* ОВЕРЛЕЙ */
 .overlay-container {
     position: absolute;
     top: 0;
@@ -187,12 +155,9 @@ input:focus {
     z-index: 100;
 }
 
-.container.right-panel-active .overlay-container {
-    transform: translateX(-100%);
-}
+.auth-card.right-panel-active .overlay-container { transform: translateX(-100%); }
 
 .overlay {
-    background: var(--bg-dark);
     background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-panel) 100%);
     color: #fff;
     position: relative;
@@ -203,9 +168,7 @@ input:focus {
     transition: transform 0.6s ease-in-out;
 }
 
-.container.right-panel-active .overlay {
-    transform: translateX(50%);
-}
+.auth-card.right-panel-active .overlay { transform: translateX(50%); }
 
 .overlay-panel {
     position: absolute;
@@ -222,31 +185,68 @@ input:focus {
     transition: transform 0.6s ease-in-out;
 }
 
-.overlay-panel h1 { color: #fff; }
-.overlay-panel p { color: #aaa; }
+.overlay-left { transform: translateX(-20%); }
+.auth-card.right-panel-active .overlay-left { transform: translateX(0); }
 
-.overlay-left {
-    transform: translateX(-20%);
+.overlay-right { right: 0; transform: translateX(0); }
+.auth-card.right-panel-active .overlay-right { transform: translateX(20%); }
+
+.overlay-panel h1 {
+    font-weight: 900;
+    font-size: 2.5rem; /* Увеличиваем размер */
+    margin-bottom: 20px;
+    text-shadow: 0 4px 15px rgba(0,0,0,0.5); /* Добавляем тень для контраста */
+    letter-spacing: -1px;
+    color: #ffffff; /* Явно задаем белый цвет */
+    line-height: 1.2;
 }
 
-.container.right-panel-active .overlay-left {
-    transform: translateX(0);
+.overlay-panel p {
+    font-size: 1.1rem; /* Увеличиваем описание */
+    font-weight: 500;
+    opacity: 0.95; /* Делаем почти непрозрачным */
+    text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    max-width: 280px;
+    margin: 0 auto 25px;
+    color: #ffffff;
 }
 
-.overlay-right {
-    right: 0;
-    transform: translateX(0);
+/* МОБИЛЬНАЯ ВЕРСИЯ */
+@media (max-width: 768px) {
+    .auth-wrapper { padding: 80px 0 0; align-items: flex-start; }
+
+    .auth-card {
+        width: 100%;
+        min-height: calc(100vh - 80px);
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .overlay-container { display: none; }
+
+    .form-container {
+        width: 100% !important;
+        left: 0 !important;
+        transform: none !important;
+        opacity: 1;
+    }
+
+    .sign-in-container { z-index: 5; }
+    .sign-up-container { z-index: 1; visibility: hidden; opacity: 0; }
+
+    /* Переключение на мобилках */
+    .auth-card.right-panel-active .sign-in-container { visibility: hidden; opacity: 0; z-index: 1; transform: none; }
+    .auth-card.right-panel-active .sign-up-container { visibility: visible; opacity: 1; z-index: 10; transform: none; }
+
+    form { padding: 40px 25px; justify-content: flex-start; }
+    .mobile-switch { display: block !important; margin-top: 30px; font-size: 14px; }
+    button { width: 100%; }
 }
 
-.container.right-panel-active .overlay-right {
-    transform: translateX(20%);
-}
+.mobile-switch { display: none; color: var(--text-muted); }
+.mobile-switch span { color: var(--accent-dark); font-weight: 700; text-decoration: underline; }
 
-/* СОЦИАЛЬНЫЕ КНОПКИ */
-.social-container {
-    margin: 20px 0;
-}
-
+.social-container { margin: 15px 0; }
 .social-container a {
     border: 1px solid var(--border-light);
     border-radius: 50%;
@@ -254,91 +254,12 @@ input:focus {
     justify-content: center;
     align-items: center;
     margin: 0 5px;
-    height: 45px;
-    width: 45px;
+    height: 40px;
+    width: 40px;
+    color: var(--text-main);
     transition: 0.3s;
 }
 
-.social-container a:hover {
-    background-color: var(--border-light);
-    transform: scale(1.1);
-}
-
-.error-msg {
-    color: #ff4d4d;
-    font-size: 13px;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-/* Адаптивность для мобильных */
-/* =========================================
-   ПОЛНАЯ МОБИЛЬНАЯ АДАПТИВНОСТЬ
-   ========================================= */
-
-@media (max-width: 768px) {
-    /* 1. Изменяем размер основного контейнера */
-    .container {
-        width: 95%;
-        min-height: 500px;
-        margin: 20px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    /* 2. Полностью скрываем боковую панель (overlay) */
-    /* Она слишком тяжелая для мобильного интерфейса */
-    .overlay-container {
-        display: none;
-    }
-
-    /* 3. Растягиваем формы на всю ширину */
-    .form-container {
-        width: 100% !important;
-        position: relative; /* Убираем абсолютное позиционирование для стека */
-    }
-
-    /* 4. Логика переключения между Входом и Регистрацией */
-    /* Когда панель НЕ активна, показываем только Вход */
-    .sign-up-container {
-        display: none;
-        opacity: 0;
-    }
-
-    /* Когда добавляется класс .right-panel-active, показываем Регистрацию */
-    .container.right-panel-active .sign-in-container {
-        display: none;
-    }
-
-    .container.right-panel-active .sign-up-container {
-        display: flex;
-        opacity: 1;
-        transform: none; /* Убираем сдвиг, так как панель теперь на весь экран */
-    }
-
-    /* 5. Настройка отступов внутри форм */
-    form {
-        padding: 0 25px;
-    }
-
-    h1 {
-        font-size: 24px;
-        margin-bottom: 15px;
-    }
-
-    /* 6. Добавляем мобильную кнопку переключения */
-    /* Т.к. оверлей скрыт, нам нужно дать пользователю ссылку "Создать аккаунт" */
-    .mobile-switch {
-        display: block !important;
-        margin-top: 20px;
-        font-size: 14px;
-        color: var(--text-muted);
-        cursor: pointer;
-        text-decoration: underline;
-    }
-}
-
-/* Скрываем мобильную переключалку на десктопе */
-.mobile-switch {
-    display: none;
-}
+.social-container a:hover { background: var(--border-light); }
+.error-msg { color: #ff4d4d; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.forgot-pass { font-size: 13px; margin: 10px 0; color: var(--text-muted); }
