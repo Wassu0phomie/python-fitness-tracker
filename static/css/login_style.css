@@ -15,14 +15,24 @@
 
 body {
     margin: 0;
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                url('/static/images/background_pic/background.jpg') no-repeat center center fixed;
-    background-size: cover;
     font-family: 'Inter', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+}
+
+.full-screen-bg {
+    position: fixed; /* Фиксируем на весь экран */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Сначала градиент (верхний слой), потом картинка (нижний слой) */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.2)),
+                url('/static/images/background_pic/background.jpg') no-repeat center center;
+    background-size: cover;
+    z-index: -1; /* Уводим в самый низ, под хедер и форму */
 }
 
 /* Обертка для центрирования карточки */

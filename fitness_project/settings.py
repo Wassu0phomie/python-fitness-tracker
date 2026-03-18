@@ -145,3 +145,5 @@ LOGIN_REDIRECT_URL = 'index'  # Имя пути из main/urls.py
 LOGOUT_REDIRECT_URL = 'login' # Куда идти после выхода
 
 LOGIN_URL = 'login'
+
+AUTH_USER_MODEL = 'users.CustomUser'

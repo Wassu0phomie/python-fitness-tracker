@@ -12,7 +12,7 @@
 
     <link rel="stylesheet" href="{% static 'css/welcome_style.css' %}"> <link rel="stylesheet" href="{% static 'css/login_style.css' %}">   </head>
 <body>
-
+    <div class="full-screen-bg"></div>
     <header id="main-header" class="main-header">
         <div class="container header-wrap">
             <div class="header__left-group">
@@ -73,7 +73,7 @@
                         <p class="error-msg">Неверный логин или пароль</p>
                     {% endif %}
 
-                    <input type="text" name="username" placeholder="Логин" required />
+                    <input type="text" name="username" placeholder="Email" required />
                     <input type="password" name="password" placeholder="Пароль" required />
                     <a href="#" class="forgot-pass">Забыли пароль?</a>
                     <button type="submit">Войти</button>
