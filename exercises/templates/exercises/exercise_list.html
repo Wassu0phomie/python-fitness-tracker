@@ -14,8 +14,22 @@
         <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="h3 fw-bold text-primary">{{ exercises.count }}</div>
-                    <div class="small text-muted">Упражнений</div>
+                    <div class="h3 fw-bold text-primary">
+                        {% if filter_params.q or filter_params.muscle or filter_params.difficulty or filter_params.exercise_type %}
+                        {# Если применены фильтры, показываем количество найденных объектов #}
+                        {{ paginator.count }}
+                        {% else %}
+                        {# Если фильтров нет, показываем общее число из базы #}
+                        {{ paginator.count }}
+                        {% endif %}
+                    </div>
+                    <div class="small text-muted">
+                        {% if filter_params.q or filter_params.muscle or filter_params.difficulty or filter_params.exercise_type %}
+                            Найдено результатов
+                        {% else %}
+                            Упражнений в базе
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -76,8 +90,7 @@
                     <select name="muscle" class="form-select">
                         <option value="">Все группы</option>
                         {% for muscle in muscle_groups %}
-                        <option value="{{ muscle.id }}" {% if filter_params.muscle == muscle.id|stringformat:"s" %}selected{% endif %}>{{ muscle.name }}</option>
-                        {% endfor %}
+                        <option value="{{ muscle.slug }}" {% if filter_params.muscle == muscle.slug %}selected{% endif %}>{{ muscle.name }}</option>                        {% endfor %}
                     </select>
                 </div>
                 <div class="col-12 text-end mt-3">
@@ -124,5 +137,32 @@
         </div>
         {% endfor %}
     </div>
+    {% if is_paginated %}
+    <nav aria-label="Навигация по упражнениям" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link shadow-sm" href="?page={{ page_obj.previous_page_number }}{% if filter_params.q %}&q={{ filter_params.q }}{% endif %}{% if filter_params.muscle %}&muscle={{ filter_params.muscle }}{% endif %}" aria-label="Предыдущая">
+                        <span aria-hidden="true">&laquo; Назад</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link shadow-sm">&laquo; Назад</span></li>
+            {% endif %}
+
+            <li class="page-item active"><span class="page-link shadow-sm">{{ page_obj.number }} из {{ paginator.num_pages }}</span></li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link shadow-sm" href="?page={{ page_obj.next_page_number }}{% if filter_params.q %}&q={{ filter_params.q }}{% endif %}{% if filter_params.muscle %}&muscle={{ filter_params.muscle }}{% endif %}" aria-label="Следующая">
+                        <span aria-hidden="true">Вперед &raquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link shadow-sm">Вперед &raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 {% endblock %}
