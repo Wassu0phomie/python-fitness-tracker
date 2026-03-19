@@ -20,6 +20,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('activate/<str:uidb64>/<str:token>/', users_views.activate, name='activate'),
     path('register/', users_views.register, name='register'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
 
 # Для медиа-файлов в режиме разработки
