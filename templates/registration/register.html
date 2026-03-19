@@ -1,0 +1,9 @@
+<body style="background: #1a1a1a; color: white; padding: 50px; font-family: sans-serif;">
+    <h1 style="color: #00f2fe;">Диагностика регистрации</h1>
+    <div style="background: #333; padding: 20px; border-radius: 10px; border: 1px solid red;">
+        <h3>Ошибки в твоей форме:</h3>
+        {{ form.errors }}
+    </div>
+    <br>
+    <a href="{% url 'login' %}" style="color: #00f2fe;">Назад к FITAPP</a>
+</body>

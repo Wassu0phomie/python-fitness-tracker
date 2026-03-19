@@ -100,7 +100,7 @@ class CustomUserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         # Убедись, что эти поля есть в твоей модели CustomUser в models.py
-        fields = ('first_name', 'last_name', 'email', 'phone', 'city', 'country')
+        fields = ('first_name', 'last_name', 'email', 'phone')
         widgets = {
             'first_name': forms.TextInput(
                 attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
@@ -111,12 +111,6 @@ class CustomUserUpdateForm(forms.ModelForm):
             'email': forms.EmailInput(
                 attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
                        'placeholder': 'EMAIL'}),
-            'city': forms.TextInput(
-                attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
-                       'placeholder': 'CITY'}),
-            'country': forms.TextInput(
-                attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
-                       'placeholder': 'COUNTRY'}),
         }
 
     def clean_email(self):

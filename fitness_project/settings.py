@@ -147,3 +147,15 @@ LOGOUT_REDIRECT_URL = 'login' # Куда идти после выхода
 LOGIN_URL = 'login'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True  # Для порта 465 ставим True
+EMAIL_USE_TLS = False
+
+EMAIL_HOST_USER = 'fitapp-project@mail.ru'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# Отображение отправителя в письме
+DEFAULT_FROM_EMAIL = 'FITAPP <fitapp-project@mail.ru>'
