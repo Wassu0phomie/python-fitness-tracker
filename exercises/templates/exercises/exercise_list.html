@@ -106,7 +106,13 @@
         <div class="col">
             <div class="card h-100 shadow-sm border-0">
                 {% if exercise.main_image %}
-                    <img src="{{ exercise.main_image}}" class="card-img-top" alt="{{ exercise.name }}" style="height: 200px; object-fit: cover;">
+                    <div style="height: 200px; width: 100%; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img src="{{ exercise.main_image }}"
+                             class="card-img-top"
+                             alt="{{ exercise.name }}"
+                             loading="lazy"
+                             style="height: 100%; width: 100%; object-fit: contain; padding: 10px;">
+                    </div>
                 {% else %}
                     <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                         <i class="bi bi-image text-muted fs-1"></i>

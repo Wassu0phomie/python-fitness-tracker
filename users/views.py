@@ -7,6 +7,10 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from .forms import CustomUserCreationForm  # Убедись, что импорт формы верный
+from django.contrib import messages
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+
 
 User = get_user_model()
 
@@ -64,3 +68,16 @@ def activate(request, uidb64, token):
         return render(request, 'registration/activation_success.html')
     else:
         return render(request, 'registration/activation_invalid.html')
+
+
+@login_required
+def delete_profile(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)  # Сначала выходим из системы
+        user.delete()  # Затем удаляем объект пользователя
+        messages.success(request, "Ваш профиль был безвозвратно удален.")
+        return redirect('welcome')  # Редирект на главную
+
+    # Если зашли через GET (просто по ссылке), возвращаем в настройки
+    return redirect('profile_settings')

@@ -79,6 +79,7 @@ class Exercise(models.Model):
     video_url = models.URLField(blank=True)
     video_file = models.FileField(upload_to='exercise_videos/', blank=True, null=True)
     image = models.ImageField(upload_to='exercise_images/', blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="Ссылка на GIF/SVG")
 
     calories_per_hour = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
@@ -106,7 +107,9 @@ class Exercise(models.Model):
 
     @property
     def main_image(self):
-        return self.image.url if self.image else None
+        if self.image:
+            return self.image.url
+        return self.image_url
 
 
 # class FavoriteExercise(models.Model):

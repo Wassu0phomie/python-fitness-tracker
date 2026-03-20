@@ -99,6 +99,7 @@ class ExerciseAdmin(admin.ModelAdmin):
             'fields': (
                 'image',
                 'video_file',
+                'image_url',
                 'video_url'
             )
         }),
