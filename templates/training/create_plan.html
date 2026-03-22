@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Создание тренировки | FitnessApp{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg p-4" style="border-radius: 25px;">
+                <h2 class="fw-bold mb-4">НОВЫЙ ТРЕНИРОВОЧНЫЙ ПЛАН</h2>
+
+                <form method="POST" id="planForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <label class="small text-muted fw-bold mb-2">НАЗВАНИЕ ПЛАНА</label>
+                            <input type="text" name="title" class="form-control border-0 bg-light p-3"
+                                   placeholder="Например: Набор массы" style="border-radius: 12px;">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="small text-muted fw-bold mb-2">ДАТА НАЧАЛА</label>
+                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="small text-muted fw-bold mb-2">ДАТА ОКОНЧАНИЯ</label>
+                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;">
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="small text-muted fw-bold mb-3 d-block">ВЫБЕРИТЕ ДНИ ТРЕНИРОВОК</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            {% for num, label in day_choices %}
+                            <div class="day-selector">
+                                <input type="checkbox" class="btn-check" name="selected_days" id="day-{{ num }}" value="{{ num }}">
+                                <label class="btn btn-outline-dark rounded-circle shadow-sm d-flex align-items-center justify-content-center fw-bold"
+                                       for="day-{{ num }}"
+                                       style="width: 55px; height: 55px; border-width: 2px; transition: 0.3s;">
+                                    {{ label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div id="workout-days-container">
+                        <div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50">
+                            <i class="bi bi-calendar-check fs-1"></i>
+                            <p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-dark py-3 fw-bold shadow"
+                                style="background-color: #D7FD51; color: #000; border: none; border-radius: 15px;">
+                            СОХРАНИТЬ И ЗАПУСТИТЬ ПЛАН
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-check:checked + .btn-outline-dark {
+        background-color: #D7FD51 !important;
+        border-color: #D7FD51 !important;
+        color: #000 !important;
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(215, 253, 81, 0.5) !important;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
+</style>
+{% endblock %}

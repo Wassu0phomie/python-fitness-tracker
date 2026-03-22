@@ -15,9 +15,15 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 mb-4 overflow-hidden">
                 <div class="card-header bg-white border-0 pt-4 pb-0 text-center">
-                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-person-fill text-primary fs-1"></i>
-                    </div>
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}"
+                             class="rounded-circle shadow-sm object-fit-cover"
+                             style="width: 100px; height: 100px; border: 3px solid #D7FD51;">
+                    {% else %}
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-person-fill text-primary fs-1"></i>
+                        </div>
+                    {% endif %}
                     <h5 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h5>
                     <p class="text-muted small">{{ user.email }}</p>
                 </div>
@@ -101,7 +107,7 @@
             </div>
 
             <div class="mt-5 pt-4 border-top">
-                <h5 class="text-danger">Опасная зона</h5>
+                <h5 class="text-danger">ВНИМАНИЕ!</h5>
                 <p class="text-muted small">Удаление аккаунта нельзя отменить.</p>
 
                 <form action="{% url 'delete_profile' %}" method="POST"
@@ -162,4 +168,60 @@
     </div>
 </div>
 
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold px-3 pt-3">Настройки профиля</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <p>Тест связи: {{ form.instance.email }}</p> <div class="space-y-4">
+                        {{ form.as_p }} <div class="mb-3">
+                             {{ form.first_name }}
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold mb-1">ФОТО ПРОФИЛЯ</label>
+                            {{ form.avatar }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold mb-1">ИМЯ</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold mb-1">ФАМИЛИЯ</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold mb-1">EMAIL</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold mb-1">ТЕЛЕФОН</label>
+                            {{ form.phone }}
+                        </div>
+                    </div>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger small mt-2">
+                            Пожалуйста, исправьте ошибки в полях.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" name="update_profile" class="btn btn-dark rounded-pill px-4" style="background-color: #D7FD51; color: #000; border: none;">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

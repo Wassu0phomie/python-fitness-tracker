@@ -100,17 +100,22 @@ class CustomUserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         # Убедись, что эти поля есть в твоей модели CustomUser в models.py
-        fields = ('first_name', 'last_name', 'email', 'phone')
+        fields = ('first_name', 'last_name', 'email', 'phone', 'avatar')
         widgets = {
-            'first_name': forms.TextInput(
-                attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
-                       'placeholder': 'FIRST NAME'}),
-            'last_name': forms.TextInput(
-                attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
-                       'placeholder': 'LAST NAME'}),
-            'email': forms.EmailInput(
-                attrs={'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
-                       'placeholder': 'EMAIL'}),
+            'first_name': forms.TextInput(attrs={
+                'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
+                'placeholder': 'FIRST NAME'}),
+            'last_name': forms.TextInput(attrs={
+                'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
+                'placeholder': 'LAST NAME'}),
+            'email': forms.EmailInput(attrs={
+                'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
+                'placeholder': 'EMAIL'}),
+            # Кастомизируем поле выбора файла
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control form-control-sm mt-1',
+                'accept': 'image/*'  # Чтобы предлагал только картинки
+            }),
         }
 
     def clean_email(self):

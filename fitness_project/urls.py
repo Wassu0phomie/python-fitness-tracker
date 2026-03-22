@@ -17,6 +17,7 @@ urlpatterns = [
     path('', main_views.welcome, name='welcome'),
     path('app/', include('main.urls')), #Не забыть изменить
     path('exercises/', include('exercises.urls')),
+    path('plan/', include('training.urls')),
     path('users/', include('users.urls')),
 ]
 

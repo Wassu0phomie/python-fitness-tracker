@@ -23,6 +23,12 @@ class CustomUser(AbstractUser):
     username = None  # Логин только по Email
     email = models.EmailField('Email адрес', unique=True)
 
+    avatar = models.ImageField(
+        'Фото профиля',
+        upload_to='avatars/%Y/%m/',
+        null=True,
+        blank=True
+    )
     # Основные данные
     first_name = models.CharField('Имя', max_length=50)
     last_name = models.CharField('Фамилия', max_length=50)
