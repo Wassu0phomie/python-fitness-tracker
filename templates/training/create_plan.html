@@ -16,15 +16,15 @@
                         <div class="col-md-6">
                             <label class="small text-muted fw-bold mb-2">НАЗВАНИЕ ПЛАНА</label>
                             <input type="text" name="title" class="form-control border-0 bg-light p-3"
-                                   placeholder="Например: Набор массы" style="border-radius: 12px;">
+                                   placeholder="Например: Набор массы" style="border-radius: 12px;" required>
                         </div>
                         <div class="col-md-3">
                             <label class="small text-muted fw-bold mb-2">ДАТА НАЧАЛА</label>
-                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;">
+                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
                         </div>
                         <div class="col-md-3">
                             <label class="small text-muted fw-bold mb-2">ДАТА ОКОНЧАНИЯ</label>
-                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;">
+                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
                         </div>
                     </div>
 
@@ -76,4 +76,75 @@
         border-width: 2px !important;
     }
 </style>
+
+<script>
+document.querySelectorAll('.btn-check').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const dayNum = this.value;
+        const dayLabel = document.querySelector(`label[for="${this.id}"]`).innerText;
+        const container = document.getElementById('workout-days-container');
+
+        if (this.checked) {
+            // Удаляем заглушку "Выберите дни", если она есть
+            if (container.querySelector('.text-center.py-5')) {
+                container.innerHTML = '';
+            }
+
+            // Создаем блок для дня
+            const dayBlock = document.createElement('div');
+            dayBlock.id = `day-block-${dayNum}`;
+            dayBlock.className = 'card mb-4 border-0 bg-light p-4 rounded-4 shadow-sm animate-fade-in';
+            dayBlock.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-uppercase">${dayLabel}</h5>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="copyDay(${dayNum})">
+                        <i class="bi bi-copy me-1"></i> Скопировать в...
+                    </button>
+                </div>
+                <div class="exercise-list" id="exercise-list-${dayNum}">
+                    </div>
+                <button type="button" class="btn btn-link text-dark fw-bold text-decoration-none p-0 mt-2" onclick="addExercise(${dayNum})">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Добавить упражнение
+                </button>
+            `;
+            container.prepend(dayBlock);
+        } else {
+            // Удаляем блок, если галочка снята
+            const blockToRemove = document.getElementById(`day-block-${dayNum}`);
+            if (blockToRemove) blockToRemove.remove();
+
+            // Если дней не осталось, возвращаем заглушку
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50"><i class="bi bi-calendar-check fs-1"></i><p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p></div>';
+            }
+        }
+    });
+});
+
+function addExercise(dayNum) {
+    const list = document.getElementById(`exercise-list-${dayNum}`);
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 align-items-center animate-fade-in';
+    row.innerHTML = `
+        <div class="col-md-6">
+            <select name="exercises_${dayNum}" class="form-select border-0 bg-white p-2" style="border-radius: 10px;">
+                <option value="">Выберите упражнение...</option>
+                {% for ex in exercises %}
+                <option value="{{ ex.id }}">{{ ex.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="sets_${dayNum}" class="form-control border-0 p-2" placeholder="Сеты" style="border-radius: 10px;">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="reps_${dayNum}" class="form-control border-0 p-2" placeholder="Повторы" style="border-radius: 10px;">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn text-danger" onclick="this.parentElement.parentElement.remove()"><i class="bi bi-trash"></i></button>
+        </div>
+    `;
+    list.appendChild(row);
+}
+</script>
 {% endblock %}
