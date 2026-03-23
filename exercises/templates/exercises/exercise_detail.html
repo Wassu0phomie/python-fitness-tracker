@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ exercise.name }} | FitnessApp{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'exercise_list' %}">База упражнений</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ exercise.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm overflow-hidden mb-4">
+                {% if exercise.video_url %}
+                    <div class="ratio ratio-16x9">
+                        <iframe src="{{ exercise.video_url }}" title="{{ exercise.name }}" allowfullscreen></iframe>
+                    </div>
+                {% elif exercise.main_image %}
+                    <img src="{{ exercise.main_image }}" class="img-fluid w-100" alt="{{ exercise.name }}">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 300px;">
+                        <i class="bi bi-image text-muted display-1"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="p-3 border rounded bg-light text-center">
+                        <small class="text-muted d-block">Сложность</small>
+                        <span class="fw-bold">{{ exercise.get_difficulty_display }}</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-3 border rounded bg-light text-center">
+                        <small class="text-muted d-block">Тип</small>
+                        <span class="fw-bold">{{ exercise.get_exercise_type_display }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold mb-3">{{ exercise.name }}</h1>
+
+            <div class="mb-4">
+                <h5 class="fw-bold text-primary">Целевые мышцы</h5>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    {% for muscle in exercise.primary_muscles.all %}
+                        <span class="badge bg-primary px-3 py-2">{{ muscle.name }}</span>
+                    {% endfor %}
+                    {% for muscle in exercise.secondary_muscles.all %}
+                        <span class="badge bg-outline-primary border border-primary text-primary px-3 py-2">{{ muscle.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if exercise.equipment.exists %}
+            <div class="mb-4">
+                <h5 class="fw-bold text-dark">Оборудование</h5>
+                <p class="text-muted">
+                    {% for item in exercise.equipment.all %}
+                        {{ item.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <h5 class="fw-bold">Техника выполнения</h5>
+                <div class="text-muted" style="white-space: pre-line;">
+                    {{ exercise.instructions|default:"Инструкции скоро будут добавлены." }}
+                </div>
+            </div>
+
+            {% if exercise.benefits %}
+            <div class="alert alert-success border-0 shadow-sm">
+                <h6 class="fw-bold"><i class="bi bi-check-circle me-2"></i>Преимущества</h6>
+                <small>{{ exercise.benefits }}</small>
+            </div>
+            {% endif %}
+
+            {% if exercise.precautions %}
+            <div class="alert alert-warning border-0 shadow-sm">
+                <h6 class="fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Меры предосторожности</h6>
+                <small>{{ exercise.precautions }}</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if similar_exercises %}
+    <div class="mt-5">
+        <h3 class="fw-bold mb-4">Похожие упражнения</h3>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for similar in similar_exercises %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <img src="{{ similar.main_image }}" class="card-img-top" alt="{{ similar.name }}" style="height: 150px; object-fit: contain;">
+                    <div class="card-body p-2">
+                        <h6 class="card-title fw-bold mb-0">
+                            <a href="{% url 'exercise_detail' similar.slug %}" class="text-decoration-none text-dark stretched-link">
+                                {{ similar.name }}
+                            </a>
+                        </h6>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

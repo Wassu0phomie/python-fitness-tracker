@@ -1,7 +1,8 @@
 from django.db import models
 from django.conf import settings
 from exercises.models import Exercise
-from datetime import date  # Добавь этот импорт
+from datetime import date
+from django.core.validators import MinValueValidator
 
 
 class WorkoutPlan(models.Model):
@@ -10,7 +11,6 @@ class WorkoutPlan(models.Model):
     start_date = models.DateField(verbose_name="Дата начала")
     end_date = models.DateField(verbose_name="Дата окончания")
 
-    # НОВОЕ: Поле для архивации
     is_active = models.BooleanField(default=True, verbose_name="Активен")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -43,12 +43,23 @@ class DayExercise(models.Model):
     workout_day = models.ForeignKey(WorkoutDay, related_name='exercises', on_delete=models.CASCADE)
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
 
-    # МОЖНО ОСТАВИТЬ КАК БЫЛО, но лучше разделить для гибкости:
-    sets = models.PositiveIntegerField(default=1, verbose_name="Подходы")
-    reps = models.CharField(max_length=50, verbose_name="Повторения")
+    # Устанавливаем минимальное значение 1 для подходов
+    sets = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name="Подходы"
+    )
 
-    # Для порядка упражнений
+    # Меняем CharField на PositiveIntegerField для строгой числовой логики
+    reps = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name="Повторения"
+    )
+
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ['order']
+        verbose_name = "Упражнение в тренировке"
+        verbose_name_plural = "Упражнения в тренировках"

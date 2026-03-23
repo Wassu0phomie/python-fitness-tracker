@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Журнал тренировок | FitnessApp{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">МОИ ТРЕНИРОВКИ</h2>
+        <a href="{% url 'create_plan' %}" class="btn btn-dark rounded-pill px-4">
+            + Создать новый план
+        </a>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <ul class="nav nav-pills mb-4 bg-light p-1 rounded-pill d-inline-flex border" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill px-4 fw-bold" id="pills-active-tab" data-bs-toggle="pill" data-bs-target="#pills-active" type="button" role="tab">
+                    Активные <span class="badge bg-dark ms-1 opacity-50">{{ active_plans.count }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-bold" id="pills-archive-tab" data-bs-toggle="pill" data-bs-target="#pills-archive" type="button" role="tab">
+                    Архив <span class="badge bg-secondary ms-1 opacity-50">{{ archive_plans.count }}</span>
+                </button>
+            </li>
+        </ul>
+        {% if archive_plans.exists %}
+            <form action="{% url 'clear_archive' %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm"
+                        onclick="return confirm('Вы уверены, что хотите навсегда удалить все архивные планы?')">
+                    <i class="bi bi-trash3-fill me-1"></i> Очистить архив
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-active" role="tabpanel">
+            <div class="row g-4">
+                {% for plan in active_plans %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 p-3 hover-shadow transition">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold text-uppercase mb-0">{{ plan.title }}</h5>
+                                <span class="badge bg-success rounded-pill">В процессе</span>
+                            </div>
+                            <p class="text-muted small mb-4">
+                                <i class="bi bi-calendar-range me-2"></i>{{ plan.start_date|date:"d.m.Y" }} — {{ plan.end_date|date:"d.m.Y" }}
+                            </p>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+                                <div class="d-flex gap-1">
+                                    {% for day in plan.days.all %}
+                                        <span class="badge bg-light text-dark border rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 10px;">
+                                            {{ day.get_day_number_display }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                                <a href="{% url 'plan_detail' plan.id %}" class="btn btn-sm btn-dark rounded-pill px-3">Открыть</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-clipboard-x display-1 text-muted opacity-25"></i>
+                    <p class="mt-3 text-muted">У вас пока нет активных тренировок.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="pills-archive" role="tabpanel">
+            {% if archive_plans %}
+            <div class="list-group shadow-sm rounded-4 overflow-hidden border-0">
+                {% for plan in archive_plans %}
+                <a href="{% url 'plan_detail' plan.id %}" class="list-group-item list-group-item-action border-0 border-bottom d-flex justify-content-between align-items-center py-3 px-4">
+                    <div>
+                        <span class="fw-bold text-uppercase">{{ plan.title }}</span>
+                        <div class="small text-muted">Завершен: {{ plan.end_date|date:"d M Y" }}</div>
+                    </div>
+                    <span class="badge bg-light text-muted rounded-pill px-3 border small">Архив</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">Архив пуст.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link { color: #6c757d; transition: 0.3s; }
+    .nav-pills .nav-link.active { background-color: #fff !important; color: #000 !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .hover-shadow:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important; }
+    .transition { transition: all 0.3s ease; }
+</style>
+{% endblock %}

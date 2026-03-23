@@ -121,6 +121,24 @@ document.querySelectorAll('.btn-check').forEach(checkbox => {
     });
 });
 
+document.getElementById('planForm').addEventListener('submit', function(e) {
+    // Ищем все выпадающие списки упражнений
+    const exerciseSelects = document.querySelectorAll('select[name^="exercises_"]');
+    let hasExercise = false;
+
+    // Проверяем, выбрано ли хоть что-то
+    exerciseSelects.forEach(select => {
+        if (select.value !== "") {
+            hasExercise = true;
+        }
+    });
+
+    if (!hasExercise) {
+        e.preventDefault(); // Останавливаем отправку формы
+        alert('Пожалуйста, добавьте хотя бы одно упражнение в план!');
+    }
+});
+
 function addExercise(dayNum) {
     const list = document.getElementById(`exercise-list-${dayNum}`);
     const row = document.createElement('div');
@@ -135,10 +153,12 @@ function addExercise(dayNum) {
             </select>
         </div>
         <div class="col-md-2">
-            <input type="number" name="sets_${dayNum}" class="form-control border-0 p-2" placeholder="Сеты" style="border-radius: 10px;">
+            <input type="number" name="sets_${dayNum}" class="form-control border-0 p-2" placeholder="Сеты" style="border-radius: 10px;"
+            min="1" step="1" oninput="this.value = Math.abs(Math.floor(this.value)) || ''">
         </div>
         <div class="col-md-3">
-            <input type="text" name="reps_${dayNum}" class="form-control border-0 p-2" placeholder="Повторы" style="border-radius: 10px;">
+            <input type="number" name="reps_${dayNum}" class="form-control border-0 p-2" placeholder="Повторы" style="border-radius: 10px;
+            min="1" step="1" oninput="this.value = Math.abs(Math.floor(this.value)) || ''"">
         </div>
         <div class="col-md-1">
             <button type="button" class="btn text-danger" onclick="this.parentElement.parentElement.remove()"><i class="bi bi-trash"></i></button>

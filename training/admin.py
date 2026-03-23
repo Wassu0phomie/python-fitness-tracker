@@ -2,45 +2,59 @@ from django.contrib import admin
 from .models import WorkoutPlan, WorkoutDay, DayExercise
 
 
-# 1. Упражнения внутри Дня
+# Таблица упражнений, которая будет "встроена" в карточку дня
 class DayExerciseInline(admin.TabularInline):
     model = DayExercise
-    extra = 1  # Количество пустых полей для новых упражнений
+    extra = 1  # Одно пустое поле для быстрого добавления нового упражнения
     fields = ('exercise', 'sets', 'reps', 'order')
-    sortable_field_name = "order"
-
-
-# 2. Дни внутри Плана
-class WorkoutDayInline(admin.StackedInline):
-    model = WorkoutDay
-    extra = 1
-    show_change_link = True  # Позволяет перейти к редактированию конкретного дня
-
-
-@admin.register(WorkoutPlan)
-class WorkoutPlanAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'start_date', 'end_date', 'is_active')
-    list_filter = ('is_active', 'user', 'start_date')
-    search_fields = ('title', 'user__username')
-    inlines = [WorkoutDayInline]
-
-    # Раскрасим статус "Активен" в списке
-    list_editable = ('is_active',)
+    sortable_field_name = "order"  # Позволяет задавать порядок выполнения
 
 
 @admin.register(WorkoutDay)
 class WorkoutDayAdmin(admin.ModelAdmin):
-    list_display = ('day_number', 'plan', 'get_user')
-    list_filter = ('day_number', 'plan__user')
+    # 1. Показываем название плана и пользователя прямо в списке
+    list_display = ('get_day_name', 'get_plan_title', 'get_user_name', 'exercises_count')
+
+    # 2. Добавляем фильтры справа (это самое важное!)
+    # Теперь вы сможете кликнуть на "План: Набор массы" и увидеть только его дни
+    list_filter = ('day_number', 'plan__user', 'plan__title')
+
+    # 3. Добавляем поиск
+    search_fields = ('plan__title', 'plan__user__username')
+
     inlines = [DayExerciseInline]
 
-    def get_user(self, obj):
-        return obj.plan.user
+    # Вспомогательные методы для отображения данных из связанных таблиц
+    def get_day_name(self, obj):
+        return obj.get_day_number_display()
 
-    get_user.short_description = 'Пользователь'
+    get_day_name.short_description = "День недели"
+
+    def get_plan_title(self, obj):
+        return obj.plan.title
+
+    get_plan_title.short_description = "План"
+
+    def get_user_name(self, obj):
+        return obj.plan.user.username
+
+    get_user_name.short_description = "Пользователь"
+
+    def exercises_count(self, obj):
+        return obj.exercises.count()
+
+    exercises_count.short_description = "Упр-й"
 
 
-@admin.register(DayExercise)
-class DayExerciseAdmin(admin.ModelAdmin):
-    list_display = ('exercise', 'workout_day', 'sets', 'reps')
-    list_filter = ('workout_day__plan__user', 'exercise')
+# Также зарегистрируем План, чтобы видеть в нем список дней
+class WorkoutDayInline(admin.StackedInline):
+    model = WorkoutDay
+    extra = 0
+    show_change_link = True  # Ссылка "Изменить", которая ведет сразу к упражнениям дня
+
+
+@admin.register(WorkoutPlan)
+class WorkoutPlanAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'is_active', 'start_date', 'end_date')
+    inlines = [WorkoutDayInline]
+

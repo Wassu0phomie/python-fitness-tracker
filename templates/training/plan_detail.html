@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ plan.title }} | FitnessApp{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-uppercase mb-1">{{ plan.title }}</h2>
+            <p class="text-muted small mb-0">
+                <i class="bi bi-calendar3 me-1"></i>
+                {# Прямая проверка архива без промежуточных переменных #}
+                {% if plan.end_date < today_date.date or not plan.is_active %}
+                    <span class="badge bg-secondary">В архиве (завершен {{ plan.end_date|date:"d.m.Y" }})</span>
+                {% else %}
+                    Сегодня: {{ today_date|date:"l, d E" }}
+                {% endif %}
+            </p>
+        </div>
+
+        {% if plan.end_date < today_date.date or not plan.is_active %}
+            <a href="#" class="btn btn-dark rounded-pill px-4 shadow-sm" style="background-color: #D7FD51; color: #000; border: none;">
+                <i class="bi bi-arrow-repeat me-1"></i> Запустить заново
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="accordion border-0" id="workoutDaysAccordion">
+        {% for day in days %}
+        <div class="accordion-item border-0 shadow-sm mb-3" style="border-radius: 15px; overflow: hidden;">
+            <h2 class="accordion-header">
+                {# Проверка: разворачивать ли день (только если активен и сегодня) #}
+                <button class="accordion-button
+                        {% if plan.end_date < today_date.date or not plan.is_active or day.day_number != current_day_num %}collapsed{% endif %}
+                        fw-bold py-3"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#day{{ day.id }}">
+
+                    <span class="badge
+                        {% if plan.is_active and plan.end_date >= today_date.date and day.day_number == current_day_num %}bg-success text-white{% else %}bg-dark{% endif %}
+                        me-3">
+                        {{ day.get_day_number_display }}
+                    </span>
+
+                    {% if plan.is_active and plan.end_date >= today_date.date and day.day_number == current_day_num %}
+                        <span class="badge bg-warning text-dark">Тренировка на сегодня!</span>
+                    {% endif %}
+                </button>
+            </h2>
+
+            <div id="day{{ day.id }}"
+                 class="accordion-collapse collapse {% if plan.is_active and plan.end_date >= today_date.date and day.day_number == current_day_num %}show{% endif %}"
+                 data-bs-parent="#workoutDaysAccordion">
+
+                <div class="accordion-body bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    {# Показываем колонку чекбоксов только в активном плане #}
+                                    {% if plan.is_active and plan.end_date >= today_date.date %}
+                                        <th style="width: 40px;"></th>
+                                    {% endif %}
+                                    <th>Упражнение</th>
+                                    <th>Подходы</th>
+                                    <th>Повторы</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in day.exercises.all %}
+                                <tr class="exercise-row">
+                                    {% if plan.is_active and plan.end_date >= today_date.date %}
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input exercise-checkbox"
+                                                   type="checkbox"
+                                                   id="ex{{ item.id }}"
+                                                   {% if day.day_number != current_day_num %}disabled{% endif %}>
+                                        </div>
+                                    </td>
+                                    {% endif %}
+
+                                    <td class="{% if not plan.is_active or plan.end_date < today_date.date or day.day_number != current_day_num %}text-muted{% endif %}">
+                                        <label class="form-check-label d-block" for="ex{{ item.id }}">
+                                            <div class="fw-bold name-text">{{ item.exercise.name }}</div>
+                                            <div class="text-muted small">{{ item.exercise.category }}</div>
+                                        </label>
+                                    </td>
+                                    <td><span class="badge rounded-pill bg-light text-dark border">{{ item.sets }}</span></td>
+                                    <td>{{ item.reps }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-3 text-muted">В этот день упражнений нет</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if plan.end_date < today_date.date or not plan.is_active %}
+                        <div class="text-muted small mt-2 fst-italic">
+                            <i class="bi bi-info-circle me-1"></i> Этот тренировочный день завершен.
+                        </div>
+                    {% elif day.day_number != current_day_num %}
+                        <div class="alert alert-secondary py-2 mt-2 small border-0">
+                            <i class="bi bi-lock-fill me-1"></i>
+                            Просмотр доступен, но выполнение откроется в {{ day.get_day_number_display }}.
+                        </div>
+                    {% else %}
+                        <div class="text-end mt-3">
+                            <button class="btn btn-success btn-sm rounded-pill px-4 shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Завершить сегодняшнюю тренировку
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'show_plan' %}" class="btn btn-link text-decoration-none text-muted">
+            <i class="bi bi-arrow-left me-1"></i> Назад к списку планов
+        </a>
+    </div>
+</div>
+
+<style>
+    .exercise-checkbox:checked + label .name-text {
+        text-decoration: line-through;
+        opacity: 0.6;
+    }
+    .accordion-button:not(.collapsed) {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+    .exercise-row:hover {
+        background-color: rgba(215, 253, 81, 0.05);
+    }
+</style>
+{% endblock %}
