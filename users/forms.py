@@ -87,20 +87,10 @@ class CustomUserLoginForm(AuthenticationForm):
 
 class CustomUserUpdateForm(forms.ModelForm):
     """Форма редактирования профиля атлета"""
-
-    phone = forms.CharField(
-        required=False,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$', "Введите корректный номер телефона.")],
-        widget=forms.TextInput(attrs={
-            'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',
-            'placeholder': 'PHONE NUMBER'
-        })
-    )
-
     class Meta:
         model = User
         # Убедись, что эти поля есть в твоей модели CustomUser в models.py
-        fields = ('first_name', 'last_name', 'email', 'phone', 'avatar')
+        fields = ('first_name', 'last_name', 'email', 'avatar')
         widgets = {
             'first_name': forms.TextInput(attrs={
                 'class': 'dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500',

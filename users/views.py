@@ -6,7 +6,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 
-from .models import CustomUser
+from .models import CustomUser, UserProgress
 from .forms import CustomUserCreationForm, CustomUserUpdateForm, UserProgressUpdateForm
 from django.utils import timezone
 from training.models import WorkoutPlan
@@ -23,7 +23,6 @@ def profile_view(request):
     user = request.user
     today = timezone.now().date()
 
-    # Берем логику из старого IndexView
     active_plans = WorkoutPlan.objects.filter(
         user=user,
         is_active=True,

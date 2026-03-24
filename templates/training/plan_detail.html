@@ -82,6 +82,12 @@
                     <div class="p-3 bg-light-subtle">
                         {% if plan.end_date < today_date.date or not plan.is_active %}
                             <p class="text-muted small mb-0 fst-italic"><i class="bi bi-info-circle"></i> План завершен.</p>
+                        {% elif plan.start_date > today_date.date %}
+                            <div class="text-center p-2 border border-warning-subtle rounded bg-warning-light">
+                                <p class="text-warning small mb-0 fw-bold">
+                                    <i class="bi bi-clock-history"></i> Тренировка станет доступна {{ plan.start_date|date:"d.m.Y" }}
+                                </p>
+                            </div>
                         {% elif day.day_number != current_day_num %}
                             <p class="text-muted small mb-0"><i class="bi bi-lock-fill"></i> Доступно в {{ day.get_day_number_display }}.</p>
                         {% else %}

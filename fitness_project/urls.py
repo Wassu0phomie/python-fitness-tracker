@@ -10,13 +10,13 @@ from django.contrib.auth import views as auth_views
 from users import views as users_views
 
 urlpatterns = [
-    # Админка
     path('admin/', admin.site.urls),
     path('', users_views.welcome, name='welcome'),
     path('app/', include('users.urls')),
     path('exercises/', include('exercises.urls')),
     path('plan/', include('training.urls')),
     path('users/', include('users.urls')),
+    path('progress/', include('progress.urls')),
 ]
 
 # Для медиа-файлов в режиме разработки
