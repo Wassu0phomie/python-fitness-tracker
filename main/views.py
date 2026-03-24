@@ -5,8 +5,7 @@ from datetime import date
 from django.shortcuts import render
 from django.utils import timezone
 
-def welcome(request):
-    return render(request, 'welcome.html')
+
 
 
 class IndexView(TemplateView):

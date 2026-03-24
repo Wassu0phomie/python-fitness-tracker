@@ -131,3 +131,14 @@ class CustomUserUpdateForm(forms.ModelForm):
             if isinstance(cleaned_data[field], str):
                 cleaned_data[field] = strip_tags(cleaned_data[field])
         return cleaned_data
+
+from .models import UserProgress
+
+class UserProgressUpdateForm(forms.ModelForm):
+    class Meta:
+        model = UserProgress
+        fields = ('weight', 'height')
+        widgets = {
+            'weight': forms.NumberInput(attrs={'class': 'form-control-custom', 'step': '0.1'}),
+            'height': forms.NumberInput(attrs={'class': 'form-control-custom', 'step': '0.1'}),
+        }

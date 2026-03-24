@@ -7,31 +7,43 @@ from django.utils.encoding import force_str
 from django.contrib.auth.tokens import default_token_generator
 
 from .models import CustomUser
-from .forms import CustomUserCreationForm, CustomUserUpdateForm
+from .forms import CustomUserCreationForm, CustomUserUpdateForm, UserProgressUpdateForm
+from django.utils import timezone
+from training.models import WorkoutPlan
 
+
+
+def welcome(request):
+    return render(request, 'welcome.html')
 
 # ========== ПРОФИЛЬ И РЕДАКТИРОВАНИЕ ==========
 
 @login_required
-def index(request):
+def profile_view(request):
     user = request.user
+    today = timezone.now().date()
 
-    if request.method == 'POST' and 'update_profile' in request.POST:
-        # request.FILES нужен для обработки загруженного аватара
-        form = CustomUserUpdateForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Профиль обновлен!")
-            return redirect('index')
-    else:
-        # Если это просто просмотр страницы (GET), создаем форму с данными юзера
-        form = CustomUserUpdateForm(instance=user)
+    # Берем логику из старого IndexView
+    active_plans = WorkoutPlan.objects.filter(
+        user=user,
+        is_active=True,
+        end_date__gte=today
+    ).order_by('-start_date')
 
-    # Убедитесь, что 'main/index.html' соответствует вашему расположению файла
-    return render(request, 'main/index.html', {
+    # Получаем последние замеры (модель UserProgress из ваших models.py)
+    # Используем related_name='progress_logs'
+    latest_progress = user.progress_logs.first()
+
+    context = {
         'user': user,
-        'form': form,  # Передаем форму в шаблон под именем 'form'
-    })
+        'active_plans': active_plans,
+        'profile': latest_progress,
+        'date': timezone.now(),
+        'recent_photos': [],  # Заглушка
+    }
+
+    # Путь к шаблону уже в папке users
+    return render(request, 'users/profile.html', context)
 
 
 @login_required
@@ -44,15 +56,43 @@ def delete_profile(request):
         messages.success(request, "Ваш аккаунт был безвозвратно удален. Нам жаль, что вы уходите.")
         return redirect('welcome')
 
-    return redirect('index')
+    return redirect('profile')
 
+
+@login_required
+def edit_profile_view(request):
+    user = request.user
+    # Получаем последнюю запись прогресса или создаем новую, если записей нет
+    progress = user.progress_logs.first() or UserProgress(user=user)
+
+    if request.method == 'POST':
+        user_form = CustomUserUpdateForm(request.POST, request.FILES, instance=user)
+        progress_form = UserProgressUpdateForm(request.POST, instance=progress)
+
+        if user_form.is_valid() and progress_form.is_valid():
+            user_form.save()
+            # При сохранении прогресса убеждаемся, что связь с юзером установлена
+            new_progress = progress_form.save(commit=False)
+            new_progress.user = user
+            new_progress.save()
+
+            messages.success(request, "Профиль и параметры тела обновлены!")
+            return redirect('profile')
+    else:
+        user_form = CustomUserUpdateForm(instance=user)
+        progress_form = UserProgressUpdateForm(instance=progress)
+
+    return render(request, 'users/edit_profile.html', {
+        'form': user_form,
+        'progress_form': progress_form
+    })
 
 # ========== РЕГИСТРАЦИЯ И АКТИВАЦИЯ ==========
 
 def register(request):
     """Регистрация нового пользователя"""
     if request.user.is_authenticated:
-        return redirect('index')
+        return redirect('profile')
 
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -81,7 +121,7 @@ def activate(request, uidb64, token):
         user.save()
         login(request, user)
         messages.success(request, "Ваш аккаунт успешно активирован!")
-        return redirect('index')
+        return redirect('profile')
     else:
         messages.error(request, "Ссылка активации недействительна.")
         return redirect('welcome')

@@ -26,6 +26,10 @@
                     {% endif %}
                     <h5 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h5>
                     <p class="text-muted small">{{ user.email }}</p>
+                    <form action="{% url 'logout' %}" method="post" class="px-3">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-dark w-100 rounded-pill">Выйти</button>
+                    </form>
                 </div>
                 <div class="card-body pt-2">
                     <hr class="text-muted opacity-25">
@@ -43,16 +47,16 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="d-grid">
-                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                            <i class="bi bi-pencil-square me-1"></i> Редактировать профиль
-                        </button>
+                        <a href="{% url 'edit_profile' %}" class="btn btn-outline-dark btn-sm rounded-pill px-4">
+                            <i class="bi bi-gear me-1"></i> Настройки профиля
+                        </a>
                     </div>
                 </div>
             </div>
+
             <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-dark text-white py-3">
+                <div class="card-header bg-white text-dark py-3">
                     <h5 class="card-title mb-0"><i class="bi bi-calendar3 me-2"></i>Мои текущие планы</h5>
                 </div>
                 <div class="card-body p-4">
@@ -60,8 +64,8 @@
                         <div class="list-group list-group-flush">
                             {% for plan in active_plans %}
                                 <a href="{% url 'plan_detail' plan.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0">
-                                    <div>
-                                        <h6 class="mb-0 fw-bold">{{ plan.title }}</h6>
+                                    <div style="min-width: 0; flex: 1;">
+                                        <h6 class="mb-0 fw-bold text-truncate">{{ plan.title }}</h6>
                                         <small class="text-muted">Начат: {{ plan.start_date|date:"d.m.Y" }}</small>
                                     </div>
                                     <span class="badge bg-light text-primary border border-primary rounded-pill">В процессе</span>
@@ -72,7 +76,7 @@
                         <div class="text-center py-4">
                             <i class="bi bi-clipboard-x text-muted display-4"></i>
                             <p class="text-muted mt-2">У вас пока нет активных тренировочных планов.</p>
-                            <a href="create_plan" class="btn btn-primary">
+                            <a href="{% url 'create_plan' %}" class="btn btn-primary">
                                 <i class="bi bi-plus-lg me-1"></i> Создать первый план
                             </a>
                         </div>
@@ -80,8 +84,8 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-dark text-white py-3">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white text-dark py-3">
                     <h5 class="card-title mb-0"><i class="bi bi-camera me-2"></i>Последний прогресс</h5>
                 </div>
                 <div class="card-body">
@@ -98,25 +102,11 @@
                         {% empty %}
                             <div class="col-12 text-center py-5">
                                 <i class="bi bi-images text-muted fs-1"></i>
-                                <p class="text-muted mt-2">Загрузите первое фото в календарь, чтобы следить за изменениями!</p>
-                                <a href="#" class="btn btn-outline-dark btn-sm">Добавить фото</a>
+                                <p class="text-muted mt-2">Загрузите фото прогресса!</p>
                             </div>
                         {% endfor %}
                     </div>
                 </div>
-            </div>
-
-            <div class="mt-5 pt-4 border-top">
-                <h5 class="text-danger">ВНИМАНИЕ!</h5>
-                <p class="text-muted small">Удаление аккаунта нельзя отменить.</p>
-
-                <form action="{% url 'delete_profile' %}" method="POST"
-                      onsubmit="return confirm('Вы уверены? Все данные будут стерты.');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                        Удалить аккаунт
-                    </button>
-                </form>
             </div>
         </div>
 
@@ -133,8 +123,7 @@
                                 <span>Найти упражнение</span>
                             </div>
                         </a>
-
-                        <a href="#" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+                        <a href="{% url 'create_plan' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
                             <div class="d-flex align-items-center">
                                 <div class="bg-success bg-opacity-10 p-2 rounded me-3">
                                     <i class="bi bi-plus-square text-success"></i>
@@ -142,86 +131,46 @@
                                 <span>Новая тренировка</span>
                             </div>
                         </a>
-
-                        <a href="#" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
-                                    <i class="bi bi-graph-up text-warning"></i>
-                                </div>
-                                <span>Замеры тела</span>
-                            </div>
-                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="card bg-info bg-opacity-10 border-0 p-3">
+            <div class="card bg-info bg-opacity-10 border-0 p-3 mb-4">
                 <div class="d-flex align-items-center">
                     <i class="bi bi-info-circle-fill text-info fs-4 me-3"></i>
                     <div>
                         <small class="fw-bold d-block text-info">Совет дня</small>
-                        <small class="text-dark">Не забывайте пить воду во время тренировки!</small>
+                        <small class="text-dark">Пейте воду во время тренировки!</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="fw-bold px-3 pt-3">Настройки профиля</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <form method="POST">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    <p>Тест связи: {{ form.instance.email }}</p> <div class="space-y-4">
-                        {{ form.as_p }} <div class="mb-3">
-                             {{ form.first_name }}
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="mb-3">
-                            <label class="small text-muted fw-bold mb-1">ФОТО ПРОФИЛЯ</label>
-                            {{ form.avatar }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="small text-muted fw-bold mb-1">ИМЯ</label>
-                            {{ form.first_name }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="small text-muted fw-bold mb-1">ФАМИЛИЯ</label>
-                            {{ form.last_name }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="small text-muted fw-bold mb-1">EMAIL</label>
-                            {{ form.email }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="small text-muted fw-bold mb-1">ТЕЛЕФОН</label>
-                            {{ form.phone }}
-                        </div>
-                    </div>
-
-                    {% if form.errors %}
-                        <div class="alert alert-danger small mt-2">
-                            Пожалуйста, исправьте ошибки в полях.
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" name="update_profile" class="btn btn-dark rounded-pill px-4" style="background-color: #D7FD51; color: #000; border: none;">
-                        Сохранить
+    <div class="row">
+        <div class="col-12">
+            <div class="mt-5 pt-4 border-top">
+                <h5 class="text-danger small fw-bold text-uppercase">Внимаение!</h5>
+                <p class="text-muted small">Удаление аккаунта нельзя отменить. Все ваши данные будут удалены.</p>
+                <form action="{% url 'delete_profile' %}" method="POST" onsubmit="return confirm('Вы уверены? Все ваши данные будут утрачены Безвозвратно.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                        Удалить аккаунт
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .list-group-item .d-flex {
+    min-width: 0; /* Важно для корректной работы text-truncate в flex-контейнере */
+}
+</style>
 {% endblock %}

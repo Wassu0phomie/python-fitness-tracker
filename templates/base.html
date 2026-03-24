@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FITAPP | Dashboard{% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'images\logo\logo.jpeg' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo/logo.jpeg' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -18,27 +18,29 @@
             --accent-dark: #b5d930;
             --sidebar-width: 280px;
             --text-main: #242424;
+            --bottom-nav-height: 70px;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #fcfcfc; /*белый фон
+            background-color: #fcfcfc;
             color: var(--text-main);
+            margin: 0;
         }
 
-        /* SIDEBAR */
+        /* --- SIDEBAR (Desktop) --- */
         #sidebar {
             width: var(--sidebar-width);
             min-height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
             background-color: #ffffff !important;
             border-right: 1px solid #f2f2f2 !important;
+            transition: all 0.3s ease;
         }
 
-        /* Логотип в сайдбаре */
         .sidebar-logo {
             font-size: 24px;
             font-weight: 900;
@@ -46,64 +48,107 @@
             color: #000;
             text-decoration: none;
         }
-        .sidebar-logo span {
-            color: var(--accent-dark);
-        }
+        .sidebar-logo span { color: var(--accent-dark); }
 
-        /* Навигация */
         .nav-pills .nav-link {
             color: var(--text-main);
             font-weight: 600;
             padding: 12px 16px;
             margin-bottom: 4px;
-            border-radius: 12px; /* Мягкие скругления */
+            border-radius: 12px;
             transition: all 0.2s ease;
         }
 
-        .nav-pills .nav-link:hover {
-            background-color: #f8f9fa;
-            color: #000;
-        }
+        .nav-pills .nav-link:hover { background-color: #f8f9fa; }
 
-        /* АКТИВНЫЙ ПУНКТ (Тот самый неон) */
         .nav-pills .nav-link.active {
             background-color: var(--accent-neon) !important;
-            color: #000 !important; /* Черный текст на лаймовом фоне */
+            color: #000 !important;
             box-shadow: 0 4px 12px rgba(215, 253, 81, 0.3);
         }
 
-        .nav-link i {
-            font-size: 1.1rem;
-            margin-right: 10px;
-        }
-
-        /* ОСНОВНОЙ КОНТЕНТ */
+        /* --- MAIN CONTENT --- */
         #main-content {
             margin-left: var(--sidebar-width);
             padding: 40px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
-        /* HTMX Индикатор */
-        .htmx-indicator {
-            display:none;
-        }
-        .htmx-request .htmx-indicator {
-            display:inline-block;
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-nav {
+            height: var(--bottom-nav-height);
+            background: #ffffff;
+            border-top: 1px solid #eee;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            z-index: 1050;
         }
 
-        /* Кастомный скроллбар для сайдбара */
-        #sidebar::-webkit-scrollbar {
-            width: 4px;
+        .mobile-nav .nav-link {
+            color: #aaa;
+            font-size: 1.5rem;
+            padding: 10px;
+            transition: 0.2s;
+            position: relative;
         }
-        #sidebar::-webkit-scrollbar-thumb {
-            background: #eee;
+
+        .mobile-nav .nav-link.active-mobile {
+            color: #000 !important;
         }
+
+        /* Индикатор активной вкладки (точка или фон) */
+        .active-mobile::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background: var(--accent-dark);
+            border-radius: 50%;
+        }
+
+        .plus-btn-mobile {
+            width: 55px;
+            height: 55px;
+            background: #000;
+            color: #fff !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -35px;
+            border: 5px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* --- RESPONSIVE LOGIC --- */
+        @media (max-width: 991.98px) {
+            #sidebar {
+                display: none !important;
+            }
+            #main-content {
+                margin-left: 0;
+                padding: 20px 15px calc(var(--bottom-nav-height) + 20px) 15px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .mobile-nav {
+                display: none !important;
+            }
+        }
+
+        /* HTMX Loading Indicator */
+        .htmx-indicator { display:none; }
+        .htmx-request .htmx-indicator { display:inline-block; }
     </style>
 </head>
 <body>
 
     <div class="d-flex flex-column flex-shrink-0 p-4 bg-white" id="sidebar">
-        <a href="{% url 'index' %}" class="sidebar-logo mb-4 d-block text-center">
+        <a href="{% url 'profile' %}" class="sidebar-logo mb-4 d-block text-center">
             FIT<span>APP</span>
         </a>
 
@@ -111,28 +156,28 @@
 
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
-                <a href="{% url 'index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-                    <i class="bi bi-person-fill"></i> Профиль
+                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="bi bi-person-fill me-2"></i> Профиль
                 </a>
             </li>
             <li>
                 <a href="{% url 'exercise_list' %}" class="nav-link {% if 'exercise' in request.path %}active{% endif %}">
-                    <i class="bi bi-fire"></i> Упражнения
+                    <i class="bi bi-fire me-2"></i> Упражнения
                 </a>
             </li>
             <li>
-                <a href="{% url 'create_plan' %}" class="nav-link">
-                    <i class="bi bi-plus-circle-fill"></i> Новая тренировка
+                <a href="{% url 'create_plan' %}" class="nav-link {% if request.resolver_match.url_name == 'create_plan' %}active{% endif %}">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Новая тренировка
                 </a>
             </li>
             <li>
-                <a href="{% url 'show_plan' %}" class="nav-link">
-                    <i class="bi bi-calendar-heart"></i> Журнал
+                <a href="{% url 'show_plan' %}" class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active{% endif %}">
+                    <i class="bi bi-calendar-heart me-2"></i> Журнал
                 </a>
             </li>
             <li>
                 <a href="#" class="nav-link">
-                    <i class="bi bi-image"></i> Прогресс в фото
+                    <i class="bi bi-image me-2"></i> Фото прогресса
                 </a>
             </li>
         </ul>
@@ -145,7 +190,7 @@
                 <strong class="fw-bold">{{ user.first_name|default:user.username|default:"Атлет" }}</strong>
             </a>
             <ul class="dropdown-menu text-small shadow border-0" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item py-2" href="{% url 'index' %}">Настройки</a></li>
+                <li><a class="dropdown-item py-2" href="#">Настройки</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form action="{% url 'logout' %}" method="post" class="px-3">
@@ -157,9 +202,31 @@
         </div>
     </div>
 
+    <nav class="mobile-nav fixed-bottom d-flex justify-content-around align-items-center d-lg-none">
+        <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active-mobile{% endif %}">
+            <i class="bi bi-person-circle"></i>
+        </a>
+        <a href="{% url 'exercise_list' %}" class="nav-link {% if 'exercise' in request.path %}active-mobile{% endif %}">
+            <i class="bi bi-fire"></i>
+        </a>
+
+        <a href="{% url 'create_plan' %}" class="nav-link p-0">
+            <div class="plus-btn-mobile">
+                <i class="bi bi-plus-lg"></i>
+            </div>
+        </a>
+
+        <a href="{% url 'show_plan' %}" class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active-mobile{% endif %}">
+            <i class="bi bi-calendar-check"></i>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="bi bi-gear"></i>
+        </a>
+    </nav>
+
     <main id="main-content">
         <div class="container-fluid">
-            <div class="htmx-indicator position-fixed top-0 end-0 m-4">
+            <div class="htmx-indicator position-fixed top-0 end-0 m-4" style="z-index: 2000;">
                 <div class="spinner-border text-dark" role="status"></div>
             </div>
 
@@ -170,6 +237,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Поддержка CSRF для HTMX
         document.body.addEventListener('htmx:configRequest', (event) => {
             event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
         });

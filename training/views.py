@@ -73,7 +73,7 @@ def create_plan_view(request):
                         order=i
                     )
 
-        return redirect('index')
+        return redirect('plan_detail', pk=plan.pk)
 
     day_choices = WorkoutDay.DAYS_OF_WEEK
     exercises = Exercise.objects.all()
@@ -85,6 +85,11 @@ def create_plan_view(request):
 
 @login_required
 def plans_list_view(request):
+    WorkoutPlan.objects.filter(
+        user=request.user,
+        is_active=True,
+        end_date__lt=timezone.now().date()
+    ).update(is_active=False)
     # Получаем все планы именно этого пользователя
     # Сортируем: сначала новые (-created_at)
     all_plans = WorkoutPlan.objects.filter(user=request.user).order_by('-created_at')
@@ -122,8 +127,10 @@ def plan_detail_view(request, pk):
     })
 
 
+@login_required
 @require_POST
 def clear_archive_view(request):
+    """Удаляет только архивные (неактивные) планы пользователя"""
     archived_plans = WorkoutPlan.objects.filter(user=request.user, is_active=False)
     count = archived_plans.count()
 
@@ -131,6 +138,34 @@ def clear_archive_view(request):
         archived_plans.delete()
         messages.success(request, f"Архив очищен: удалено {count} программ.")
     else:
-        messages.info(request, "В архиве пока нет программ для удаления.")
+        messages.info(request, "В архиве нет программ для удаления.")
 
+    return redirect('show_plan')
+
+
+@login_required
+@require_POST
+def clear_active_view(request):
+    """Удаляет все текущие активные планы пользователя"""
+    active_plans = WorkoutPlan.objects.filter(user=request.user, is_active=True)
+    count = active_plans.count()
+
+    if count > 0:
+        active_plans.delete()
+        messages.success(request, f"Все активные тренировки удалены ({count} шт.).")
+    else:
+        messages.info(request, "У вас нет активных тренировок.")
+
+    return redirect('show_plan')
+
+
+@login_required
+@require_POST
+def delete_plan_view(request, pk):
+    # Ищем план, принадлежащий именно текущему пользователю
+    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
+    title = plan.title
+    plan.delete()
+
+    messages.success(request, f"План «{title}» успешно удален.")
     return redirect('show_plan')

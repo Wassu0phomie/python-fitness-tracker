@@ -6,10 +6,9 @@
 {% block content %}
 <div class="container py-5">
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'exercise_list' %}">База упражнений</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ exercise.name }}</li>
-        </ol>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="bi bi-arrow-left me-2"></i>Назад
+        </a>
     </nav>
 
     <div class="row g-5">

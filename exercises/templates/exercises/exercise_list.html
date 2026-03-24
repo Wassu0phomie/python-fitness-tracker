@@ -9,7 +9,6 @@
         <h1 class="display-4 fw-bold text-primary">База упражнений</h1>
         <p class="lead text-muted">Изучайте технику выполнения и находите новые упражнения</p>
     </div>
-
     <div class="row g-3 mb-4 text-center">
         <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0">
@@ -58,7 +57,11 @@
             </div>
         </div>
     </div>
-
+    <div class="d-md-none mb-3">
+        <button class="btn btn-dark w-100 rounded-pill py-2 fw-bold" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters">
+            <i class="bi bi-sliders2 me-2"></i> ФИЛЬТРЫ И ПОИСК
+        </button>
+    </div>
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body p-4">
             <h5 class="card-title mb-3"><i class="bi bi-sliders me-2"></i>Фильтры</h5>
@@ -171,4 +174,104 @@
     </nav>
     {% endif %}
 </div>
+<div class="offcanvas offcanvas-bottom h-auto rounded-top-4" tabindex="-1" id="offcanvasFilters" style="max-height: 90vh;">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-bold text-uppercase">Фильтры поиска</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="get" class="row g-3">
+            <div class="col-12">
+                <label class="form-label-custom">Название</label>
+                <input type="text" name="q" value="{{ filter_params.q }}" class="form-control-custom" placeholder="Например: Жим лежа">
+            </div>
+            <div class="col-12">
+                <label class="form-label-custom">Целевые мышцы</label>
+                <select name="muscle" class="form-select-custom">
+                    <option value="">Все группы</option>
+                    {% for muscle in muscle_groups %}
+                    <option value="{{ muscle.slug }}" {% if filter_params.muscle == muscle.slug %}selected{% endif %}>{{ muscle.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label-custom">Сложность</label>
+                <select name="difficulty" class="form-select-custom">
+                    <option value="">Любая</option>
+                    {% for value, label in difficulties %}
+                    <option value="{{ value }}" {% if filter_params.difficulty == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 d-grid gap-2 mt-4 pb-4">
+                <button type="submit" class="btn btn-dark py-3 rounded-pill fw-bold" style="background-color: #D7FD51; color: #000; border: none;">ПРИМЕНИТЬ</button>
+                <a href="{% url 'exercise_list' %}" class="btn btn-light py-3 rounded-pill text-muted">СБРОСИТЬ ВСЁ</a>
+            </div>
+        </form>
+    </div>
+</div>
+<style>
+    /* Прячем десктопные фильтры на мобильных */
+    @media (max-width: 767px) {
+        .card.shadow-sm.border-0.mb-4 { display: none; }
+
+        /* Уменьшаем заголовки статистики, чтобы они не ломали сетку */
+        .h3.fw-bold { font-size: 1.25rem !important; }
+        .small.text-muted { font-size: 0.7rem !important; line-height: 1.1; }
+
+        /* Добавляем отступ снизу для Offcanvas, чтобы он не перекрывался системными кнопками */
+        .offcanvas-body { padding-bottom: 80px !important; }
+    }
+
+    /* Кастомные элементы управления */
+    .form-label-custom {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control-custom, .form-select-custom {
+        width: 100%;
+        padding: 12px 15px;
+        background-color: #f8f9fa;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        transition: 0.3s;
+        appearance: none; /* Убираем стандартные стрелки для красоты */
+    }
+
+    .form-select-custom {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    .form-control-custom:focus, .form-select-custom:focus {
+        background-color: #fff;
+        border-color: #D7FD51;
+        outline: none;
+        box-shadow: 0 5px 15px rgba(215, 253, 81, 0.1);
+    }
+
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+
+    .rounded-top-4 {
+        border-top-left-radius: 1.5rem !important;
+        border-top-right-radius: 1.5rem !important;
+        border-top: 5px solid #D7FD51; /* Добавим фирменную полоску сверху */
+    }
+
+    /* Исправление отображения карточек */
+    .card-img-top {
+        transition: transform 0.3s ease;
+    }
+    .card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+</style>
 {% endblock %}
