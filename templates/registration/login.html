@@ -9,6 +9,9 @@
             <input type="email" name="email" placeholder="Email" required />
             <input type="password" name="password1" placeholder="Пароль" required />
             <input type="password" name="password2" placeholder="Повтор пароля" required />
+            <div class="mobile-switch">
+                Уже есть аккаунт? <span onclick="document.querySelector('.auth-card').classList.remove('right-panel-active')">Войти</span>
+            </div>
             <button type="submit">Зарегистрироваться</button>
         </form>
     </div>
@@ -20,6 +23,9 @@
             <input type="text" name="username" placeholder="Email" required />
             <input type="password" name="password" placeholder="Пароль" required />
             <a href="{% url 'password_reset' %}" class="forgot-pass">Забыли пароль?</a>
+            <div class="mobile-switch">
+                Нет аккаунта? <span onclick="document.querySelector('.auth-card').classList.add('right-panel-active')">Зарегистрироваться</span>
+            </div>
             <button type="submit">Войти</button>
         </form>
     </div>

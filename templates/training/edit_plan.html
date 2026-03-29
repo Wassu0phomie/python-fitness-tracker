@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Создание тренировки | FitnessApp{% endblock %}
+{% block title %}Редактирование тренировки | FitnessApp{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -15,16 +15,16 @@
                     <div class="row g-3 mb-5">
                         <div class="col-md-6">
                             <label class="small text-muted fw-bold mb-2">НАЗВАНИЕ ПЛАНА</label>
-                            <input type="text" name="title" class="form-control border-0 bg-light p-3"
+                            <input type="text" name="title" value="{{ plan.title }}" class="form-control border-0 bg-light p-3"
                                    placeholder="Например: Набор массы" style="border-radius: 12px;" required>
                         </div>
                         <div class="col-md-3">
                             <label class="small text-muted fw-bold mb-2">ДАТА НАЧАЛА</label>
-                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
+                            <input type="date" name="start_date" value="{{ plan.start_date|date:'Y-m-d' }}" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
                         </div>
                         <div class="col-md-3">
                             <label class="small text-muted fw-bold mb-2">ДАТА ОКОНЧАНИЯ</label>
-                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
+                            <input type="date" name="end_date" value="{{ plan.end_date|date:'Y-m-d' }}" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
                         </div>
                     </div>
 
@@ -153,7 +153,7 @@ document.querySelectorAll('.btn-check').forEach(checkbox => {
                     <i class="bi bi-plus-circle-fill me-2"></i>Добавить упражнение
                 </button>
             `;
-            container.appendChild(dayBlock);
+            container.prepend(dayBlock);
         } else {
             const blockToRemove = document.getElementById(`day-block-${dayNum}`);
             if (blockToRemove) blockToRemove.remove();
@@ -349,6 +349,94 @@ if (exerciseModal) {
             card.style.display = 'block';
         });
     });
+
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Используем задержку или четкую последовательность, чтобы DOM успел обновиться
+    {% for day in existing_days %}
+        (function() {
+            const dayNum = "{{ day.day_number }}";
+            const checkbox = document.getElementById('day-' + dayNum);
+
+            if (checkbox) {
+                checkbox.checked = true;
+
+                // Эмулируем логику из слушателя 'change' вручную для надежности
+                const dayLabel = document.querySelector(`label[for="${checkbox.id}"]`).innerText;
+                const container = document.getElementById('workout-days-container');
+                if (container.querySelector('.text-center.py-5')) container.innerHTML = '';
+
+                const dayBlock = document.createElement('div');
+                dayBlock.id = `day-block-${dayNum}`;
+                dayBlock.className = 'card mb-4 border-0 bg-light p-4 rounded-4 shadow-sm';
+                dayBlock.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-uppercase">${dayLabel}</h5>
+                    </div>
+                    <div class="exercise-list" id="exercise-list-${dayNum}"></div>
+                    <button type="button" class="btn btn-link text-dark fw-bold text-decoration-none p-0 mt-2 open-gallery-btn"
+                            data-bs-toggle="modal" data-bs-target="#exerciseGallery" data-day="${dayNum}">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Добавить упражнение
+                    </button>
+                `;
+                container.appendChild(dayBlock);
+
+                // Теперь добавляем упражнения именно в этот созданный блок
+                const listContainer = document.getElementById(`exercise-list-${dayNum}`);
+                {% for de in day.exercises.all %}
+                    const row = document.createElement('div');
+                    row.className = 'row g-2 mb-2 align-items-center';
+                    row.innerHTML = `
+                        <div class="col-md-6">
+                            <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm" style="border-radius: 10px;">{{ de.exercise.name }}</div>
+                            <input type="hidden" name="exercises_${dayNum}" value="{{ de.exercise.id }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="sets_${dayNum}" class="form-control border-0 p-2 text-center shadow-sm"
+                                   value="{{ de.sets }}" min="1" style="border-radius: 10px;">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="reps_${dayNum}" class="form-control border-0 p-2 text-center shadow-sm"
+                                   value="{{ de.reps }}" min="1" style="border-radius: 10px;">
+                        </div>
+                        <div class="col-md-1 text-center">
+                            <button type="button" class="btn text-danger p-0" onclick="this.parentElement.parentElement.remove()">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                {% endfor %}
+            }
+        })();
+    {% endfor %}
+});
+// Вспомогательная функция для наполнения (аналог addExerciseToDay, но с параметрами)
+function addExerciseToExistingDay(id, name, sets, reps) {
+    const listContainer = document.getElementById(`exercise-list-${activeDayForSelection}`);
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 align-items-center';
+    row.innerHTML = `
+        <div class="col-md-6">
+            <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm">${name}</div>
+            <input type="hidden" name="exercises_${activeDayForSelection}" value="${id}">
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="sets_${activeDayForSelection}" class="form-control border-0 p-2 text-center"
+                   value="${sets}" min="1">
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="reps_${activeDayForSelection}" class="form-control border-0 p-2 text-center"
+                   value="${reps}" min="1">
+        </div>
+        <div class="col-md-1 text-center">
+            <button type="button" class="btn text-danger p-0" onclick="this.parentElement.parentElement.remove()">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    listContainer.appendChild(row);
 }
 </script>
 {% endblock %}

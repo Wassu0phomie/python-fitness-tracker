@@ -4,7 +4,6 @@ from exercises.models import Exercise
 from datetime import date
 from django.core.validators import MinValueValidator
 
-
 class WorkoutPlan(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, verbose_name="Название плана")
@@ -20,8 +19,15 @@ class WorkoutPlan(models.Model):
 
     # НОВОЕ: Метод для проверки просрочки
     @property
-    def is_expired(self):
-        return date.today() > self.end_date
+    def status(self):
+        today = date.today()
+        if not self.is_active:
+            return "paused"  # Принудительно остановлен
+        if today > self.end_date:
+            return "expired"  # Просрочен по дате
+        if today < self.start_date:
+            return "pending"  # Еще не начался
+        return "active"
 
 
 class WorkoutDay(models.Model):
@@ -63,3 +69,4 @@ class DayExercise(models.Model):
         ordering = ['order']
         verbose_name = "Упражнение в тренировке"
         verbose_name_plural = "Упражнения в тренировках"
+

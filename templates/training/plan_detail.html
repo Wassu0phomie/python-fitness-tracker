@@ -18,13 +18,6 @@
                 {% endif %}
             </p>
         </div>
-
-        {% if plan.end_date < today_date.date or not plan.is_active %}
-            <a href="#" class="btn btn-dark rounded-pill px-4 shadow-sm w-auto align-self-start align-self-md-center flex-shrink-0"
-               style="background-color: #D7FD51; color: #000; border: none; white-space: nowrap;">
-                <i class="bi bi-arrow-repeat me-1"></i> Запустить заново
-            </a>
-        {% endif %}
     </div>
 
     <div class="accordion border-0" id="workoutDaysAccordion">
@@ -56,7 +49,8 @@
                                 {% if plan.is_active and plan.end_date >= today_date.date %}
                                 <div class="form-check mb-0 me-3">
                                     <input class="form-check-input exercise-checkbox" type="checkbox" id="ex{{ item.id }}"
-                                           {% if day.day_number != current_day_num %}disabled{% endif %}
+                                           {% if day.day_number != current_day_num or is_completed_today %}disabled{% endif %}
+                                           {% if is_completed_today %}checked{% endif %}
                                            style="width: 1.5rem; height: 1.5rem; cursor: pointer;">
                                 </div>
                                 {% endif %}
@@ -91,10 +85,24 @@
                         {% elif day.day_number != current_day_num %}
                             <p class="text-muted small mb-0"><i class="bi bi-lock-fill"></i> Доступно в {{ day.get_day_number_display }}.</p>
                         {% else %}
-                            <button class="btn btn-success w-100 w-md-auto rounded-pill fw-bold py-2 shadow-sm border-0">
-                                <i class="bi bi-check2-all me-2"></i>
-                                <span class="d-inline d-md-none">ЗАВЕРШИТЬ</span> <span class="d-none d-md-inline">ЗАВЕРШИТЬ ТРЕНИРОВКУ</span>
-                            </button>
+                            {% if is_completed_today %}
+                                <div class="alert alert-success d-flex align-items-center rounded-pill py-3 px-4 m-0 border-0 shadow-sm"
+                                     style="background: #D7FD51; color: #000;">
+                                    <i class="bi bi-check-all me-2"></i>
+                                    <span class="fw-bold text-uppercase small">План на сегодня выполнен! Отдыхай</span>
+                                </div>
+                            {% else %}
+                                <div class="mt-4 pt-3 border-top" id="complete-area-{{ day.id }}">
+                                    <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-sm transition-all"
+                                            style="letter-spacing: 1px;"
+                                            hx-post="{% url 'complete_workout' day.id %}"
+                                            hx-target="#complete-area-{{ day.id }}"
+                                            hx-swap="innerHTML"
+                                            hx-confirm="Все упражнения выполнены? Это добавит тренировку в твой прогресс!">
+                                        ЗАВЕРШИТЬ ТРЕНИРОВКУ
+                                    </button>
+                                </div>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -103,9 +111,25 @@
         {% endfor %}
     </div>
 
-    <div class="mt-4 mb-5 text-center">
-        <a href="{% url 'show_plan' %}" class="btn btn-link text-decoration-none text-muted small">
-            <i class="bi bi-arrow-left me-1"></i> Назад к списку планов
+    <div class="mt-5 mb-5 d-flex flex-column align-items-center gap-4">
+
+        {% if plan.status == 'expired' or plan.status == 'paused' %}
+            <form action="{% url 'edit_plan' plan.pk %}" class="w-100 text-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-dark px-5 py-3 fw-bold shadow"
+                        style="background-color: #D7FD51; color: #000; border: none; border-radius: 15px; min-width: 280px;">
+                    <i class="bi bi-play-fill me-2"></i>ЗАПУСТИТЬ ЗАНОВО
+                </button>
+            </form>
+        {% else %}
+
+            <a href="{% url 'edit_plan' plan.pk %}" class="btn btn-outline-dark px-5 py-2 fw-bold"
+               style="border-radius: 12px; min-width: 280px;">
+                <i class="bi bi-pencil-square me-2"></i>РЕДАКТИРОВАТЬ СОСТАВ
+            </a>
+        {% endif %}
+        <a href="{% url 'show_plan' %}" class="btn btn-link text-muted small mt-2">
+            <i class="bi bi-arrow-left"></i> Назад к списку
         </a>
     </div>
 </div>

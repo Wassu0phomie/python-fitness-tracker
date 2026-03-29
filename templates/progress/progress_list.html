@@ -1,58 +1,105 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-4">
-    <h2 class="fw-bold mb-4">Мой прогресс</h2>
+<style>
+    .heatmap-container {
+        display: grid;
+        grid-template-columns: repeat(52, 1fr); /* 52 недели */
+        grid-template-rows: repeat(7, 1fr);    /* 7 дней */
+        grid-auto-flow: column;
+        gap: 3px;
+        max-width: 800px;
+    }
+    .day-cell {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        background-color: #ebedf0; /* Пустой день */
+    }
+    /* Цвета как в GitHub (или ваши неоновые) */
+    .level-1 { background-color: #9be9a8; }
+    .level-2 { background-color: #40c463; }
+    .level-3 { background-color: #30a14e; }
+    .level-4 { background-color: #216e39; }
+</style>
 
-    <div class="row">
-        <div class="col-lg-8 mb-4">
-            <div class="card shadow-sm border-0 p-4">
-                <h5 class="fw-bold">Динамика веса</h5>
-                <canvas id="weightChart" width="400" height="200"></canvas>
+<div class="card p-3 shadow-sm border-0" style="border-radius: 20px;">
+    <h6 class="fw-bold mb-3 small text-uppercase">Календарь активности</h6>
+    <div class="heatmap-container">
+        {% for day in heatmap_data %}
+            <div class="day-cell level-{{ day.level }}"
+                 title="{{ day.date }}: {{ day.count }} тренировок">
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="container py-4">
+    <h2 class="fw-bold text-uppercase mb-4">Прогресс</h2>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 20px; background: #D7FD51;">
+                <span class="small fw-bold text-uppercase opacity-75">Всего тренировок</span>
+                <div class="display-4 fw-900">{{ total_workouts }}</div>
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 p-4 text-center bg-primary text-white">
-                <h6>Новый замер?</h6>
-                <p class="small">Зафиксируй результат сегодня</p>
-                <a href="{% url 'progress:add' %}" class="btn btn-light rounded-pill">Добавить данные</a>
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 20px;">
+                <h6 class="fw-bold small text-uppercase mb-3">Активность за месяц</h6>
+                <canvas id="activityChart" style="max-height: 150px;"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="row g-3">
-        <h5 class="fw-bold">История в фото</h5>
-        {% for log in logs %}
-            {% if log.photo %}
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <img src="{{ log.photo.url }}" class="card-img-top rounded" alt="Прогресс">
-                    <div class="card-footer bg-white small text-muted text-center">
-                        {{ log.date|date:"d.m.Y" }} ({{ log.weight }} кг)
-                    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0 text-uppercase">Галерея трансформации</h4>
+        <button class="btn btn-dark rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#uploadForm">
+            + ЗАМЕР
+        </button>
+    </div>
+
+    <div class="collapse mb-4" id="uploadForm">
+        <div class="card border-0 shadow-sm p-3" style="border-radius: 20px;">
+            <form hx-post="{% url 'upload_progress' %}" hx-encoding="multipart/form-data" 
+                  hx-target="#gallery-grid" hx-swap="afterbegin" hx-on::after-request="this.reset()">
+                {% csrf_token %}
+                <div class="row g-2">
+                    <div class="col-md-3"><input type="file" name="image" class="form-control border-0 bg-light" required></div>
+                    <div class="col-md-2"><input type="number" name="weight" step="0.1" class="form-control border-0 bg-light" placeholder="Вес (кг)"></div>
+                    <div class="col-md-5"><input type="text" name="comment" class="form-control border-0 bg-light" placeholder="Комментарий..."></div>
+                    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold">OK</button></div>
                 </div>
-            </div>
-            {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3" id="gallery-grid">
+        {% for photo in photos %}
+            {% include 'progress/partials/photo_card.html' %}
         {% endfor %}
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('weightChart').getContext('2d');
+    const ctx = document.getElementById('activityChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {{ labels|safe }},
+            labels: {{ labels_json|safe }},
             datasets: [{
-                label: 'Вес (кг)',
-                data: {{ weight_data|safe }},
-                borderColor: '#0d6efd',
-                tension: 0.3,
+                data: {{ data_json|safe }},
+                borderColor: '#D7FD51',
+                backgroundColor: 'rgba(215, 253, 81, 0.1)',
                 fill: true,
-                backgroundColor: 'rgba(13, 110, 253, 0.05)'
+                tension: 0.4,
+                pointRadius: 0
             }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { x: { display: false }, y: { beginAtZero: true, display: false } }
         }
     });
 </script>

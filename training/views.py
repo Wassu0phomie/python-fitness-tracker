@@ -2,10 +2,12 @@ from exercises.models import Exercise  # Импортируй свою моде�
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import WorkoutPlan, WorkoutDay, DayExercise
+from exercises.models import Exercise, MuscleGroup
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from datetime import date
 from django.contrib import messages
+from django.http import HttpResponse
 @login_required
 def create_plan_view(request):
     if request.method == 'POST':
@@ -77,9 +79,11 @@ def create_plan_view(request):
 
     day_choices = WorkoutDay.DAYS_OF_WEEK
     exercises = Exercise.objects.all()
+    muscle_groups = MuscleGroup.objects.all()
     return render(request, 'training/create_plan.html', {
         'day_choices': day_choices,
-        'exercises': exercises
+        'exercises': exercises,
+        'muscle_groups': muscle_groups
     })
 
 
@@ -108,23 +112,30 @@ def plans_list_view(request):
 
 
 def plan_detail_view(request, pk):
+    from progress.models import WorkoutLog
+
     plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
     days = plan.days.all().prefetch_related('exercises__exercise')
 
     # Получаем текущий день недели (0 - Понедельник, 1 - Вторник и т.д.)
-    current_day_num = timezone.now().isoweekday()
-
-    # Маппинг для твоей модели (если у тебя ПН=1, СР=3 и т.д., скорректируй числа)
-    # Python: 0=ПН, 1=ВТ, 2=СР, 3=ЧТ, 4=ПТ, 5=СБ, 6=ВС
-    # Допустим, в твоей модели числа совпадают (1-7 или 0-6)
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    current_day_num = now.isoweekday()
+    # Проверяем, есть ли запись о завершении ЛЮБОГО дня этого плана за СЕГОДНЯ
+    is_completed_today = WorkoutLog.objects.filter(
+        user=request.user,
+        workout_day__plan=plan,
+        completed_at__date=today
+    ).exists()
 
     return render(request, 'training/plan_detail.html', {
         'plan': plan,
         'days': days,
         'today_date': timezone.now(),
-        'current_day_num': current_day_num  # Передаем в шаблон
-
+        'current_day_num': current_day_num,
+        'is_completed_today': is_completed_today,  # Передаем статус
     })
+
 
 
 @login_required
@@ -169,3 +180,76 @@ def delete_plan_view(request, pk):
 
     messages.success(request, f"План «{title}» успешно удален.")
     return redirect('show_plan')
+
+
+@login_required
+def edit_plan_view(request, pk):
+    # Получаем план, принадлежащий именно этому пользователю
+    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        # Логика сохранения почти такая же, как в create_plan_view,
+        # но сначала мы очищаем старые данные дня
+        plan.title = request.POST.get('title')
+        plan.start_date = request.POST.get('start_date')
+        plan.end_date = request.POST.get('end_date')
+        plan.is_active = True
+        plan.save()
+
+        # Удаляем старые дни и упражнения, чтобы перезаписать их новыми (простой путь)
+        plan.days.all().delete()
+
+        selected_days = request.POST.getlist('selected_days')
+        for day_num in selected_days:
+            workout_day = WorkoutDay.objects.create(plan=plan, day_number=day_num)
+
+            exercise_ids = request.POST.getlist(f'exercises_{day_num}')
+            sets_list = request.POST.getlist(f'sets_{day_num}')
+            reps_list = request.POST.getlist(f'reps_{day_num}')
+
+            for i in range(len(exercise_ids)):
+                if exercise_ids[i]:
+                    DayExercise.objects.create(
+                        workout_day=workout_day,
+                        exercise_id=exercise_ids[i],
+                        sets=sets_list[i] or 0,
+                        reps=reps_list[i] or "0",
+                        order=i
+                    )
+        messages.success(request, f"План «{plan.title}» успешно обновлен и активирован!")
+        return redirect('plan_detail', pk=plan.pk)
+
+    # Для GET-запроса: подготавливаем данные
+    day_choices = WorkoutDay.DAYS_OF_WEEK
+    exercises = Exercise.objects.all()
+    muscle_groups = MuscleGroup.objects.all()
+
+    # Получаем уже выбранные дни и упражнения для JS
+    existing_days = plan.days.all().prefetch_related('exercises__exercise')
+
+    return render(request, 'training/edit_plan.html', {
+        'plan': plan,
+        'day_choices': day_choices,
+        'exercises': exercises,
+        'muscle_groups': muscle_groups,
+        'existing_days': existing_days,
+    })
+
+
+@login_required
+@require_POST
+def complete_workout_view(request, day_id):
+    # Импорт ВНУТРИ функции рвет циклический импорт
+    from progress.models import WorkoutLog
+    from .models import WorkoutDay
+
+    day = get_object_or_404(WorkoutDay, id=day_id, plan__user=request.user)
+
+    # Регистрируем выполнение
+    WorkoutLog.objects.create(user=request.user, workout_day=day)
+
+    return HttpResponse("""
+        <div class="alert alert-success rounded-pill py-3 px-4 border-0 shadow-sm" style="background: #D7FD51; color: #000;">
+            <i class="bi bi-fire me-2"></i><b>ТРЕНИРОВКА ЗАЧТЕНА!</b>
+        </div>
+    """)
