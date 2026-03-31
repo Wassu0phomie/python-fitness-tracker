@@ -1,41 +1,24 @@
-from django.views.generic import TemplateView
-from training.models import WorkoutPlan
-# from progress.models import ProgressPhoto
-from datetime import date
+import requests
+import json
 from django.shortcuts import render
-from django.utils import timezone
 
 
+# ... ваши остальные импорты ...
 
+def recipe_list(request):
+    query = request.GET.get('q', 'healthy')
+    api_key = 'f1824f216dd542488cc1c392fc36d60d'  # Сюда вставьте ключ от Spoonacular
+    url = f'https://api.spoonacular.com/recipes/complexSearch?query={query}&number=12&apiKey={api_key}'
 
-class IndexView(TemplateView):
-    template_name = 'main/index.html'
+    try:
+        response = requests.get(url)
+        data = response.json()
+        recipes = data.get('results', [])
+    except Exception as e:
+        print(f"Ошибка при запросе к API: {e}")
+        recipes = []
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-
-        if user.is_authenticated:
-            # 1. Фильтруем только реально активные планы
-            # План активен, если флаг is_active=True И дата окончания еще не прошла
-            today = timezone.now().date()
-            context['active_plans'] = WorkoutPlan.objects.filter(
-                user=user,
-                is_active=True,
-                end_date__gte=today  # Дата окончания больше или равна сегодняшней
-            ).order_by('-start_date')
-
-            # 2. Получение профиля
-            # В Django лучше использовать hasattr, чтобы не ловить ошибки через try/except
-            if hasattr(user, 'profile'):
-                context['profile'] = user.profile
-            else:
-                context['profile'] = None
-
-            # 3. Передаем дату (объект timezone.now() для фильтра |date в шаблоне)
-            context['date'] = timezone.now()
-
-            # 4. Фото прогресса (заглушка)
-            context['recent_photos'] = [] # Пока модель не готова, передаем пустой список
-
-        return context
+    return render(request, 'main/recipe_list.html', {
+        'recipes': recipes,
+        'query': query
+    })

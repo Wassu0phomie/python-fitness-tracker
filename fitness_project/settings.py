@@ -31,7 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '192.168.0.10',
-    'localhost'
+    'localhost',
+    '127.0.0.1'
 ]
 
 

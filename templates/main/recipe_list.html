@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold text-uppercase mb-4">Поиск рецептов</h2>
+
+    <form method="GET" class="mb-5">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control rounded-pill-start" placeholder="Найти рецепт (например, курица)..." value="{{ query }}">
+            <button type="submit" class="btn btn-primary rounded-pill-end px-4">Искать</button>
+        </div>
+    </form>
+
+    <div class="row g-4">
+        {% for recipe in recipes %}
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+                    <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="fw-bold">{{ recipe.title }}</h6>
+                        <a href="https://spoonacular.com/recipes/{{ recipe.title|slugify }}-{{ recipe.id }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill mt-2">
+                            Смотреть рецепт
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-center text-muted">Ничего не найдено по запросу "{{ query }}".</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

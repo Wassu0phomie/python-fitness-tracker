@@ -17,6 +17,7 @@ urlpatterns = [
     path('plan/', include('training.urls')),
     path('users/', include('users.urls')),
     path('progress/', include('progress.urls')),
+    path('recipe/', include('main.urls')),
 ]
 
 # Для медиа-файлов в режиме разработки

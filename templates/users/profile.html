@@ -115,28 +115,39 @@
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4">Быстрые действия</h5>
                     <div class="d-grid gap-3">
-                        <a href="{% url 'exercise_list' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+                        <a href="{% url 'exercise_list' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover rounded-4">
                             <div class="d-flex align-items-center">
                                 <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
                                     <i class="bi bi-search text-primary"></i>
                                 </div>
-                                <span>Найти упражнение</span>
+                                <span class="fw-bold">Найти упражнение</span>
                             </div>
                         </a>
-                        <a href="{% url 'create_plan' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+
+                        <a href="{% url 'recipe_list' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover rounded-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-egg-fried text-warning"></i>
+                                </div>
+                                <span class="fw-bold">Полезные рецепты</span>
+                            </div>
+                        </a>
+
+                        <a href="{% url 'create_plan' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover rounded-4">
                             <div class="d-flex align-items-center">
                                 <div class="bg-success bg-opacity-10 p-2 rounded me-3">
                                     <i class="bi bi-plus-square text-success"></i>
                                 </div>
-                                <span>Новая тренировка</span>
+                                <span class="fw-bold">Новая тренировка</span>
                             </div>
                         </a>
-                        <a href="#" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover">
+
+                        <a href="{% url 'progress' %}" class="btn btn-light border text-start py-3 px-3 shadow-sm-hover rounded-4">
                             <div class="d-flex align-items-center">
-                                <div class="bg-success bg-opacity-10 p-2 rounded me-3">
-                                    <i class="bi bi-clipboard-data text-success"></i>
+                                <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-clipboard-data text-info"></i>
                                 </div>
-                                <span>Прогресс</span>
+                                <span class="fw-bold">Мой прогресс</span>
                             </div>
                         </a>
                     </div>
