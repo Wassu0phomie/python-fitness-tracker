@@ -78,10 +78,12 @@
                 <div class="d-flex flex-wrap gap-2 mb-4" id="muscleFilters">
                     <button class="btn btn-sm btn-dark rounded-pill px-3 filter-muscle-btn active" data-muscle="all">Все</button>
                     {% for muscle in muscle_groups %}
-                        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-muscle-btn"
-                                data-muscle="{{ muscle.slug }}">
-                            {{ muscle.name }}
-                        </button>
+                        {% if muscle.is_group %}  {# <--- Добавьте это условие #}
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-muscle-btn"
+                                    data-muscle="{{ muscle.slug }}">
+                                {{ muscle.name }}
+                            </button>
+                        {% endif %}
                     {% endfor %}
                 </div>
 

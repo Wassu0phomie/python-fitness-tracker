@@ -134,11 +134,13 @@
 
                 <div class="card-body d-flex flex-column p-4">
                     <div class="mb-2">
-                        <small class="text-primary fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.7rem;">
-                            {{ exercise.get_exercise_type_display }}
-                        </small>
+                        <span class="exercise-overline">
+                            {{ exercise.get_exercise_type_display }} •
+                            {% for group in exercise.muscle_groups.all|slice:":1" %}
+                                {{ group.name }}
+                            {% endfor %}
+                        </span>
                     </div>
-
                     <h5 class="card-title fw-bold mb-2 text-dark">{{ exercise.name }}</h5>
 
                     <p class="card-text text-muted small mb-4 flex-grow-1">

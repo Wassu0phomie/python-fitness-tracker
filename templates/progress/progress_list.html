@@ -46,6 +46,11 @@
     border-top-right-radius: 50rem !important;
     border-bottom-right-radius: 50rem !important;
 }
+.modal-backdrop.show {
+    opacity: 0.9 !important; /* Почти полная непрозрачность (от 0 до 1) */
+    background-color: #000;  /* Чистый черный цвет */
+    backdrop-filter: blur(5px); /* Легкое размытие заднего плана */
+}
 </style>
 
 <div class="container py-4">
@@ -161,7 +166,17 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 bg-transparent">
+            <div class="modal-body p-0 text-center position-relative">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                <img src="" id="modalImage" class="img-fluid rounded-4 shadow-lg" alt="Progress">
+                <div id="modalCaption" class="mt-3 text-white fw-bold"></div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -207,6 +222,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 cutout: '70%', maintainAspectRatio: false,
                 plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 10 } } } }
             }
+        });
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const imageModal = document.getElementById('imageModal');
+    if (imageModal) {
+        imageModal.addEventListener('show.bs.modal', function (event) {
+            const trigger = event.relatedTarget; // Элемент, на который нажали
+            const imgSrc = trigger.getAttribute('data-bs-img');
+            const caption = trigger.getAttribute('data-bs-caption');
+
+            imageModal.querySelector('#modalImage').src = imgSrc;
+            imageModal.querySelector('#modalCaption').textContent = caption;
         });
     }
 });

@@ -1,8 +1,12 @@
 <div class="card border-0 shadow-sm transition-hover h-100" id="photo-{{ photo.id }}" style="border-radius: 18px; overflow: hidden;">
     <div class="position-relative">
-        <img src="{{ photo.image.url }}" class="card-img-top"
-             style="height: 220px; object-fit: cover; cursor: zoom-in;"
-             onclick="window.open(this.src, '_blank')">
+        <img src="{{ photo.image.url }}"
+             class="card-img-top"
+             style="height: 220px; object-fit: cover; cursor: pointer;"
+             data-bs-toggle="modal"
+             data-bs-target="#imageModal"
+             data-bs-img="{{ photo.image.url }}"
+             data-bs-caption="{{ photo.created_at|date:'d.m.Y' }} — {{ photo.weight }} кг">
 
         <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm"
                 hx-post="{% url 'delete_photo' photo.id %}"

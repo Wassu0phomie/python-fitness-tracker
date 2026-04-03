@@ -15,9 +15,7 @@ class ExerciseListView(ListView):
     FILTER_MAPPING = {
         'exercise_type': lambda qs, val: qs.filter(exercise_type=val),
         'difficulty': lambda qs, val: qs.filter(difficulty=val),
-        'muscle': lambda qs, val: qs.filter(
-            Q(primary_muscles__slug=val) | Q(secondary_muscles__slug=val)
-        ),
+        'muscle': lambda qs, val: qs.filter(muscle_groups__slug=val),
         'equipment': lambda qs, val: qs.filter(equipment__slug=val),
     }
 
@@ -42,7 +40,7 @@ class ExerciseListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['muscle_groups'] = MuscleGroup.objects.all()
+        context['muscle_groups'] = MuscleGroup.objects.filter(is_group=True)
         context['equipment'] = Equipment.objects.all()
         context['exercise_types'] = Exercise.TYPE_CHOICES
         context['difficulties'] = Exercise.DIFFICULTY_CHOICES

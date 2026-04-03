@@ -22,101 +22,86 @@ class EquipmentAdmin(admin.ModelAdmin):
 
 @admin.register(MuscleGroup)
 class MuscleGroupAdmin(admin.ModelAdmin):
-    """Админка для групп мышц"""
-    list_display = ['name', 'slug', 'icon']
+    # Теперь в списке сразу будет видно галочку
+    list_display = ['name', 'is_group', 'slug', 'icon']
+
+    # Можно быстро отфильтровать только группы или только мышцы
+    list_filter = ['is_group']
+
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
-    list_per_page = 20
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('name', 'slug', 'icon', 'description')
+            'fields': ('name', 'is_group', 'slug', 'icon', 'description')
         }),
     )
 
 
 @admin.register(Exercise)
 class ExerciseAdmin(admin.ModelAdmin):
-    """Админка для упражнений"""
+    """Админка для упражнений с разделением на общие группы и детальные мышцы"""
 
-    # Отображение в списке - только реальные поля модели
     list_display = [
         'name',
-        'slug',
-        'exercise_type',  # Используем реальное поле
-        'difficulty',  # Используем реальное поле
-        'is_active',
-        'created_at'
-    ]
-
-    # Фильтры
-    list_filter = [
+        'display_muscle_groups',  # Добавим отображение групп в список
         'exercise_type',
         'difficulty',
         'is_active',
-        'created_at'
     ]
 
-    # Поиск
-    search_fields = [
-        'name',
-        'description',
-        'instructions',
-        'benefits',
-        'precautions'
+    # Добавляем фильтр по новым общим группам
+    list_filter = [
+        'muscle_groups',
+        'exercise_type',
+        'difficulty',
+        'is_active',
     ]
 
-    # Автозаполнение полей ManyToMany
-    autocomplete_fields = ['primary_muscles', 'secondary_muscles', 'equipment']
+    search_fields = ['name', 'description']
 
-    # Предварительное заполнение slug
+    # ВАЖНО: Добавляем muscle_groups в автозаполнение
+    # Теперь у вас будет 3 удобных окна поиска мышц
+    autocomplete_fields = [
+        'muscle_groups',
+        'primary_muscles',
+        'secondary_muscles',
+        'equipment'
+    ]
+
     prepopulated_fields = {'slug': ('name',)}
 
-    # Разделение на группы полей (fieldsets)
     fieldsets = (
         ('Основная информация', {
-            'fields': (
-                'name',
-                'slug',
-                'description',
-            )
+            'fields': ('name', 'slug', 'description')
         }),
         ('Тип и сложность', {
-            'fields': (
-                'exercise_type',
-                'difficulty',
-            )
+            'fields': ('exercise_type', 'difficulty')
         }),
-        ('Детальное описание', {
+        ('Классификация (АНАТОМИЯ)', {
             'fields': (
-                'instructions',
-                'benefits',
-                'precautions',
+                'muscle_groups',     # Общая категория (например: Плечи)
+                'primary_muscles',   # Детальные основные (например: Передняя дельта)
+                'secondary_muscles', # Вспомогательные (например: Трицепс)
+                'equipment'
             ),
-            'classes': ('collapse',)  # Сворачиваемая секция
+            'description': 'Сначала выберите общую группу для фильтрации, затем детальные мышцы.'
         }),
         ('Медиа файлы', {
-            'fields': (
-                'image',
-                'video_file',
-                'image_url',
-                'video_url'
-            )
+            'fields': ('image', 'video_file', 'image_url', 'video_url')
         }),
-        ('Классификация', {
-            'fields': (
-                'primary_muscles',
-                'secondary_muscles',
-                'equipment'
-            )
+        ('Текстовые блоки', {
+            'fields': ('instructions', 'benefits', 'precautions'),
+            'classes': ('collapse',)
         }),
         ('Дополнительно', {
-            'fields': (
-                'calories_per_hour',
-                'is_active'
-            )
+            'fields': ('calories_per_hour', 'is_active', 'created_at', 'updated_at')
         }),
     )
 
-    # Поля только для чтения - только реальные поля
     readonly_fields = ['created_at', 'updated_at']
+
+    # Вспомогательный метод для красивого списка
+    def display_muscle_groups(self, obj):
+        return ", ".join([m.name for m in obj.muscle_groups.all()])
+    display_muscle_groups.short_description = 'Целевые группы'

@@ -1,6 +1,26 @@
 from django.db import models
 from django.utils.text import slugify
+import os
 
+def exercise_gif_path(instance, filename):
+    # 1. Пытаемся определить категорию
+    # Если это новое упражнение, связей M2M еще нет, берем 'uncategorized'
+    try:
+        group = instance.muscle_groups.filter(is_group=True).first()
+        category = group.slug if group else 'other'
+    except:
+        category = 'other'
+
+    # 2. Получаем расширение файла
+    ext = filename.split('.')[-1]
+
+    # 3. Формируем имя файла на основе слага упражнения
+    # Если слага еще нет (первое сохранение), берем слаг от текущего имени
+    name = instance.slug if instance.slug else slugify(instance.name)
+    filename = f"{name}.{ext}"
+
+    # 4. Итоговый путь: exercises/grud/zhim-lezha.gif
+    return os.path.join('exercises', category, filename)
 
 class MuscleGroup(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -8,6 +28,11 @@ class MuscleGroup(models.Model):
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, blank=True, null=True)
 
+    is_group = models.BooleanField(
+        default=False,
+        verbose_name="Это основная группа",
+        help_text="Отметьте, если это крупная категория (например, Плечи, Грудь), а не отдельная мышца."
+    )
     class Meta:
         verbose_name = "Группа мышц"
         verbose_name_plural = "Группы мышц"
@@ -69,16 +94,36 @@ class Exercise(models.Model):
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES,
                                   default='beginner')
 
-    primary_muscles = models.ManyToManyField(MuscleGroup,
-                                             related_name='primary_exercises')
-    secondary_muscles = models.ManyToManyField(MuscleGroup,
-                                               related_name='secondary_exercises',
-                                               blank=True)
+    muscle_groups = models.ManyToManyField(
+        MuscleGroup,
+        related_name='grouped_exercises',
+        verbose_name="Группы мышц (общие)"
+    )
+
+    # 2. Основные детальные мышцы (например: Передняя дельта)
+    primary_muscles = models.ManyToManyField(
+        MuscleGroup,
+        related_name='primary_exercises',
+        verbose_name="Основные мышцы (детально)"
+    )
+
+    # 3. Вторичные детальные мышцы (например: Трицепс)
+    secondary_muscles = models.ManyToManyField(
+        MuscleGroup,
+        related_name='secondary_exercises',
+        blank=True,
+        verbose_name="Вторичные мышцы (детально)"
+    )
     equipment = models.ManyToManyField(Equipment, blank=True)
 
     video_url = models.URLField(blank=True)
     video_file = models.FileField(upload_to='exercise_videos/', blank=True, null=True)
-    image = models.ImageField(upload_to='exercise_images/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=exercise_gif_path,
+        blank=True,
+        null=True,
+        verbose_name="GIF-анимация (файл)"
+    )
     image_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="Ссылка на GIF/SVG")
 
     calories_per_hour = models.PositiveIntegerField(default=0)
