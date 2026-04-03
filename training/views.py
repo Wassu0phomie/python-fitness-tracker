@@ -253,3 +253,6 @@ def complete_workout_view(request, day_id):
             <i class="bi bi-fire me-2"></i><b>ТРЕНИРОВКА ЗАЧТЕНА!</b>
         </div>
     """)
+
+
+

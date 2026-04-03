@@ -91,7 +91,7 @@
                     {% for ex in exercises %}
                     <div class="col-md-4 modal-ex-card"
                          data-name="{{ ex.name|lower }}"
-                         data-muscles="{% for m in ex.primary_muscles.all %}{{ m.slug }} {% endfor %}">
+                         data-muscles="{% for m in ex.muscle_groups.all %}{{ m.slug }} {% endfor %}">
                         <div class="card h-100 border-0 shadow-sm-hover cursor-pointer p-2"
                              style="border-radius: 15px; transition: 0.3s;"
                              onclick="addExerciseToDay('{{ ex.id }}', '{{ ex.name }}', '{{ ex.main_image }}')">

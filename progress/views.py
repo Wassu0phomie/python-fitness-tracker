@@ -20,12 +20,15 @@ def progress_view(request):
         user=request.user,
         completed_at__date__gte=start_date_month
     )
-    .values('workout_day__exercises__exercise__primary_muscles__name')
-    .annotate(count=Count('workout_day__exercises__exercise__primary_muscles'))
+    .filter(workout_day__exercises__exercise__muscle_groups__is_group=True)  # Фильтр по группам
+    .values('workout_day__exercises__exercise__muscle_groups__name')
+    .annotate(count=Count('workout_day__exercises__exercise__muscle_groups'))
     .order_by('-count'))
 
-    muscle_labels = [s['workout_day__exercises__exercise__primary_muscles__name'] for s in muscle_stats if s['workout_day__exercises__exercise__primary_muscles__name']]
-    muscle_data = [s['count'] for s in muscle_stats if s['workout_day__exercises__exercise__primary_muscles__name']]
+    # Обновите ключи в генераторах списков
+    muscle_labels = [s['workout_day__exercises__exercise__muscle_groups__name'] for s in muscle_stats if
+                     s['workout_day__exercises__exercise__muscle_groups__name']]
+    muscle_data = [s['count'] for s in muscle_stats if s['workout_day__exercises__exercise__muscle_groups__name']]
 
     # --- 2. Активность за месяц (Линейный график) ---
     activity_stats = (WorkoutLog.objects.filter(
