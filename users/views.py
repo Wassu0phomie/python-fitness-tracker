@@ -10,8 +10,7 @@ from .models import CustomUser, UserProgress
 from .forms import CustomUserCreationForm, CustomUserUpdateForm, UserProgressUpdateForm
 from django.utils import timezone
 from training.models import WorkoutPlan
-
-
+from progress.models import WorkoutLog, ProgressEntry
 
 def welcome(request):
     return render(request, 'welcome.html')
@@ -23,25 +22,47 @@ def profile_view(request):
     user = request.user
     today = timezone.now().date()
 
-    active_plans = WorkoutPlan.objects.filter(
-        user=user,
-        is_active=True,
-        end_date__gte=today
-    ).order_by('-start_date')
+    # 1. Считаем реальные тренировки из лога
+    total_workouts = WorkoutLog.objects.filter(user=user).count()
 
-    # Получаем последние замеры (модель UserProgress из ваших models.py)
-    # Используем related_name='progress_logs'
+    # 2. Логика опыта (1 тренировка = 100 XP)
+    total_xp = total_workouts * 100
+    xp_for_next_level = 1000
+    user_level = (total_xp // xp_for_next_level) + 1
+    xp_progress = total_xp % xp_for_next_level
+    xp_percentage = (xp_progress / xp_for_next_level) * 100
+
+    # 3. Спортивные ранги (не аниме)
+    if total_workouts < 5:
+        current_rank = "Новичок"
+    elif total_workouts < 15:
+        current_rank = "Любитель"
+    elif total_workouts < 35:
+        current_rank = "Атлет"
+    elif total_workouts < 70:
+        current_rank = "Профи"
+    else:
+        current_rank = "Мастер"
+
+    # 4. Получаем данные профиля и фото
+    active_plans = WorkoutPlan.objects.filter(user=user, is_active=True, end_date__gte=today)
     latest_progress = user.progress_logs.first()
+
+    # Берем последние 3 фото из ProgressEntry для превью
+    recent_photos = ProgressEntry.objects.filter(user=user).exclude(image='').order_by('-created_at')[:3]
 
     context = {
         'user': user,
         'active_plans': active_plans,
         'profile': latest_progress,
+        'total_workouts': total_workouts,
+        'user_level': user_level,
+        'current_rank': current_rank,
+        'xp_progress': xp_progress,
+        'xp_percentage': xp_percentage,
+        'recent_photos': recent_photos,
         'date': timezone.now(),
-        'recent_photos': [],  # Заглушка
     }
-
-    # Путь к шаблону уже в папке users
     return render(request, 'users/profile.html', context)
 
 

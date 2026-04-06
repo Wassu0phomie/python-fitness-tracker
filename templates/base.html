@@ -190,7 +190,7 @@
                 <strong class="fw-bold">{{ user.first_name|default:user.username|default:"Атлет" }}</strong>
             </a>
             <ul class="dropdown-menu text-small shadow border-0" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item py-2" href="#">Настройки</a></li>
+                <li><a class="dropdown-item py-2" href="{% url 'edit_profile' %}">Настройки</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <form action="{% url 'logout' %}" method="post" class="px-3">

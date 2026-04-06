@@ -84,31 +84,36 @@
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white text-dark py-3">
-                    <h5 class="card-title mb-0"><i class="bi bi-camera me-2"></i>Последний прогресс</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for photo in recent_photos %}
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100 border-0 shadow-sm text-center">
-                                    <img src="{{ photo.photo.url }}" class="card-img-top" alt="Прогресс" style="height: 150px; object-fit: cover;">
-                                    <div class="card-footer bg-white small text-muted">
-                                        {{ photo.date|date:"d M Y" }}
-                                    </div>
-                                </div>
-                            </div>
-                        {% empty %}
-                            <div class="col-12 text-center py-5">
-                                <i class="bi bi-images text-muted fs-1"></i>
-                                <p class="text-muted mt-2">Загрузите фото прогресса!</p>
-                            </div>
-                        {% endfor %}
-                    </div>
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 24px; background: #111; color: #fff; overflow: hidden;">
+    <div class="p-4">
+        <div class="d-flex align-items-center mb-3">
+            <img src="https://ui-avatars.com/api/?name={{ user.first_name|default:user.email }}&background=D7FD51&color=000"
+                 width="64" height="64" class="rounded-circle me-3 border border-2 border-white">
+            <div>
+                <h4 class="fw-bold mb-0">{{ user.get_full_name|default:user.email }}</h4>
+                <span class="badge" style="background: #D7FD51; color: #000;">
+                    Ур. {{ user_level }} • {{ current_rank }}
+                </span>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <div class="d-flex justify-content-between small opacity-75 mb-1">
+                <span>{{ xp_progress }} / 1000 XP</span>
+                <span>{{ xp_percentage|floatformat:0 }}%</span>
+            </div>
+            <div class="progress" style="height: 12px; background: #222; border-radius: 6px; border: 1px solid #333;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                     role="progressbar"
+                     style="width: {{ xp_percentage }}%; background-color: #D7FD51; box-shadow: 0 0 15px rgba(215, 253, 81, 0.5); transition: width 0.6s ease;"
+                     aria-valuenow="{{ xp_percentage }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
                 </div>
             </div>
         </div>
+    </div>
+    </div>
 
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 mb-4">
