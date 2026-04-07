@@ -1,13 +1,466 @@
+{% load static %}
+
 <div id="exercise-grid-container">
+    <div class="row mb-4 animate-fade-in">
+        <div class="col-12">
+            <div class="d-flex align-items-end justify-content-between">
+                <div>
+                    <h2 class="fw-black text-uppercase mb-0 profile-title">База упражнений</h2>
+                    <div class="title-underline"></div>
+                </div>
+                <div class="text-end d-none d-sm-block">
+                    <div class="date-badge">
+                        <i class="bi bi-lightning-charge me-2"></i>Всего: {{ paginator.count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4 text-center">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-primary">{{ paginator.count }}</div>
+                    <div class="small text-muted">Упражнений в базе</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-success">{{ muscle_groups.count }}</div>
+                    <div class="small text-muted">Групп мышц</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-info">{{ equipment.count }}</div>
+                    <div class="small text-muted">Видов оборудования</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="h3 fw-bold text-warning">4</div>
+                    <div class="small text-muted">Уровня сложности</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Мобильная кнопка фильтров - под статистикой -->
+    <div class="d-md-none mb-3">
+        <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
+                type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters">
+            <i class="bi bi-sliders2 me-2"></i>
+            <span>ФИЛЬТРЫ И ПОИСК</span>
+            <span id="active-filters-badge" class="badge rounded-circle bg-primary ms-2" style="display: none; width: 22px; height: 22px; padding: 4px; font-size: 10px;">0</span>
+        </button>
+    </div>
+
+    <!-- Десктопные фильтры -->
+    <div class="card shadow-sm border-0 mb-4 sticky-filter d-none d-md-block">
+        <div class="card-body p-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label-custom small">Поиск</label>
+                    <input type="text" name="q" id="search-input" value="{{ filter_params.q }}"
+                           class="form-control-custom" placeholder="Название..."
+                           hx-get="{% url 'exercise_list' %}"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-target="#exercise-grid-container"
+                           hx-swap="outerHTML"
+                           hx-push-url="true"
+                           hx-include="[name='exercise_type'],[name='difficulty'],[name='muscle']">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label-custom small">Тип</label>
+                    <select name="exercise_type" id="type-filter" class="form-select-custom"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-trigger="change"
+                            hx-target="#exercise-grid-container"
+                            hx-swap="outerHTML"
+                            hx-push-url="true"
+                            hx-include="[name='q'],[name='difficulty'],[name='muscle']">
+                        <option value="">Все типы</option>
+                        {% for value, label in exercise_types %}
+                        <option value="{{ value }}" {% if filter_params.exercise_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label-custom small">Сложность</label>
+                    <select name="difficulty" id="difficulty-filter" class="form-select-custom"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-trigger="change"
+                            hx-target="#exercise-grid-container"
+                            hx-swap="outerHTML"
+                            hx-push-url="true"
+                            hx-include="[name='q'],[name='exercise_type'],[name='muscle']">
+                        <option value="">Любая</option>
+                        {% for value, label in difficulties %}
+                        <option value="{{ value }}" {% if filter_params.difficulty == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label-custom small">Мышцы</label>
+                    <select name="muscle" id="muscle-filter" class="form-select-custom"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-trigger="change"
+                            hx-target="#exercise-grid-container"
+                            hx-swap="outerHTML"
+                            hx-push-url="true"
+                            hx-include="[name='q'],[name='exercise_type'],[name='difficulty']">
+                        <option value="">Все группы</option>
+                        {% for muscle in muscle_groups %}
+                        <option value="{{ muscle.slug }}" {% if filter_params.muscle == muscle.slug %}selected{% endif %}>{{ muscle.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 text-end mt-3">
+                    <button id="reset-filters" class="btn btn-link text-muted text-decoration-none small"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-target="#exercise-grid-container"
+                            hx-swap="outerHTML"
+                            hx-push-url="true">
+                        Сбросить всё
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СЕТКА УПРАЖНЕНИЙ -->
+    {% if exercises %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="exercises-grid">
         {% for exercise in exercises %}
-            {% include 'exercises/partials/exercise_card.html' %}
-        {% endfor %}
+        <div class="col exercise-item">
+            <div class="card h-100 border-0 shadow-sm exercise-card-fancy cursor-pointer"
+                 style="border-radius: 20px; overflow: hidden; transition: transform 0.2s;"
+                 hx-get="{% url 'exercise_detail' exercise.slug %}"
+                 hx-target="#main-content"
+                 hx-push-url="true">
 
-        {% include 'exercises/partials/infinite_scroll_trigger.html' %}
+                <div class="position-absolute top-0 end-0 m-3 z-index-1">
+                    <span class="badge rounded-pill {% if exercise.difficulty == 'beginner' %}bg-success{% elif exercise.difficulty == 'intermediate' %}bg-warning text-dark{% else %}bg-danger{% endif %} shadow-sm px-3 py-2">
+                        {{ exercise.get_difficulty_display }}
+                    </span>
+                </div>
+
+                <div class="exercise-image-wrapper" style="position: relative; height: 200px; background-color: #f8f9fa; overflow: hidden;">
+                    {% if exercise.main_image %}
+                        <img src="{{ exercise.main_image }}" alt="{{ exercise.name }}" style="width: 100%; height: 100%; object-fit: contain; padding: 15px; transition: transform 0.3s ease;">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <i class="bi bi-camera-video text-muted fs-1 opacity-25"></i>
+                        </div>
+                    {% endif %}
+
+                    <div class="image-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+                        <span class="btn btn-light btn-sm rounded-pill fw-bold shadow-sm px-4 py-2">
+                            <i class="bi bi-eye me-1"></i> Просмотр
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body p-3">
+                    <div class="mb-2">
+                        <span class="small text-muted">
+                            {{ exercise.get_exercise_type_display }} •
+                            {% for group in exercise.muscle_groups.all|slice:":1" %}
+                                {{ group.name }}
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <h6 class="fw-bold mb-2 text-truncate">{{ exercise.name }}</h6>
+                    <p class="small text-muted mb-3">{{ exercise.description|truncatechars:60 }}</p>
+                    <div class="d-flex flex-wrap gap-1 mb-3">
+                        {% for muscle in exercise.primary_muscles.all|slice:":2" %}
+                            <span class="badge-muscle">{{ muscle.name }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'exercise_detail' exercise.slug %}" class="btn btn-dark w-100 rounded-pill py-2 shadow-sm-hover-dark">
+                        Подробнее →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 
-    <div id="exercises-count" hx-swap-oob="true">
-        {{ exercises.paginator.count }}
+    <!-- Пагинация -->
+    {% if exercises.has_other_pages %}
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if exercises.has_previous %}
+            <li class="page-item">
+                <a class="page-link rounded-pill me-2 border-0 shadow-sm" href="#"
+                   hx-get="{% url 'exercise_list' %}?page={{ exercises.previous_page_number }}{% for key, value in filter_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                   hx-target="#exercise-grid-container"
+                   hx-swap="outerHTML"
+                   hx-push-url="true">
+                    ←
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link rounded-pill border-0 shadow-sm mx-1" style="background-color: #D7FD51; color: #000; font-weight: bold;">
+                    {{ exercises.number }}
+                </span>
+            </li>
+
+            {% if exercises.has_next %}
+            <li class="page-item">
+                <a class="page-link rounded-pill ms-2 border-0 shadow-sm" href="#"
+                   hx-get="{% url 'exercise_list' %}?page={{ exercises.next_page_number }}{% for key, value in filter_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}"
+                   hx-target="#exercise-grid-container"
+                   hx-swap="outerHTML"
+                   hx-push-url="true">
+                    →
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-emoji-frown display-1 text-muted"></i>
+        <p class="text-muted mt-3">Упражнения не найдены</p>
+        <button class="btn btn-dark rounded-pill px-4"
+                hx-get="{% url 'exercise_list' %}"
+                hx-target="#exercise-grid-container"
+                hx-swap="outerHTML"
+                hx-push-url="true">
+            Сбросить фильтры
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Мобильные фильтры Offcanvas -->
+<div class="offcanvas offcanvas-bottom h-auto rounded-top-5 shadow-lg" tabindex="-1" id="offcanvasFilters" style="max-height: 90vh; border-top: 3px solid #D7FD51;">
+    <div class="offcanvas-header border-bottom py-3">
+        <h5 class="offcanvas-title fw-black text-uppercase">Фильтры</h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-4">
+        <div class="row g-4" id="mobile-filters-container">
+            <div class="col-12">
+                <label class="form-label-custom">Название</label>
+                <input type="text" id="mobile-search-input" value="{{ filter_params.q }}"
+                       class="form-control-custom" placeholder="Например: Жим лежа">
+            </div>
+
+            <div class="col-12">
+                <label class="form-label-custom">Тип упражнения</label>
+                <select id="mobile-type-filter" class="form-select-custom">
+                    <option value="">Все типы</option>
+                    {% for value, label in exercise_types %}
+                    <option value="{{ value }}" {% if filter_params.exercise_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label-custom">Сложность</label>
+                <select id="mobile-difficulty-filter" class="form-select-custom">
+                    <option value="">Любая</option>
+                    {% for value, label in difficulties %}
+                    <option value="{{ value }}" {% if filter_params.difficulty == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label-custom">Целевые мышцы</label>
+                <select id="mobile-muscle-filter" class="form-select-custom">
+                    <option value="">Все группы</option>
+                    {% for muscle in muscle_groups %}
+                    <option value="{{ muscle.slug }}" {% if filter_params.muscle == muscle.slug %}selected{% endif %}>{{ muscle.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 d-grid gap-2 mt-4 pb-2">
+                <button id="mobile-apply-filters" class="btn btn-dark py-3 rounded-pill fw-bold text-uppercase"
+                        style="background-color: #D7FD51; color: #000; border: none; letter-spacing: 1px;">
+                    Применить
+                </button>
+                <button id="mobile-reset-filters" class="btn btn-light py-3 rounded-pill text-muted fw-bold">
+                    Сбросить всё
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    /* Кастомные формы */
+    .form-label-custom {
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control-custom, .form-select-custom {
+        border-radius: 12px !important;
+        border: 2px solid #f1f3f5 !important;
+        padding: 12px 16px !important;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        background-color: #f8f9fa;
+        width: 100%;
+    }
+
+    .form-control-custom:focus, .form-select-custom:focus {
+        border-color: #D7FD51 !important;
+        background-color: #fff;
+        box-shadow: 0 4px 12px rgba(215, 253, 81, 0.15) !important;
+        outline: none;
+    }
+
+    .rounded-top-5 {
+        border-top-left-radius: 2rem !important;
+        border-top-right-radius: 2rem !important;
+    }
+
+    /* Карточки */
+    .exercise-card-fancy { transition: all 0.3s cubic-bezier(.25,.8,.25,1); }
+    .exercise-card-fancy:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; }
+    .exercise-card-fancy:hover .image-overlay { opacity: 1 !important; }
+    .exercise-card-fancy:hover img { transform: scale(1.05); }
+
+    .badge-muscle {
+        background: #f1f3f5;
+        color: #495057;
+        font-size: 0.65rem;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .shadow-sm-hover-dark:hover { background-color: #D7FD51 !important; color: #000 !important; border-color: #D7FD51 !important; }
+
+    @media (max-width: 767px) {
+        .profile-title { font-size: 1.5rem; }
+        .card-body .h3 { font-size: 1.1rem !important; }
+    }
+</style>
+
+<script>
+// Функция синхронизации и обновления
+function updateUI() {
+    let count = 0;
+    const filters = ['search-input', 'type-filter', 'difficulty-filter', 'muscle-filter'];
+    filters.forEach(id => {
+        if (document.getElementById(id)?.value) count++;
+    });
+
+    const badge = document.getElementById('active-filters-badge');
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+}
+
+// Синхронизация мобильных полей с десктопными
+function syncMobileFilters() {
+    const mobileSearch = document.getElementById('mobile-search-input');
+    const mobileType = document.getElementById('mobile-type-filter');
+    const mobileDifficulty = document.getElementById('mobile-difficulty-filter');
+    const mobileMuscle = document.getElementById('mobile-muscle-filter');
+    const searchInput = document.getElementById('search-input');
+    const typeFilter = document.getElementById('type-filter');
+    const difficultyFilter = document.getElementById('difficulty-filter');
+    const muscleFilter = document.getElementById('muscle-filter');
+
+    if (mobileSearch && searchInput) mobileSearch.value = searchInput.value || '';
+    if (mobileType && typeFilter) mobileType.value = typeFilter.value || '';
+    if (mobileDifficulty && difficultyFilter) mobileDifficulty.value = difficultyFilter.value || '';
+    if (mobileMuscle && muscleFilter) mobileMuscle.value = muscleFilter.value || '';
+}
+
+// Применение мобильных фильтров
+document.getElementById('mobile-apply-filters')?.addEventListener('click', function() {
+    const q = document.getElementById('mobile-search-input').value;
+    const type = document.getElementById('mobile-type-filter').value;
+    const diff = document.getElementById('mobile-difficulty-filter').value;
+    const muscle = document.getElementById('mobile-muscle-filter').value;
+
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (type) params.set('exercise_type', type);
+    if (diff) params.set('difficulty', diff);
+    if (muscle) params.set('muscle', muscle);
+
+    // Обновляем десктопные поля
+    const searchInput = document.getElementById('search-input');
+    const typeFilter = document.getElementById('type-filter');
+    const difficultyFilter = document.getElementById('difficulty-filter');
+    const muscleFilter = document.getElementById('muscle-filter');
+
+    if (searchInput) searchInput.value = q;
+    if (typeFilter) typeFilter.value = type;
+    if (difficultyFilter) difficultyFilter.value = diff;
+    if (muscleFilter) muscleFilter.value = muscle;
+
+    htmx.ajax('GET', `{% url 'exercise_list' %}?${params.toString()}`, {
+        target: '#exercise-grid-container',
+        swap: 'outerHTML',
+        pushUrl: true
+    });
+
+    bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasFilters')).hide();
+});
+
+// Сброс мобильных фильтров
+document.getElementById('mobile-reset-filters')?.addEventListener('click', function() {
+    // Очищаем мобильные поля
+    document.getElementById('mobile-search-input').value = '';
+    document.getElementById('mobile-type-filter').value = '';
+    document.getElementById('mobile-difficulty-filter').value = '';
+    document.getElementById('mobile-muscle-filter').value = '';
+
+    // Очищаем десктопные поля
+    const searchInput = document.getElementById('search-input');
+    const typeFilter = document.getElementById('type-filter');
+    const difficultyFilter = document.getElementById('difficulty-filter');
+    const muscleFilter = document.getElementById('muscle-filter');
+
+    if (searchInput) searchInput.value = '';
+    if (typeFilter) typeFilter.value = '';
+    if (difficultyFilter) difficultyFilter.value = '';
+    if (muscleFilter) muscleFilter.value = '';
+
+    htmx.ajax('GET', `{% url 'exercise_list' %}`, {
+        target: '#exercise-grid-container',
+        swap: 'outerHTML',
+        pushUrl: true
+    });
+    bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasFilters')).hide();
+});
+
+// Инициализация при загрузке и после каждого HTMX-запроса
+document.addEventListener('DOMContentLoaded', function() {
+    syncMobileFilters();
+    updateUI();
+});
+document.addEventListener('htmx:afterSwap', function() {
+    syncMobileFilters();
+    updateUI();
+});
+</script>

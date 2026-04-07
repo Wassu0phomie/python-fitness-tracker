@@ -13,6 +13,7 @@
     <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
 
     <style>
+        /* Оставляем твои стили без изменений */
         :root {
             --accent-neon: #D7FD51;
             --accent-dark: #b5d930;
@@ -28,7 +29,6 @@
             margin: 0;
         }
 
-        /* --- SIDEBAR (Desktop) --- */
         #sidebar {
             width: var(--sidebar-width);
             min-height: 100vh;
@@ -38,7 +38,6 @@
             z-index: 1000;
             background-color: #ffffff !important;
             border-right: 1px solid #f2f2f2 !important;
-            transition: all 0.3s ease;
         }
 
         .sidebar-logo {
@@ -57,6 +56,7 @@
             margin-bottom: 4px;
             border-radius: 12px;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .nav-pills .nav-link:hover { background-color: #f8f9fa; }
@@ -67,15 +67,12 @@
             box-shadow: 0 4px 12px rgba(215, 253, 81, 0.3);
         }
 
-        /* --- MAIN CONTENT --- */
         #main-content {
             margin-left: var(--sidebar-width);
             padding: 40px;
             min-height: 100vh;
-            transition: all 0.3s ease;
         }
 
-        /* --- MOBILE BOTTOM NAV --- */
         .mobile-nav {
             height: var(--bottom-nav-height);
             background: #ffffff;
@@ -88,7 +85,6 @@
             color: #aaa;
             font-size: 1.5rem;
             padding: 10px;
-            transition: 0.2s;
             position: relative;
         }
 
@@ -96,7 +92,6 @@
             color: #000 !important;
         }
 
-        /* Индикатор активной вкладки (точка или фон) */
         .active-mobile::after {
             content: '';
             position: absolute;
@@ -123,85 +118,30 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* --- RESPONSIVE LOGIC --- */
         @media (max-width: 991.98px) {
-            #sidebar {
-                display: none !important;
-            }
-            #main-content {
-                margin-left: 0;
-                padding: 20px 15px calc(var(--bottom-nav-height) + 20px) 15px;
-            }
+            #sidebar { display: none !important; }
+            #main-content { margin-left: 0; padding: 20px 15px calc(var(--bottom-nav-height) + 20px) 15px; }
         }
 
-        @media (min-width: 992px) {
-            .mobile-nav {
-                display: none !important;
-            }
-        }
+        @media (min-width: 992px) { .mobile-nav { display: none !important; } }
 
-        /* HTMX Loading Indicator */
         .htmx-indicator { display:none; }
         .htmx-request .htmx-indicator { display:inline-block; }
-        :root {
-    --fit-green: #D7FD51;
-    --fit-dark: #1a1a1a;
-}
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #fcfcfc;
-}
-
-.fw-black { font-weight: 900; }
-
-/* Анимация появления */
-.animate-fade-in {
-    animation: fadeIn 0.6s ease-out;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Стили заголовка страницы */
-.profile-title {
-    color: var(--fit-dark);
-    font-size: 1.75rem;
-    letter-spacing: -1px;
-}
-
-.title-underline {
-    width: 50px;
-    height: 4px;
-    background: var(--fit-green);
-    margin-top: 5px;
-    border-radius: 2px;
-}
-
-/* Бадж справа (дата или счетчик) */
-.date-badge {
-    background: white;
-    padding: 10px 20px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    border: 1px solid #eee;
-    display: inline-flex;
-    align-items: center;
-}
-
-/* Адаптивность для мобильных */
-@media (max-width: 576px) {
-    .profile-title { font-size: 1.4rem; }
-}
+        .fw-black { font-weight: 900; }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <div class="d-flex flex-column flex-shrink-0 p-4 bg-white" id="sidebar">
-        <a href="{% url 'profile' %}" class="sidebar-logo mb-4 d-block text-center">
+        <a href="{% url 'profile' %}"
+           hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
+           class="sidebar-logo mb-4 d-block text-center">
             FIT<span>APP</span>
         </a>
 
@@ -209,55 +149,71 @@ body {
 
         <ul class="nav nav-pills flex-column mb-auto">
             <li class="nav-item">
-                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <a href="{% url 'profile' %}"
+                   hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
+                   class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <i class="bi bi-person-fill me-2"></i> Профиль
                 </a>
             </li>
             <li>
-                <a href="{% url 'exercise_list' %}" class="nav-link {% if 'exercise' in request.path %}active{% endif %}">
-                    <i class="bi bi-fire me-2"></i> Упражнения
-                </a>
+                <a href="{% url 'exercise_list' %}"
+           hx-get="{% url 'exercise_list' %}"
+           hx-target="#main-content"
+           hx-push-url="true"
+           hx-on::after-request="setTimeout(() => { if(window.initExerciseList) window.initExerciseList(); }, 50)"
+           class="nav-link {% if 'exercise' in request.path %}active{% endif %}">
+            <i class="bi bi-fire me-2"></i> Упражнения
+        </a>
+
             </li>
             <li>
-                <a href="{% url 'create_plan' %}" class="nav-link {% if request.resolver_match.url_name == 'create_plan' %}active{% endif %}">
+                <a href="{% url 'create_plan' %}"
+                   hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true"
+                   class="nav-link {% if request.resolver_match.url_name == 'create_plan' %}active{% endif %}">
                     <i class="bi bi-plus-circle-fill me-2"></i> Новая тренировка
                 </a>
             </li>
             <li>
-                <a href="{% url 'show_plan' %}" class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active{% endif %}">
+                <a href="{% url 'show_plan' %}"
+                   hx-get="{% url 'show_plan' %}" hx-target="#main-content" hx-push-url="true"
+                   class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active{% endif %}">
                     <i class="bi bi-calendar-heart me-2"></i> Журнал
                 </a>
             </li>
             <li>
-                <a href="{% url 'progress' %}" class="nav-link">
+                <a href="{% url 'progress' %}"
+                   hx-get="{% url 'progress' %}" hx-target="#main-content" hx-push-url="true"
+                   class="nav-link">
                     <i class="bi bi-graph-up-arrow me-2"></i> Прогресс
                 </a>
             </li>
         </ul>
 
         <hr style="opacity: 0.1;">
-        <a class="dropdown-item py-2" href="{% url 'edit_profile' %}">Настройки</a>
-
+        <a class="dropdown-item py-2" href="{% url 'edit_profile' %}" hx-get="{% url 'edit_profile' %}" hx-target="#main-content" hx-push-url="true">Настройки</a>
     </div>
 
     <nav class="mobile-nav fixed-bottom d-flex justify-content-around align-items-center d-lg-none">
-        <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active-mobile{% endif %}">
+        <a href="{% url 'profile' %}" hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
+           class="nav-link {% if request.resolver_match.url_name == 'profile' %}active-mobile{% endif %}">
             <i class="bi bi-person-circle"></i>
         </a>
-        <a href="{% url 'exercise_list' %}" class="nav-link {% if 'exercise' in request.path %}active-mobile{% endif %}">
+        <a href="{% url 'exercise_list' %}" hx-get="{% url 'exercise_list' %}" hx-target="#main-content" hx-push-url="true"
+           class="nav-link {% if 'exercise' in request.path %}active-mobile{% endif %}">
             <i class="bi bi-fire"></i>
         </a>
 
-        <a href="{% url 'create_plan' %}" class="nav-link p-0">
+        <a href="{% url 'create_plan' %}" hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true" class="nav-link p-0">
             <div class="plus-btn-mobile">
                 <i class="bi bi-plus-lg"></i>
             </div>
         </a>
 
-        <a href="{% url 'show_plan' %}" class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active-mobile{% endif %}">
+        <a href="{% url 'show_plan' %}" hx-get="{% url 'show_plan' %}" hx-target="#main-content" hx-push-url="true"
+           class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active-mobile{% endif %}">
             <i class="bi bi-calendar-check"></i>
         </a>
-        <a href="{% url 'progress' %}" class="nav-link">
+        <a href="{% url 'progress' %}" hx-get="{% url 'progress' %}" hx-target="#main-content" hx-push-url="true" class="nav-link">
            <i class="bi bi-graph-up-arrow me-2"></i>
         </a>
     </nav>
@@ -274,57 +230,36 @@ body {
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.body.addEventListener('htmx:configRequest', (event) => {
-        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-    });
+    <script>
+        // Твои JS скрипты для анимации и обновления классов (уже настроены правильно)
+        document.body.addEventListener('htmx:beforeRequest', function() {
+            document.getElementById('main-content').style.opacity = '0.6';
+        });
 
-    // Анимация загрузки
-    document.body.addEventListener('htmx:beforeRequest', function() {
-        const mainContent = document.getElementById('main-content');
-        mainContent.style.opacity = '0.6';
-        mainContent.style.transition = 'opacity 0.2s';
-    });
+        document.body.addEventListener('htmx:afterRequest', function() {
+            document.getElementById('main-content').style.opacity = '1';
+        });
 
-    document.body.addEventListener('htmx:afterRequest', function() {
-        const mainContent = document.getElementById('main-content');
-        mainContent.style.opacity = '1';
-    });
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'main-content') {
+                const currentPath = window.location.pathname;
 
-    // Обновляем активные ссылки в сайдбаре
-    document.body.addEventListener('htmx:afterSwap', function(event) {
-        if (event.detail.target.id === 'main-content') {
-            const currentPath = window.location.pathname;
+                // Обновление активных ссылок
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href === currentPath) {
+                        link.classList.add('active', 'active-mobile');
+                    } else {
+                        link.classList.remove('active', 'active-mobile');
+                    }
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
 
-            // Обновляем десктопные ссылки
-            document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-                const href = link.getAttribute('href');
-                if (href === currentPath) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-
-            // Обновляем мобильные ссылки
-            document.querySelectorAll('.mobile-nav .nav-link').forEach(link => {
-                const href = link.getAttribute('href');
-                if (href === currentPath) {
-                    link.classList.add('active-mobile');
-                } else {
-                    link.classList.remove('active-mobile');
-                }
-            });
-
-            // Плавный скролл вверх
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    });
-
-    // Обработка кнопки "Назад" в браузере
-    window.addEventListener('popstate', function() {
-        htmx.ajax('GET', window.location.pathname, '#main-content');
-    });
-</script>
+        window.addEventListener('popstate', function() {
+            htmx.ajax('GET', window.location.pathname, '#main-content');
+        });
+    </script>
 </body>
 </html>

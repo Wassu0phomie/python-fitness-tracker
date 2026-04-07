@@ -1,15 +1,28 @@
+{% load static %}
+
 <div class="container py-4">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-primary">База упражнений</h1>
-        <p class="lead text-muted">Изучайте технику выполнения и находите новые упражнения</p>
+    <div class="row mb-4 animate-fade-in">
+        <div class="col-12">
+            <div class="d-flex align-items-end justify-content-between">
+                <div>
+                    <h2 class="fw-black text-uppercase mb-0 profile-title">База упражнений</h2>
+                    <div class="title-underline"></div>
+                </div>
+                <div class="text-end d-none d-sm-block">
+                    <div class="date-badge">
+                        <i class="bi bi-lightning-charge me-2"></i>Всего: {{ paginator.count }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-3 mb-4 text-center">
         <div class="col-6 col-md-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="h3 fw-bold text-primary" id="exercises-count">0</div>
-                    <div class="small text-muted">Упражнений загружено</div>
+                    <div class="h3 fw-bold text-primary" id="exercises-count">{{ paginator.count }}</div>
+                    <div class="small text-muted">Упражнений в базе</div>
                 </div>
             </div>
         </div>
@@ -53,11 +66,19 @@
                 <div class="col-md-3">
                     <label class="form-label small">Поиск</label>
                     <input type="text" name="q" id="search-input" value="{{ filter_params.q }}"
-                           class="form-control" placeholder="Название...">
+                           class="form-control" placeholder="Название..."
+                           hx-get="{% url 'exercise_list' %}"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-target="#exercises-grid-container"
+                           hx-swap="outerHTML">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small">Тип</label>
-                    <select name="exercise_type" id="type-filter" class="form-select">
+                    <select name="exercise_type" id="type-filter" class="form-select"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-trigger="change"
+                            hx-target="#exercises-grid-container"
+                            hx-swap="outerHTML">
                         <option value="">Все типы</option>
                         {% for value, label in exercise_types %}
                         <option value="{{ value }}" {% if filter_params.exercise_type == value %}selected{% endif %}>{{ label }}</option>
@@ -66,7 +87,11 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small">Сложность</label>
-                    <select name="difficulty" id="difficulty-filter" class="form-select">
+                    <select name="difficulty" id="difficulty-filter" class="form-select"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-trigger="change"
+                            hx-target="#exercises-grid-container"
+                            hx-swap="outerHTML">
                         <option value="">Любая</option>
                         {% for value, label in difficulties %}
                         <option value="{{ value }}" {% if filter_params.difficulty == value %}selected{% endif %}>{{ label }}</option>
@@ -75,7 +100,11 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small">Мышцы</label>
-                    <select name="muscle" id="muscle-filter" class="form-select">
+                    <select name="muscle" id="muscle-filter" class="form-select"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-trigger="change"
+                            hx-target="#exercises-grid-container"
+                            hx-swap="outerHTML">
                         <option value="">Все группы</option>
                         {% for muscle in muscle_groups %}
                         <option value="{{ muscle.slug }}" {% if filter_params.muscle == muscle.slug %}selected{% endif %}>{{ muscle.name }}</option>
@@ -83,15 +112,20 @@
                     </select>
                 </div>
                 <div class="col-12 text-end mt-3">
-                    <button id="reset-filters" class="btn btn-outline-secondary">Сбросить</button>
+                    <button id="reset-filters" class="btn btn-outline-secondary"
+                            hx-get="{% url 'exercise_list' %}"
+                            hx-target="#exercises-grid-container"
+                            hx-swap="outerHTML">
+                        Сбросить
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Результаты - контейнер для бесконечной загрузки -->
-    <div id="exercises-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <!-- Сюда будет загружаться первая страница через JavaScript -->
+    <!-- Контейнер для сетки упражнений -->
+    <div id="exercises-grid-container">
+        {% include 'exercises/partials/exercise_grid.html' %}
     </div>
 </div>
 
@@ -102,431 +136,28 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
-        <div class="row g-3">
-            <div class="col-12">
-                <label class="form-label-custom">Название</label>
-                <input type="text" id="mobile-search-input" value="{{ filter_params.q }}" class="form-control-custom" placeholder="Например: Жим лежа">
-            </div>
-            <div class="col-12">
-                <label class="form-label-custom">Тип упражнения</label>
-                <select id="mobile-type-filter" class="form-select-custom">
-                    <option value="">Все типы</option>
-                    {% for value, label in exercise_types %}
-                    <option value="{{ value }}" {% if filter_params.exercise_type == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12">
-                <label class="form-label-custom">Сложность</label>
-                <select id="mobile-difficulty-filter" class="form-select-custom">
-                    <option value="">Любая</option>
-                    {% for value, label in difficulties %}
-                    <option value="{{ value }}" {% if filter_params.difficulty == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-12">
-                <label class="form-label-custom">Целевые мышцы</label>
-                <select id="mobile-muscle-filter" class="form-select-custom">
-                    <option value="">Все группы</option>
-                    {% for muscle in muscle_groups %}
-                    <option value="{{ muscle.slug }}" {% if filter_params.muscle == muscle.slug %}selected{% endif %}>{{ muscle.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-12 d-grid gap-2 mt-4 pb-4">
-                <button id="mobile-apply-filters" class="btn btn-dark py-3 rounded-pill fw-bold" style="background-color: #D7FD51; color: #000; border: none;">ПРИМЕНИТЬ</button>
-                <button id="mobile-reset-filters" class="btn btn-light py-3 rounded-pill text-muted">СБРОСИТЬ ВСЁ</button>
-            </div>
-        </div>
+        <!-- содержимое offcanvas -->
     </div>
 </div>
 
 <style>
-    @media (max-width: 767px) {
-        .card.shadow-sm.border-0.mb-4 { display: none; }
-        .h3.fw-bold { font-size: 1.25rem !important; }
-        .small.text-muted { font-size: 0.7rem !important; line-height: 1.1; }
-        .offcanvas-body { padding-bottom: 80px !important; }
-    }
-
-    .form-label-custom {
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 5px;
-        display: block;
-    }
-
-    .form-control-custom, .form-select-custom {
-        width: 100%;
-        padding: 12px 15px;
-        background-color: #f8f9fa;
-        border: 2px solid transparent;
-        border-radius: 12px;
-        transition: 0.3s;
-        appearance: none;
-    }
-
-    .form-select-custom {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        background-size: 16px 12px;
-    }
-
-    .form-control-custom:focus, .form-select-custom:focus {
-        background-color: #fff;
-        border-color: #D7FD51;
-        outline: none;
-        box-shadow: 0 5px 15px rgba(215, 253, 81, 0.1);
-    }
-
-    .rounded-top-4 {
-        border-top-left-radius: 1.5rem !important;
-        border-top-right-radius: 1.5rem !important;
-        border-top: 5px solid #D7FD51;
-    }
-
-    #exercises-grid {
-        min-height: 600px;
-        position: relative;
-    }
-
-    .exercise-card-fancy {
-        transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-        background: #fff;
-        border-radius: 20px !important;
-    }
-
-    .exercise-card-fancy:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
-    }
-
-    .exercise-image-wrapper {
-        position: relative;
-        height: 200px;
-        background-color: #f8f9fa;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 15px 15px 0 0;
-    }
-
-    .exercise-image-wrapper img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-        transition: transform 0.3s ease;
-        padding: 15px;
-    }
-
-    .exercise-card-fancy:hover .exercise-image-wrapper img {
-        transform: scale(1.05);
-    }
-
-    .image-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        border-radius: 15px 15px 0 0;
-    }
-
-    .exercise-image-wrapper:hover .image-overlay {
-        opacity: 1;
-    }
-
-    .badge-muscle {
-        background: #f1f3f5;
-        color: #495057;
-        font-size: 0.7rem;
-        padding: 4px 10px;
-        border-radius: 50px;
-        font-weight: 500;
-    }
-
-    .shadow-sm-hover-dark {
-        transition: all 0.2s ease;
-    }
-
-    .shadow-sm-hover-dark:hover {
-        background-color: #D7FD51 !important;
-        color: #000 !important;
-        border-color: #D7FD51 !important;
-    }
-
     .sticky-filter {
         position: sticky;
         top: 0;
         z-index: 100;
         background: white;
-        transition: all 0.3s ease;
-        margin-top: 0;
         border-radius: 0 !important;
     }
-
     .sticky-mobile-filter {
         position: sticky;
         top: 0;
         z-index: 100;
         background: white;
         margin: 0 calc(-50vw + 50%);
-        padding: 0;
         width: 100vw;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-
     .sticky-mobile-filter .btn {
         border-radius: 0;
         width: 100%;
-        padding: 14px;
-    }
-
-    @media (max-width: 767px) {
-        .container.py-4 {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-        .container .text-center.mb-5,
-        .container .row.g-3.mb-4,
-        .card.shadow-sm.border-0.mb-4,
-        #exercises-grid {
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-        .sticky-mobile-filter {
-            left: 0;
-            right: 0;
-            width: 100%;
-        }
     }
 </style>
-
-<script>
-let currentPage = 1;
-let isLoading = false;
-let hasMore = true;
-let totalLoaded = 0;
-
-function getFilterParams() {
-    const params = new URLSearchParams();
-    const q = document.getElementById('search-input')?.value;
-    const exercise_type = document.getElementById('type-filter')?.value;
-    const difficulty = document.getElementById('difficulty-filter')?.value;
-    const muscle = document.getElementById('muscle-filter')?.value;
-
-    if (q) params.append('q', q);
-    if (exercise_type) params.append('exercise_type', exercise_type);
-    if (difficulty) params.append('difficulty', difficulty);
-    if (muscle) params.append('muscle', muscle);
-
-    return params;
-}
-
-function loadPage(page) {
-    if (isLoading) return Promise.resolve(false);
-    isLoading = true;
-
-    const params = getFilterParams();
-    params.append('page', page);
-
-    return fetch(`/exercises/htmx/load-more/?${params.toString()}`, {
-        headers: { 'HX-Request': 'true' }
-    })
-    .then(response => response.text())
-    .then(html => {
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-
-        const newCards = tempDiv.querySelectorAll('.exercise-item');
-        const hasNextTrigger = tempDiv.querySelector('#infinite-scroll-trigger');
-
-        const grid = document.getElementById('exercises-grid');
-
-        if (page === 1) {
-            grid.innerHTML = '';
-            totalLoaded = 0;
-        }
-
-        newCards.forEach(card => {
-            grid.appendChild(card);
-            totalLoaded++;
-        });
-
-        const countElement = document.getElementById('exercises-count');
-        if (countElement) countElement.textContent = totalLoaded;
-
-        const newHasMore = hasNextTrigger !== null;
-        hasMore = newHasMore;
-
-        isLoading = false;
-        return newHasMore;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        isLoading = false;
-        return false;
-    });
-}
-
-function setupInfiniteScroll() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && hasMore && !isLoading) {
-                currentPage++;
-                loadPage(currentPage);
-            }
-        });
-    }, { threshold: 0.1, rootMargin: '100px' });
-
-    const triggerDiv = document.createElement('div');
-    triggerDiv.id = 'scroll-trigger';
-    triggerDiv.className = 'text-center py-4';
-    triggerDiv.innerHTML = '<div class="spinner-border text-success" style="display: none;" id="loading-spinner"></div>';
-    document.querySelector('.container').appendChild(triggerDiv);
-
-    observer.observe(triggerDiv);
-}
-
-document.addEventListener('DOMContentLoaded', async function() {
-    currentPage = 1;
-    hasMore = true;
-    await loadPage(1);
-    setupInfiniteScroll();
-
-    function refresh() {
-        currentPage = 1;
-        hasMore = true;
-        loadPage(1);
-    }
-
-    const resetBtn = document.getElementById('reset-filters');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', function() {
-            const searchInput = document.getElementById('search-input');
-            const typeFilter = document.getElementById('type-filter');
-            const difficultyFilter = document.getElementById('difficulty-filter');
-            const muscleFilter = document.getElementById('muscle-filter');
-
-            if (searchInput) searchInput.value = '';
-            if (typeFilter) typeFilter.value = '';
-            if (difficultyFilter) difficultyFilter.value = '';
-            if (muscleFilter) muscleFilter.value = '';
-            refresh();
-        });
-    }
-
-    let debounceTimer;
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(refresh, 500);
-        });
-    }
-
-    const typeFilter = document.getElementById('type-filter');
-    const difficultyFilter = document.getElementById('difficulty-filter');
-    const muscleFilter = document.getElementById('muscle-filter');
-
-    if (typeFilter) typeFilter.addEventListener('change', refresh);
-    if (difficultyFilter) difficultyFilter.addEventListener('change', refresh);
-    if (muscleFilter) muscleFilter.addEventListener('change', refresh);
-
-    const mobileApply = document.getElementById('mobile-apply-filters');
-    if (mobileApply) {
-        mobileApply.addEventListener('click', function() {
-            const mobileSearch = document.getElementById('mobile-search-input');
-            const mobileType = document.getElementById('mobile-type-filter');
-            const mobileDifficulty = document.getElementById('mobile-difficulty-filter');
-            const mobileMuscle = document.getElementById('mobile-muscle-filter');
-
-            if (mobileSearch && searchInput) searchInput.value = mobileSearch.value;
-            if (mobileType && typeFilter) typeFilter.value = mobileType.value;
-            if (mobileDifficulty && difficultyFilter) difficultyFilter.value = mobileDifficulty.value;
-            if (mobileMuscle && muscleFilter) muscleFilter.value = mobileMuscle.value;
-            refresh();
-
-            const offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasFilters'));
-            if (offcanvas) offcanvas.hide();
-        });
-    }
-
-    const mobileReset = document.getElementById('mobile-reset-filters');
-    if (mobileReset) {
-        mobileReset.addEventListener('click', function() {
-            const mobileSearch = document.getElementById('mobile-search-input');
-            const mobileType = document.getElementById('mobile-type-filter');
-            const mobileDifficulty = document.getElementById('mobile-difficulty-filter');
-            const mobileMuscle = document.getElementById('mobile-muscle-filter');
-
-            if (mobileSearch) mobileSearch.value = '';
-            if (mobileType) mobileType.value = '';
-            if (mobileDifficulty) mobileDifficulty.value = '';
-            if (mobileMuscle) mobileMuscle.value = '';
-
-            if (searchInput) searchInput.value = '';
-            if (typeFilter) typeFilter.value = '';
-            if (difficultyFilter) difficultyFilter.value = '';
-            if (muscleFilter) muscleFilter.value = '';
-            refresh();
-        });
-    }
-
-    const mobileSearchInput = document.getElementById('mobile-search-input');
-    if (mobileSearchInput && searchInput) {
-        mobileSearchInput.addEventListener('input', function() {
-            searchInput.value = this.value;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(refresh, 500);
-        });
-    }
-
-    const mobileTypeFilter = document.getElementById('mobile-type-filter');
-    if (mobileTypeFilter && typeFilter) {
-        mobileTypeFilter.addEventListener('change', function() {
-            typeFilter.value = this.value;
-            refresh();
-        });
-    }
-
-    const mobileDifficultyFilter = document.getElementById('mobile-difficulty-filter');
-    if (mobileDifficultyFilter && difficultyFilter) {
-        mobileDifficultyFilter.addEventListener('change', function() {
-            difficultyFilter.value = this.value;
-            refresh();
-        });
-    }
-
-    const mobileMuscleFilter = document.getElementById('mobile-muscle-filter');
-    if (mobileMuscleFilter && muscleFilter) {
-        mobileMuscleFilter.addEventListener('change', function() {
-            muscleFilter.value = this.value;
-            refresh();
-        });
-    }
-});
-
-document.addEventListener('htmx:beforeRequest', function() {
-    const spinner = document.getElementById('loading-spinner');
-    if (spinner) spinner.style.display = 'inline-block';
-});
-
-document.addEventListener('htmx:afterRequest', function() {
-    const spinner = document.getElementById('loading-spinner');
-    if (spinner) spinner.style.display = 'none';
-});
-</script>
-{% endblock %}

@@ -1,6 +1,14 @@
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import TemplateView, ListView, DetailView
+from django.http import HttpResponse
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage
+
+
 import requests
 import json
 from django.shortcuts import render
+
 
 
 # ... ваши остальные импорты ...
