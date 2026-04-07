@@ -7,6 +7,15 @@ from django.utils import timezone
 from django.db.models import Count
 from .models import WorkoutLog, ProgressEntry
 from collections import defaultdict
+
+# Словарь полных названий
+MONTHS_RU_FULL = {
+    'January': 'Январь', 'February': 'Февраль', 'March': 'Март', 'April': 'Апрель',
+    'May': 'Май', 'June': 'Июнь', 'July': 'Июль', 'August': 'Август',
+    'September': 'Сентябрь', 'October': 'Октябрь', 'November': 'Ноябрь', 'December': 'Декабрь'
+}
+
+
 @login_required
 def progress_view(request):
     # --- Инициализация дат ---
@@ -15,40 +24,37 @@ def progress_view(request):
     start_date = end_date - timedelta(days=364)
     start_date_month = today_local - timedelta(days=30)
 
-    # --- 1. Muscle Split (Круговая диаграмма) за 30 дней ---
+    # --- 1. Muscle Split ---
     muscle_stats = (WorkoutLog.objects.filter(
         user=request.user,
         completed_at__date__gte=start_date_month
     )
-    .filter(workout_day__exercises__exercise__muscle_groups__is_group=True)  # Фильтр по группам
-    .values('workout_day__exercises__exercise__muscle_groups__name')
-    .annotate(count=Count('workout_day__exercises__exercise__muscle_groups'))
-    .order_by('-count'))
+                    .filter(workout_day__exercises__exercise__muscle_groups__is_group=True)
+                    .values('workout_day__exercises__exercise__muscle_groups__name')
+                    .annotate(count=Count('workout_day__exercises__exercise__muscle_groups'))
+                    .order_by('-count'))
 
-    # Обновите ключи в генераторах списков
-    muscle_labels = [s['workout_day__exercises__exercise__muscle_groups__name'] for s in muscle_stats if
-                     s['workout_day__exercises__exercise__muscle_groups__name']]
-    muscle_data = [s['count'] for s in muscle_stats if s['workout_day__exercises__exercise__muscle_groups__name']]
+    muscle_labels = [s['workout_day__exercises__exercise__muscle_groups__name'] for s in muscle_stats]
+    muscle_data = [s['count'] for s in muscle_stats]
 
-    # --- 2. Активность за месяц (Линейный график) ---
+    # --- 2. Активность за месяц ---
     activity_stats = (WorkoutLog.objects.filter(
         user=request.user,
         completed_at__date__gte=start_date_month
     )
-    .values('completed_at__date')
-    .annotate(count=Count('id'))
-    .order_by('completed_at__date'))
+                      .values('completed_at__date')
+                      .annotate(count=Count('id'))
+                      .order_by('completed_at__date'))
 
     activity_labels = [s['completed_at__date'].strftime('%d.%m') for s in activity_stats]
     activity_data = [s['count'] for s in activity_stats]
 
-    # --- 3. Календарь (Heatmap) - СНАЧАЛА СОБИРАЕМ ДАННЫЕ ---
+    # --- 3. Календарь (Heatmap) ---
     year_stats = WorkoutLog.objects.filter(
         user=request.user,
         completed_at__date__range=[start_date, end_date]
     ).values('completed_at__date').annotate(count=Count('id'))
 
-    # Словарь для быстрого доступа к количеству тренировок по дате
     stats_dict = {s['completed_at__date']: s['count'] for s in year_stats}
 
     heatmap_data = []
@@ -56,15 +62,19 @@ def progress_view(request):
     last_month = -1
     curr = start_date
 
-    # Теперь запускаем цикл, когда stats_dict уже существует
     while curr <= end_date:
         count = stats_dict.get(curr, 0)
         level = min(count, 4) if count > 0 else 0
 
-        # Сбор подписей месяцев
+        # Сокращенные названия для календаря (Янв, Фев...)
         if curr.month != last_month:
+            eng_month = curr.strftime('%B')
+            rus_full = MONTHS_RU_FULL.get(eng_month, eng_month)
+            # Берем первые 3 буквы. Для мая исключение, т.к. он короткий
+            rus_short = rus_full[:3] if eng_month != 'May' else 'Май'
+
             months_labels.append({
-                'name': curr.strftime('%b'),
+                'name': rus_short,
                 'column': (curr - start_date).days // 7
             })
             last_month = curr.month
@@ -72,19 +82,20 @@ def progress_view(request):
         heatmap_data.append({'date': curr, 'level': level, 'count': count})
         curr += timedelta(days=1)
 
-    # --- 4. Фотографии (Группировка) ---
+    # --- 4. Фотографии (Полные названия) ---
     raw_photos = ProgressEntry.objects.filter(user=request.user).order_by('-created_at')
 
     grouped_photos = defaultdict(list)
     for photo in raw_photos:
-        # Ключ: "Март 2026"
-        month_key = photo.created_at.strftime('%B %Y')
+        eng_month = photo.created_at.strftime('%B')
+        rus_month = MONTHS_RU_FULL.get(eng_month, eng_month)
+        month_key = f"{rus_month} {photo.created_at.year}"
         grouped_photos[month_key].append(photo)
 
     return render(request, 'progress/progress_list.html', {
         'heatmap_data': heatmap_data,
         'months_labels': months_labels,
-        'grouped_photos': dict(grouped_photos),  # Передаем сгруппированный словарь
+        'grouped_photos': dict(grouped_photos),
         'total_workouts': sum(stats_dict.values()),
         'muscle_labels_json': json.dumps(muscle_labels, ensure_ascii=False),
         'muscle_data_json': json.dumps(muscle_data),

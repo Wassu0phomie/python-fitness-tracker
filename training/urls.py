@@ -13,7 +13,6 @@ urlpatterns = [
 
     # HTMX endpoints
     path('htmx/add-day/', views.htmx_add_day, name='htmx_add_day'),
-    path('htmx/add-exercise-row/', views.htmx_add_exercise_row, name='htmx_add_exercise_row'),
     path('htmx/search-exercises/', views.search_exercises_htmx, name='search_exercises_htmx'),
 
     path('plans/partial/', views.plans_list_partial, name='plans_list_partial'),

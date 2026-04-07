@@ -17,10 +17,6 @@
                 </div>
             </div>
             <div class="card border-0 shadow-lg p-4" style="border-radius: 25px;">
-                {% if error %}
-                <div class="alert alert-danger rounded-4 mb-4">{{ error }}</div>
-                {% endif %}
-
                 <form method="POST" id="planForm">
                     {% csrf_token %}
 
@@ -32,24 +28,20 @@
                         </div>
                         <div class="col-md-3">
                             <label class="small text-muted fw-bold mb-2">ДАТА НАЧАЛА</label>
-                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3"
-                                   style="border-radius: 12px;" required>
+                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
                         </div>
                         <div class="col-md-3">
                             <label class="small text-muted fw-bold mb-2">ДАТА ОКОНЧАНИЯ</label>
-                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3"
-                                   style="border-radius: 12px;" required>
+                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
                         </div>
                     </div>
 
                     <div class="mb-5">
-                        <label class="small text-muted fw-bold mb-3 d-block">ВЫБЕРИТЕ ДНИ ТРЕНИРОВОК (максимум 7)</label>
+                        <label class="small text-muted fw-bold mb-3 d-block">ВЫБЕРИТЕ ДНИ ТРЕНИРОВОК</label>
                         <div class="d-flex flex-wrap gap-3">
                             {% for num, label in day_choices %}
                             <div class="day-selector">
-                                <input type="checkbox" class="btn-check" name="selected_days"
-                                       id="day-{{ num }}" value="{{ num }}"
-                                       onchange="handleDaySelection(this, '{{ num }}', '{{ label }}')">
+                                <input type="checkbox" class="btn-check" name="selected_days" id="day-{{ num }}" value="{{ num }}">
                                 <label class="btn btn-outline-dark rounded-circle shadow-sm d-flex align-items-center justify-content-center fw-bold"
                                        for="day-{{ num }}"
                                        style="width: 55px; height: 55px; border-width: 2px; transition: 0.3s;">
@@ -59,6 +51,7 @@
                             {% endfor %}
                         </div>
                     </div>
+
                     <div id="workout-days-container">
                         <div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50">
                             <i class="bi bi-calendar-check fs-1"></i>
@@ -77,8 +70,6 @@
         </div>
     </div>
 </div>
-
-<!-- Модалка для выбора упражнений -->
 <div class="modal fade" id="exerciseGallery" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow" style="border-radius: 20px;">
@@ -89,28 +80,15 @@
             <div class="modal-body">
                 <div class="input-group mb-3 shadow-sm" style="border-radius: 12px; overflow: hidden;">
                     <span class="input-group-text border-0 bg-white"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="q" class="form-control border-0 p-3"
-                           placeholder="Поиск упражнения..."
-                           hx-get="{% url 'search_exercises_htmx' %}"
-                           hx-trigger="keyup changed delay:300ms"
-                           hx-target="#modalGrid">
+                    <input type="text" id="modalSearch" class="form-control border-0 p-3" placeholder="Поиск упражнения...">
                 </div>
 
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    <button class="btn btn-sm btn-dark rounded-pill px-3"
-                            data-muscle="all"
-                            hx-get="{% url 'search_exercises_htmx' %}"
-                            hx-vals='{"muscle": "all"}'
-                            hx-target="#modalGrid">
-                        Все
-                    </button>
+                <div class="d-flex flex-wrap gap-2 mb-4" id="muscleFilters">
+                    <button class="btn btn-sm btn-dark rounded-pill px-3 filter-muscle-btn active" data-muscle="all">Все</button>
                     {% for muscle in muscle_groups %}
-                        {% if muscle.is_group %}
-                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3"
-                                    data-muscle="{{ muscle.slug }}"
-                                    hx-get="{% url 'search_exercises_htmx' %}"
-                                    hx-vals='{"muscle": "{{ muscle.slug }}"}'
-                                    hx-target="#modalGrid">
+                        {% if muscle.is_group %}  {# <--- Добавьте это условие #}
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-muscle-btn"
+                                    data-muscle="{{ muscle.slug }}">
                                 {{ muscle.name }}
                             </button>
                         {% endif %}
@@ -119,19 +97,19 @@
 
                 <div class="row g-3" id="modalGrid">
                     {% for ex in exercises %}
-                    <div class="col-md-4">
+                    <div class="col-md-4 modal-ex-card"
+                         data-name="{{ ex.name|lower }}"
+                         data-muscles="{% for m in ex.muscle_groups.all %}{{ m.slug }} {% endfor %}">
                         <div class="card h-100 border-0 shadow-sm-hover cursor-pointer p-2"
-                             style="border-radius: 15px; transition: 0.3s; cursor: pointer;"
-                             onclick="addExerciseToDay('{{ ex.id }}', '{{ ex.name|escapejs }}')">
+                             style="border-radius: 15px; transition: 0.3s;"
+                             onclick="addExerciseToDay('{{ ex.id }}', '{{ ex.name }}', '{{ ex.main_image }}')">
                             <div class="text-center mb-2">
-                                <img src="{{ ex.main_image }}" class="img-fluid rounded"
-                                     style="height: 100px; object-fit: contain;"
-                                     onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+                                <img src="{{ ex.main_image }}" class="img-fluid rounded" style="height: 100px; object-fit: contain;">
                             </div>
                             <div class="text-center">
                                 <h6 class="small fw-bold mb-0">{{ ex.name }}</h6>
                                 <div class="mt-1">
-                                    {% for m in ex.primary_muscles.all|slice:":2" %}
+                                    {% for m in ex.primary_muscles.all %}
                                         <span class="badge bg-light text-muted" style="font-size: 0.55rem;">{{ m.name }}</span>
                                     {% endfor %}
                                 </div>
@@ -157,174 +135,46 @@
         border-style: dashed !important;
         border-width: 2px !important;
     }
-    .animate-fade-in {
-        animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .cursor-pointer {
-        cursor: pointer;
-    }
-    .shadow-sm-hover:hover {
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-        transform: translateY(-2px);
-        transition: all 0.3s;
-    }
-    .htmx-fade-in {
-        animation: fadeIn 0.3s ease-in-out;
-    }
 </style>
 
 <script>
-// Запоминаем активный день для добавления упражнения
 let activeDayForSelection = null;
 
-// Функция для экранирования HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// Функция для удаления блока дня
-function removeDayBlock(dayNum) {
-    const block = document.getElementById(`day-block-${dayNum}`);
-    if (block) {
-        block.remove();
-        const checkbox = document.getElementById(`day-${dayNum}`);
-        if (checkbox) checkbox.checked = false;
-
+// Обработка выбора дней (создание блоков дней)
+document.querySelectorAll('.btn-check').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        const dayNum = this.value;
+        const dayLabel = document.querySelector(`label[for="${this.id}"]`).innerText;
         const container = document.getElementById('workout-days-container');
-        if (container.children.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50">
-                    <i class="bi bi-calendar-check fs-1"></i>
-                    <p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p>
+
+        if (this.checked) {
+            if (container.querySelector('.text-center.py-5')) container.innerHTML = '';
+
+            const dayBlock = document.createElement('div');
+            dayBlock.id = `day-block-${dayNum}`;
+            dayBlock.className = 'card mb-4 border-0 bg-light p-4 rounded-4 shadow-sm';
+            dayBlock.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-uppercase">${dayLabel}</h5>
                 </div>
+                <div class="exercise-list" id="exercise-list-${dayNum}"></div>
+                <button type="button" class="btn btn-link text-dark fw-bold text-decoration-none p-0 mt-2 open-gallery-btn"
+                        data-bs-toggle="modal" data-bs-target="#exerciseGallery" data-day="${dayNum}">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Добавить упражнение
+                </button>
             `;
+            container.appendChild(dayBlock);
+        } else {
+            const blockToRemove = document.getElementById(`day-block-${dayNum}`);
+            if (blockToRemove) blockToRemove.remove();
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50"><i class="bi bi-calendar-check fs-1"></i><p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p></div>';
+            }
         }
-    }
-}
-
-// Функция для добавления строки упражнения
-function addExerciseRow(dayNum, exerciseId, exerciseName) {
-    const listContainer = document.getElementById(`exercise-list-${dayNum}`);
-    if (!listContainer) return false;
-
-    // Проверка на дубликаты
-    const existingInputs = listContainer.querySelectorAll(`input[name="exercises_${dayNum}"]`);
-    for (let input of existingInputs) {
-        if (input.value === exerciseId.toString()) {
-            alert('Это упражнение уже добавлено в этот день!');
-            return false;
-        }
-    }
-
-    const uniqueId = Date.now() + Math.random();
-
-    const row = document.createElement('div');
-    row.className = 'row g-2 mb-2 align-items-center animate-fade-in exercise-row';
-    row.id = `ex-row-${dayNum}-${exerciseId}-${uniqueId}`;
-    row.setAttribute('data-exercise-id', exerciseId);
-    row.innerHTML = `
-        <div class="col-md-6">
-            <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm" style="border-radius: 10px;">
-                ${escapeHtml(exerciseName)}
-            </div>
-            <input type="hidden" name="exercises_${dayNum}" value="${exerciseId}">
-        </div>
-        <div class="col-md-2">
-            <input type="number" name="sets_${dayNum}"
-                   class="form-control border-0 p-2 shadow-sm text-center sets-input"
-                   placeholder="Сеты" value="3" min="1" step="1"
-                   style="border-radius: 10px;">
-        </div>
-        <div class="col-md-3">
-            <input type="number" name="reps_${dayNum}"
-                   class="form-control border-0 p-2 shadow-sm text-center reps-input"
-                   placeholder="Повторы" value="12" min="1" step="1"
-                   style="border-radius: 10px;">
-        </div>
-        <div class="col-md-1 text-center">
-            <button type="button" class="btn text-danger p-0 delete-exercise-btn" data-row-id="${row.id}">
-                <i class="bi bi-trash fs-5"></i>
-            </button>
-        </div>
-    `;
-
-    // Добавляем обработчик для кнопки удаления
-    const deleteBtn = row.querySelector('.delete-exercise-btn');
-    deleteBtn.addEventListener('click', function() {
-        row.remove();
     });
+});
 
-    listContainer.appendChild(row);
-    return true;
-}
-
-// Функция для обработки выбора/снятия дня
-function handleDaySelection(checkbox, dayNum, dayLabel) {
-    const container = document.getElementById('workout-days-container');
-    let existingBlock = document.getElementById(`day-block-${dayNum}`);
-
-    if (checkbox.checked) {
-        const existingBlocks = container.querySelectorAll('[id^="day-block-"]');
-        if (existingBlocks.length >= 7) {
-            alert('Максимум можно выбрать 7 дней в неделю!');
-            checkbox.checked = false;
-            return;
-        }
-
-        if (existingBlock) return;
-
-        const placeholder = container.querySelector('.text-center');
-        if (placeholder) placeholder.remove();
-
-        const dayBlock = document.createElement('div');
-        dayBlock.className = 'card mb-4 border-0 bg-light p-4 rounded-4 shadow-sm animate-fade-in';
-        dayBlock.id = `day-block-${dayNum}`;
-        dayBlock.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold mb-0 text-uppercase">${escapeHtml(dayLabel)}</h5>
-                <button type="button" class="btn-close" onclick="removeDayBlock(${dayNum})"></button>
-            </div>
-            <div class="exercise-list" id="exercise-list-${dayNum}"></div>
-            <button type="button"
-                    class="btn btn-link text-dark fw-bold text-decoration-none p-0 mt-2 open-gallery-btn"
-                    data-bs-toggle="modal"
-                    data-bs-target="#exerciseGallery"
-                    data-day="${dayNum}">
-                <i class="bi bi-plus-circle-fill me-2"></i>Добавить упражнение
-            </button>
-        `;
-        container.appendChild(dayBlock);
-    } else {
-        removeDayBlock(dayNum);
-    }
-}
-
-// Функция добавления упражнения из модалки
-function addExerciseToDay(id, name) {
-    if (!activeDayForSelection) {
-        alert('Пожалуйста, сначала выберите день тренировки');
-        return;
-    }
-    addExerciseRow(activeDayForSelection, id, name);
-
-    const modalElement = document.getElementById('exerciseGallery');
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    if (modal) modal.hide();
-}
-
-// Запоминаем активный день при открытии модалки
+// 1. Когда открываем модалку, запоминаем ID дня
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('.open-gallery-btn');
     if (btn) {
@@ -332,66 +182,183 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Восстановление существующих строк упражнений при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    // Находим все существующие строки упражнений
-    const allExerciseRows = document.querySelectorAll('.exercise-list .row');
-    allExerciseRows.forEach(row => {
-        // Добавляем класс exercise-row если его нет
-        if (!row.classList.contains('exercise-row')) {
-            row.classList.add('exercise-row');
-        }
+// 2. Функция добавления упражнения в список конкретного дня
+// 2. Функция добавления упражнения в список конкретного дня (в стиле "прошлого отображения")
+function addExerciseToDay(id, name, img) {
+    if (!activeDayForSelection) return;
 
-        // Находим кнопку удаления и добавляем обработчик
-        const deleteBtn = row.querySelector('.btn.text-danger');
-        if (deleteBtn && !deleteBtn.hasAttribute('data-listener')) {
-            deleteBtn.setAttribute('data-listener', 'true');
-            deleteBtn.addEventListener('click', function() {
-                row.remove();
-            });
-        }
+    const listContainer = document.getElementById(`exercise-list-${activeDayForSelection}`);
 
-        // Убеждаемся, что поля ввода имеют правильные имена
-        const setsInput = row.querySelector('input[name^="sets_"]');
-        const repsInput = row.querySelector('input[name^="reps_"]');
-        if (setsInput && !setsInput.classList.contains('sets-input')) {
-            setsInput.classList.add('sets-input');
+    const row = document.createElement('div');
+    // Используем row для сеточной структуры, как в старом варианте
+    row.className = 'row g-2 mb-2 align-items-center animate-fade-in';
+    row.innerHTML = `
+        <div class="col-md-6">
+            <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm" style="border-radius: 10px;">
+                ${name}
+            </div>
+            <input type="hidden" name="exercises_${activeDayForSelection}" value="${id}">
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="sets_${activeDayForSelection}"
+                   class="form-control border-0 p-2 shadow-sm text-center"
+                   placeholder="Сеты" value="" min="1" step="1"
+                   style="border-radius: 10px;"
+                   oninput="this.value = Math.abs(Math.floor(this.value)) || ''">
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="reps_${activeDayForSelection}"
+                   class="form-control border-0 p-2 shadow-sm text-center"
+                   placeholder="Повторы" value="" min="1" step="1"
+                   style="border-radius: 10px;"
+                   oninput="this.value = Math.abs(Math.floor(this.value)) || ''">
+        </div>
+        <div class="col-md-1 text-center">
+            <button type="button" class="btn text-danger p-0" onclick="this.parentElement.parentElement.remove()">
+                <i class="bi bi-trash fs-5"></i>
+            </button>
+        </div>
+    `;
+
+    listContainer.appendChild(row);
+
+    // Закрываем модалку
+    const modalElement = document.getElementById('exerciseGallery');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) modal.hide();
+}
+
+let currentMuscleFilter = 'all';
+
+// Функция фильтрации
+function applyFilters() {
+    const searchQuery = document.getElementById('modalSearch').value.toLowerCase();
+
+    document.querySelectorAll('.modal-ex-card').forEach(card => {
+        const name = card.dataset.name;
+        // Получаем массив слагов мышц из атрибута
+        const muscles = card.dataset.muscles.trim().split(' ');
+
+        const matchesSearch = name.includes(searchQuery);
+        const matchesMuscle = (currentMuscleFilter === 'all' || muscles.includes(currentMuscleFilter));
+
+        // Показываем только если совпали И поиск, И группа мышц
+        if (matchesSearch && matchesMuscle) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
         }
-        if (repsInput && !repsInput.classList.contains('reps-input')) {
-            repsInput.classList.add('reps-input');
-        }
+    });
+}
+
+// 3. Живой поиск в модалке
+document.getElementById('modalSearch').addEventListener('input', applyFilters);
+
+// Обработка клика по кнопкам мышц
+document.querySelectorAll('.filter-muscle-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Меняем активную кнопку визуально
+        document.querySelectorAll('.filter-muscle-btn').forEach(b => {
+            b.classList.remove('btn-dark', 'active');
+            b.classList.add('btn-outline-secondary');
+        });
+        this.classList.remove('btn-outline-secondary');
+        this.classList.add('btn-dark', 'active');
+
+        // Устанавливаем текущий фильтр и запускаем функцию
+        currentMuscleFilter = this.dataset.muscle;
+        applyFilters();
     });
 });
 
-// Валидация формы
 document.getElementById('planForm').addEventListener('submit', function(e) {
     const selectedDayCheckboxes = document.querySelectorAll('.btn-check:checked');
+    const workoutDaysContainer = document.getElementById('workout-days-container');
 
+    // 1. Проверка: Выбран ли хотя бы один день в чекбоксах
     if (selectedDayCheckboxes.length === 0) {
         e.preventDefault();
         alert('Пожалуйста, выберите хотя бы один день недели!');
         return;
     }
 
-    if (selectedDayCheckboxes.length > 7) {
-        e.preventDefault();
-        alert('Нельзя выбрать больше 7 дней!');
-        return;
-    }
-
     let totalExercises = 0;
+    let emptyDays = [];
+
     selectedDayCheckboxes.forEach(checkbox => {
         const dayNum = checkbox.value;
-        const exercisesInDay = document.querySelectorAll(`#exercise-list-${dayNum} .exercise-row, #exercise-list-${dayNum} .row`);
-        totalExercises += exercisesInDay.length;
+        const dayLabel = document.querySelector(`label[for="${checkbox.id}"]`).innerText;
+        const exercisesInDay = document.querySelectorAll(`#exercise-list-${dayNum} input[name^="exercises_"]`);
+
+        if (exercisesInDay.length === 0) {
+            emptyDays.push(dayLabel);
+        } else {
+            totalExercises += exercisesInDay.length;
+        }
     });
 
+    // 2. Проверка: Есть ли вообще хоть одно упражнение во всей форме
     if (totalExercises === 0) {
         e.preventDefault();
         alert('Добавьте хотя бы одно упражнение в выбранные дни!');
         return;
     }
-});
-</script>
 
+    // 3. Логика для "пустых" дней:
+    // Если пользователь выбрал день, но не добавил туда упражнений,
+    // мы можем либо прервать отправку, либо просто предупредить.
+    if (emptyDays.length > 0) {
+        const confirmEmpty = confirm(
+            `В следующих днях нет упражнений: ${emptyDays.join(', ')}.\n` +
+            `Эти дни НЕ будут сохранены. Продолжить?`
+        );
+
+        if (!confirmEmpty) {
+            e.preventDefault();
+            return;
+        } else {
+            // Чтобы пустые дни не создавались на бэкенде,
+            // временно снимаем с них "checked" перед отправкой
+            selectedDayCheckboxes.forEach(checkbox => {
+                const dayNum = checkbox.value;
+                const exercisesInDay = document.querySelectorAll(`#exercise-list-${dayNum} input[name^="exercises_"]`);
+                if (exercisesInDay.length === 0) {
+                    checkbox.checked = false;
+                }
+            });
+        }
+    }
+});
+const exerciseModal = document.getElementById('exerciseGallery');
+if (exerciseModal) {
+    exerciseModal.addEventListener('hidden.bs.modal', function() {
+        // Сбрасываем поле поиска
+        const searchInput = document.getElementById('modalSearch');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        // Сбрасываем фильтр по мышцам на "Все"
+        currentMuscleFilter = 'all';
+
+        // Обновляем активные классы кнопок
+        document.querySelectorAll('.filter-muscle-btn').forEach(btn => {
+            btn.classList.remove('btn-dark', 'active');
+            btn.classList.add('btn-outline-secondary');
+        });
+
+        // Активируем кнопку "Все"
+        const allButton = document.querySelector('.filter-muscle-btn[data-muscle="all"]');
+        if (allButton) {
+            allButton.classList.remove('btn-outline-secondary');
+            allButton.classList.add('btn-dark', 'active');
+        }
+
+        // Показываем все упражнения
+        document.querySelectorAll('.modal-ex-card').forEach(card => {
+            card.style.display = 'block';
+        });
+    });
+}
+</script>
 {% endblock %}

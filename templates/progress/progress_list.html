@@ -2,19 +2,35 @@
 
 {% block content %}
 <style>
-/* --- Календарь активности --- */
-.heatmap-card { border-radius: 20px; background: #fff; }
+/* --- СОХРАНЕННЫЙ СТИЛЬ КАЛЕНДАРЯ --- */
+.heatmap-card {
+    border-radius: 20px;
+    background: #fff;
+    max-width: 850px;
+    margin-left: 0;
+}
 .heatmap-wrapper { display: flex; gap: 10px; font-size: 10px; color: #999; }
 .days-labels { display: grid; grid-template-rows: repeat(7, 11px); gap: 3px; padding-top: 15px; }
-.months-labels { display: grid; grid-template-columns: repeat(52, minmax(11px, 1fr)); gap: 3px; margin-bottom: 5px; }
-.heatmap-scroll-area { overflow-x: auto; flex-grow: 1; }
+.months-labels {
+    display: grid;
+    grid-template-columns: repeat(53, 11px);
+    gap: 3px;
+    margin-bottom: 5px;
+    width: max-content;
+}
+.heatmap-scroll-area {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding-bottom: 10px;
+}
 .heatmap-container {
     display: grid;
-    grid-template-columns: repeat(52, minmax(11px, 1fr));
+    grid-template-columns: repeat(53, 11px);
     grid-template-rows: repeat(7, 11px);
     grid-auto-flow: column;
     gap: 3px;
-    padding: 5px 0;
+    width: max-content;
 }
 .day-cell { width: 11px; height: 11px; border-radius: 2px; transition: transform 0.1s ease; }
 .day-cell:hover { transform: scale(1.4); z-index: 10; }
@@ -25,72 +41,149 @@
 .level-3 { background-color: #b3e61c; }
 .level-4 { background-color: #D7FD51; }
 
-/* --- Адаптивная галерея --- */
+/* --- ОБНОВЛЕННЫЙ ОБЩИЙ СТИЛЬ --- */
+.content-max-width {
+    max-width: 1000px;
+    margin-left: 0;
+}
+
+.header-indicator {
+    width: 4px;
+    height: 24px;
+    background-color: #D7FD51;
+    border-radius: 2px;
+}
+
+.stat-card {
+    border-radius: 24px;
+    border: none;
+    transition: transform 0.3s ease;
+}
+
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
 }
 
-.month-section h5 {
-    text-transform: capitalize;
-    font-size: 1.1rem;
+.month-divider {
+    height: 1px;
+    background: linear-gradient(to right, #dee2e6, transparent);
+    flex-grow: 1;
 }
 
-/* Стили для формы */
-.rounded-pill-start {
-    border-top-left-radius: 50rem !important;
-    border-bottom-left-radius: 50rem !important;
+.btn-dark-modern {
+    background-color: #1a1a1a;
+    color: white;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
 }
-.rounded-pill-end {
-    border-top-right-radius: 50rem !important;
-    border-bottom-right-radius: 50rem !important;
+
+.btn-dark-modern:hover {
+    background-color: #000;
+    transform: translateY(-2px);
 }
+
+.form-input-custom {
+    border: none;
+    background-color: #f8f9fa;
+    padding: 12px 20px;
+    border-radius: 12px;
+}
+
+.rounded-pill-start { border-radius: 12px 0 0 12px !important; }
+.rounded-pill-end { border-radius: 0 12px 12px 0 !important; }
+
 .modal-backdrop.show {
-    opacity: 0.9 !important; /* Почти полная непрозрачность (от 0 до 1) */
-    background-color: #000;  /* Чистый черный цвет */
-    backdrop-filter: blur(5px); /* Легкое размытие заднего плана */
+    opacity: 0.8 !important;
+    backdrop-filter: blur(8px);
+}
+    /* --- Адаптация кнопки и формы --- */
+/* --- Полная адаптация формы и исправление сжатия полей --- */
+@media (max-width: 768px) {
+    .btn-dark-modern {
+        width: 100%;
+        padding: 14px;
+        display: flex;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .form-input-custom {
+        margin-bottom: 8px;
+    }
+
+    /* Исправление блока комментария */
+    .input-group {
+        display: block !important; /* Убираем flex, чтобы элементы не сжимались в ряд */
+        width: 100%;
+    }
+
+    .input-group > .form-control {
+        display: block;
+        width: 100% !important;
+        border-radius: 12px !important; /* Делаем углы скругленными со всех сторон */
+        margin-bottom: 12px; /* Добавляем отступ от поля до кнопки */
+        padding: 12px 20px;
+    }
+
+    .input-group > .btn-primary {
+        display: block;
+        width: 100% !important;
+        border-radius: 12px !important;
+        margin-left: 0 !important;
+        padding: 14px;
+    }
+
+    .rounded-pill-start, .rounded-pill-end {
+        border-radius: 12px !important;
+    }
+
+    /* Заголовок секции */
+    .section-header-mobile {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
 }
 </style>
 
 <div class="container py-4">
-    <div class="row mb-4 animate-fade-in">
+    <div class="row mb-5 animate-fade-in content-max-width">
         <div class="col-12">
-            <div class="d-flex align-items-end justify-content-between">
-                <div>
-                    <h2 class="fw-black text-uppercase mb-0 profile-title">Мой прогресс</h2>
-                    <div class="title-underline"></div>
-                </div>
-                <div class="text-end d-none d-sm-block">
-                    <div class="date-badge">
-                        <i class="bi bi-graph-up me-2"></i>Статистика
-                    </div>
-                </div>
+            <div class="d-flex align-items-center mb-2">
+                <div class="header-indicator me-3"></div>
+                <h2 class="fw-black text-uppercase mb-0">Мой прогресс</h2>
             </div>
+            <p class="text-muted small ms-4">История ваших тренировок и физических изменений</p>
         </div>
     </div>
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 20px; background: #D7FD51;">
-                <span class="small fw-bold text-uppercase opacity-75">Всего тренировок</span>
-                <div class="display-4 fw-900">{{ total_workouts }}</div>
-                <div style="height: 60px; margin-top: 10px;">
+
+    <div class="row g-4 mb-5 content-max-width">
+        <div class="col-md-5">
+            <div class="card stat-card shadow-sm p-4 text-center h-100" style="background: #D7FD51;">
+                <span class="small fw-bold text-uppercase opacity-50">Всего тренировок</span>
+                <div class="display-3 fw-900 my-2">{{ total_workouts }}</div>
+                <div style="height: 60px;">
                     <canvas id="activityChart"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
-            <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 20px;">
-                <h6 class="fw-bold small text-uppercase mb-3">Разделение мышц за (30 дней)</h6>
-                <div style="height: 200px; position: relative;">
+        <div class="col-md-7">
+            <div class="card stat-card shadow-sm p-4 h-100 bg-white">
+                <h6 class="fw-bold small text-uppercase mb-4 text-muted">Распределение нагрузки</h6>
+                <div style="height: 180px; position: relative;">
                     <canvas id="muscleChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card p-4 shadow-sm border-0 heatmap-card mb-5">
-        <h6 class="fw-bold small text-uppercase mb-3">Календарь активности</h6>
+    <div class="card p-4 shadow-sm border-0 heatmap-card mb-5 content-max-width">
+        <h6 class="fw-bold small text-uppercase mb-3 text-muted">Календарь активности</h6>
         <div class="heatmap-wrapper">
             <div class="days-labels">
                 <div></div><div>Вт</div><div></div><div>Чт</div><div></div><div>Сб</div><div></div>
@@ -114,40 +207,44 @@
             <div class="day-cell level-1"></div>
             <div class="day-cell level-2"></div>
             <div class="day-cell level-3"></div>
+            <div class="day-cell level-4"></div>
             <span>Больше</span>
         </div>
     </div>
 
-<div class="mt-5">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-            <h4 class="fw-bold mb-0 text-uppercase">История трансформации</h4>
-            <button class="btn btn-dark rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#uploadForm">
-                + ЗАМЕР
+    <div class="mt-5 content-max-width">
+        <div class="d-flex justify-content-between align-items-center mb-4 section-header-mobile">
+            <div>
+                <h4 class="fw-bold mb-0 text-uppercase">История трансформации</h4>
+                <p class="text-muted small mb-0 d-md-block d-none">Ваш прогресс в фотографиях</p>
+            </div>
+            <button class="btn btn-dark-modern shadow-sm" data-bs-toggle="collapse" data-bs-target="#uploadForm">
+                <i class="bi bi-camera-fill me-2"></i> ДОБАВИТЬ ФОТО
             </button>
         </div>
 
-        <div class="collapse mb-4" id="uploadForm">
-            <div class="card card-body border-0 shadow-sm" style="border-radius: 20px;">
+        <div class="collapse mb-5" id="uploadForm">
+            <div class="card card-body border-0 shadow-sm p-4" style="border-radius: 24px;">
                 <form hx-post="{% url 'upload_progress' %}"
                       hx-target="#main-gallery"
                       hx-swap="afterbegin"
                       enctype="multipart/form-data"
-                      onhtmx:after-request="this.reset(); bootstrap.Collapse.getInstance(document.getElementById('uploadForm')).hide(); document.getElementById('empty-message')?.remove();">
+                      onhtmx:after-request="this.reset(); bootstrap.Collapse.getInstance(document.getElementById('uploadForm')).hide();">
                     {% csrf_token %}
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Фото прогресса</label>
-                            <input type="file" name="image" class="form-control rounded-pill" accept="image/*" required>
+                            <label class="form-label small fw-bold text-muted">ФОТО ПРОГРЕССА</label>
+                            <input type="file" name="image" class="form-control form-input-custom" accept="image/*" required>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label small fw-bold">Вес (кг)</label>
-                            <input type="number" step="0.1" name="weight" class="form-control rounded-pill" required>
+                            <label class="form-label small fw-bold text-muted">ВЕС (КГ)</label>
+                            <input type="number" step="0.1" name="weight" class="form-control form-input-custom" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small fw-bold">Комментарий</label>
+                            <label class="form-label small fw-bold text-muted">КОММЕНТАРИЙ</label>
                             <div class="input-group">
-                                <input type="text" name="comment" class="form-control rounded-pill-start" placeholder="Как самочувствие?">
-                                <button type="submit" class="btn btn-primary rounded-pill-end px-4">Сохранить</button>
+                                <input type="text" name="comment" class="form-control form-input-custom rounded-pill-start" placeholder="Ваши ощущения...">
+                                <button type="submit" class="btn btn-primary rounded-pill-end px-4 fw-bold">СОХРАНИТЬ</button>
                             </div>
                         </div>
                     </div>
@@ -158,11 +255,10 @@
         <div id="gallery-container">
             {% for month, photos in grouped_photos.items %}
                 <div class="month-section mb-5">
-                    <div class="d-flex align-items-center mb-3">
-                        <h5 class="fw-bold text-primary mb-0 me-3">{{ month }}</h5>
-                        <div class="flex-grow-1 border-top opacity-25"></div>
+                    <div class="d-flex align-items-center mb-4">
+                        <h5 class="fw-bold mb-0 me-3">{{ month }}</h5>
+                        <div class="month-divider"></div>
                     </div>
-
                     <div class="gallery-grid" {% if forloop.first %}id="main-gallery"{% endif %}>
                         {% for photo in photos %}
                             {% include 'progress/partials/photo_card.html' %}
@@ -170,14 +266,15 @@
                     </div>
                 </div>
             {% empty %}
-                <div id="empty-message" class="text-center py-5 border rounded-4 bg-light mb-4">
-                    <p class="text-muted mb-0">Здесь появится ваша история. Сделайте первое фото!</p>
+                <div id="empty-message" class="text-center py-5 border-0 shadow-sm rounded-4 bg-white mb-4">
+                    <p class="text-muted mb-0">Здесь появится ваша история трансформации.</p>
                 </div>
                 <div class="gallery-grid" id="main-gallery"></div>
             {% endfor %}
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 bg-transparent">
@@ -189,6 +286,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -232,21 +330,17 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             options: {
                 cutout: '70%', maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 10 } } } }
+                plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 10, weight: '600' } } } }
             }
         });
     }
-});
-document.addEventListener('DOMContentLoaded', function() {
+
     const imageModal = document.getElementById('imageModal');
     if (imageModal) {
         imageModal.addEventListener('show.bs.modal', function (event) {
-            const trigger = event.relatedTarget; // Элемент, на который нажали
-            const imgSrc = trigger.getAttribute('data-bs-img');
-            const caption = trigger.getAttribute('data-bs-caption');
-
-            imageModal.querySelector('#modalImage').src = imgSrc;
-            imageModal.querySelector('#modalCaption').textContent = caption;
+            const trigger = event.relatedTarget;
+            imageModal.querySelector('#modalImage').src = trigger.getAttribute('data-bs-img');
+            imageModal.querySelector('#modalCaption').textContent = trigger.getAttribute('data-bs-caption');
         });
     }
 });

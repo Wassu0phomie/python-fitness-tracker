@@ -287,49 +287,6 @@ def htmx_add_day(request):
     return HttpResponse(html)
 
 
-def htmx_add_exercise_row(request):
-    """HTMX: Добавляет строку упражнения"""
-    exercise_id = request.GET.get('exercise_id')
-    day_num = request.GET.get('day_num')
-    exercise_name = request.GET.get('exercise_name')
-
-    if not exercise_name:
-        try:
-            exercise = Exercise.objects.get(id=exercise_id)
-            exercise_name = exercise.name
-        except Exercise.DoesNotExist:
-            return HttpResponse("Упражнение не найдено", status=404)
-
-    html = f'''
-    <div class="row g-2 mb-2 align-items-center animate-fade-in" id="ex-row-{day_num}-{exercise_id}">
-        <div class="col-md-6">
-            <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm" style="border-radius: 10px;">
-                {exercise_name}
-            </div>
-            <input type="hidden" name="exercises_{day_num}" value="{exercise_id}">
-        </div>
-        <div class="col-md-2">
-            <input type="number" name="sets_{day_num}"
-                   class="form-control border-0 p-2 shadow-sm text-center"
-                   value="3" min="1" step="1"
-                   style="border-radius: 10px;">
-        </div>
-        <div class="col-md-3">
-            <input type="number" name="reps_{day_num}"
-                   class="form-control border-0 p-2 shadow-sm text-center"
-                   value="12" min="1" step="1"
-                   style="border-radius: 10px;">
-        </div>
-        <div class="col-md-1 text-center">
-            <button type="button" class="btn text-danger p-0" 
-                    onclick="this.closest('.row').remove()">
-                <i class="bi bi-trash fs-5"></i>
-            </button>
-        </div>
-    </div>
-    '''
-
-    return HttpResponse(html)
 
 
 def search_exercises_htmx(request):

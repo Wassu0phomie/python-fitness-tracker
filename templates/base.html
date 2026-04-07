@@ -230,29 +230,14 @@ body {
             </li>
             <li>
                 <a href="{% url 'progress' %}" class="nav-link">
-                    <i class="bi bi-image me-2"></i> Прогресса
+                    <i class="bi bi-graph-up-arrow me-2"></i> Прогресс
                 </a>
             </li>
         </ul>
 
         <hr style="opacity: 0.1;">
+        <a class="dropdown-item py-2" href="{% url 'edit_profile' %}">Настройки</a>
 
-        <div class="dropdown">
-            <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=D7FD51&color=000" alt="" width="32" height="32" class="rounded-circle me-2">
-                <strong class="fw-bold">{{ user.first_name|default:user.username|default:"Атлет" }}</strong>
-            </a>
-            <ul class="dropdown-menu text-small shadow border-0" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item py-2" href="{% url 'edit_profile' %}">Настройки</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <form action="{% url 'logout' %}" method="post" class="px-3">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-dark w-100 rounded-pill">Выйти</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
     </div>
 
     <nav class="mobile-nav fixed-bottom d-flex justify-content-around align-items-center d-lg-none">
@@ -273,7 +258,7 @@ body {
             <i class="bi bi-calendar-check"></i>
         </a>
         <a href="{% url 'progress' %}" class="nav-link">
-            <i class="bi bi-gear"></i>
+           <i class="bi bi-graph-up-arrow me-2"></i>
         </a>
     </nav>
 
