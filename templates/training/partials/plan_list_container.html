@@ -1,0 +1,68 @@
+<div id="plans-container">
+    <!-- Фильтры - в стиле как было -->
+    <div class="btn-group mb-4" role="group">
+        <button class="btn btn-outline-dark rounded-pill me-2 px-4 {% if filter_type == 'all' %}active{% endif %}"
+                hx-get="{% url 'plans_list_partial' %}?filter=all"
+                hx-target="#plans-container"
+                hx-swap="outerHTML">
+            Все планы
+        </button>
+        <button class="btn btn-outline-dark rounded-pill me-2 px-4 {% if filter_type == 'active' %}active{% endif %}"
+                hx-get="{% url 'plans_list_partial' %}?filter=active"
+                hx-target="#plans-container"
+                hx-swap="outerHTML">
+            Активные
+        </button>
+        <button class="btn btn-outline-dark rounded-pill px-4 {% if filter_type == 'archived' %}active{% endif %}"
+                hx-get="{% url 'plans_list_partial' %}?filter=archived"
+                hx-target="#plans-container"
+                hx-swap="outerHTML">
+            Архив
+        </button>
+    </div>
+
+    <!-- Активные планы -->
+    {% if filter_type == 'all' or filter_type == 'active' %}
+    <div class="mb-5">
+        <h4 class="fw-bold mb-3">Активные программы</h4>
+        {% for plan in plans %}
+            {% if plan.is_active and plan.end_date >= today %}
+                {% include 'training/partials/plan_card.html' with plan=plan %}
+            {% endif %}
+        {% empty %}
+            <div class="text-center py-5 border rounded-4 bg-light">
+                <p class="text-muted mb-0">Нет активных программ</p>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Архивные планы -->
+    {% if filter_type == 'all' or filter_type == 'archived' %}
+    <div>
+        <h4 class="fw-bold mb-3">Архив</h4>
+        {% for plan in plans %}
+            {% if not plan.is_active or plan.end_date < today %}
+                {% include 'training/partials/plan_card.html' with plan=plan %}
+            {% endif %}
+        {% empty %}
+            <div class="text-center py-5 border rounded-4 bg-light">
+                <p class="text-muted mb-0">Архив пуст</p>
+            </div>
+        {% endfor %}
+
+        {% if filter_type == 'archived' and plans %}
+        <div class="text-end mt-3">
+            <button class="btn btn-outline-danger rounded-pill px-4"
+                    hx-post="{% url 'clear_archive_htmx' %}"
+                    hx-target="#plans-container"
+                    hx-swap="outerHTML"
+                    hx-confirm="Удалить все архивные планы?"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                <i class="bi bi-trash"></i> Очистить архив
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

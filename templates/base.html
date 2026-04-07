@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/index_style.css' %}">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.3/dist/htmx.min.js"></script>
 
     <style>
         :root {
@@ -143,6 +143,59 @@
         /* HTMX Loading Indicator */
         .htmx-indicator { display:none; }
         .htmx-request .htmx-indicator { display:inline-block; }
+        :root {
+    --fit-green: #D7FD51;
+    --fit-dark: #1a1a1a;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #fcfcfc;
+}
+
+.fw-black { font-weight: 900; }
+
+/* Анимация появления */
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили заголовка страницы */
+.profile-title {
+    color: var(--fit-dark);
+    font-size: 1.75rem;
+    letter-spacing: -1px;
+}
+
+.title-underline {
+    width: 50px;
+    height: 4px;
+    background: var(--fit-green);
+    margin-top: 5px;
+    border-radius: 2px;
+}
+
+/* Бадж справа (дата или счетчик) */
+.date-badge {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    border: 1px solid #eee;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 576px) {
+    .profile-title { font-size: 1.4rem; }
+}
     </style>
 </head>
 <body>
@@ -177,7 +230,7 @@
             </li>
             <li>
                 <a href="{% url 'progress' %}" class="nav-link">
-                    <i class="bi bi-image me-2"></i> Фото прогресса
+                    <i class="bi bi-image me-2"></i> Прогресса
                 </a>
             </li>
         </ul>
@@ -236,11 +289,57 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Поддержка CSRF для HTMX
-        document.body.addEventListener('htmx:configRequest', (event) => {
-            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        });
-    </script>
+<script>
+    document.body.addEventListener('htmx:configRequest', (event) => {
+        event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+
+    // Анимация загрузки
+    document.body.addEventListener('htmx:beforeRequest', function() {
+        const mainContent = document.getElementById('main-content');
+        mainContent.style.opacity = '0.6';
+        mainContent.style.transition = 'opacity 0.2s';
+    });
+
+    document.body.addEventListener('htmx:afterRequest', function() {
+        const mainContent = document.getElementById('main-content');
+        mainContent.style.opacity = '1';
+    });
+
+    // Обновляем активные ссылки в сайдбаре
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'main-content') {
+            const currentPath = window.location.pathname;
+
+            // Обновляем десктопные ссылки
+            document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPath) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Обновляем мобильные ссылки
+            document.querySelectorAll('.mobile-nav .nav-link').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPath) {
+                    link.classList.add('active-mobile');
+                } else {
+                    link.classList.remove('active-mobile');
+                }
+            });
+
+            // Плавный скролл вверх
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    // Обработка кнопки "Назад" в браузере
+    window.addEventListener('popstate', function() {
+        htmx.ajax('GET', window.location.pathname, '#main-content');
+    });
+</script>
 </body>
 </html>

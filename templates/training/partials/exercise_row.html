@@ -1,0 +1,27 @@
+{# training/partials/exercise_row_htmx.html #}
+<div class="row g-2 mb-2 align-items-center animate-fade-in" id="ex-row-{{ day_num }}-{{ exercise_id }}">
+    <div class="col-md-6">
+        <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm" style="border-radius: 10px;">
+            {{ exercise_name }}
+        </div>
+        <input type="hidden" name="exercises_{{ day_num }}" value="{{ exercise_id }}">
+    </div>
+    <div class="col-md-2">
+        <input type="number" name="sets_{{ day_num }}"
+               class="form-control border-0 p-2 shadow-sm text-center"
+               value="3" min="1" step="1"
+               style="border-radius: 10px;">
+    </div>
+    <div class="col-md-3">
+        <input type="number" name="reps_{{ day_num }}"
+               class="form-control border-0 p-2 shadow-sm text-center"
+               value="12" min="1" step="1"
+               style="border-radius: 10px;">
+    </div>
+    <div class="col-md-1 text-center">
+        <button type="button" class="btn text-danger p-0"
+                onclick="this.closest('.row').remove()">
+            <i class="bi bi-trash fs-5"></i>
+        </button>
+    </div>
+</div>

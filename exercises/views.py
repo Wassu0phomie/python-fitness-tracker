@@ -1,7 +1,8 @@
-from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView, ListView, DetailView
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView, DetailView
 from django.template.response import TemplateResponse
 from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage
 from .models import Exercise, MuscleGroup, Equipment
 
 
@@ -12,17 +13,9 @@ class ExerciseListView(ListView):
     context_object_name = 'exercises'
     paginate_by = 12
 
-    FILTER_MAPPING = {
-        'exercise_type': lambda qs, val: qs.filter(exercise_type=val),
-        'difficulty': lambda qs, val: qs.filter(difficulty=val),
-        'muscle': lambda qs, val: qs.filter(muscle_groups__slug=val),
-        'equipment': lambda qs, val: qs.filter(equipment__slug=val),
-    }
-
     def get_queryset(self):
         queryset = Exercise.objects.filter(is_active=True)
 
-        # Поиск
         q = self.request.GET.get('q')
         if q:
             queryset = queryset.filter(
@@ -30,11 +23,17 @@ class ExerciseListView(ListView):
                 Q(description__icontains=q)
             )
 
-        # Фильтры
-        for param, filter_func in self.FILTER_MAPPING.items():
-            value = self.request.GET.get(param)
-            if value:
-                queryset = filter_func(queryset, value)
+        exercise_type = self.request.GET.get('exercise_type')
+        if exercise_type:
+            queryset = queryset.filter(exercise_type=exercise_type)
+
+        difficulty = self.request.GET.get('difficulty')
+        if difficulty:
+            queryset = queryset.filter(difficulty=difficulty)
+
+        muscle = self.request.GET.get('muscle')
+        if muscle:
+            queryset = queryset.filter(muscle_groups__slug=muscle)
 
         return queryset.distinct()
 
@@ -45,13 +44,11 @@ class ExerciseListView(ListView):
         context['exercise_types'] = Exercise.TYPE_CHOICES
         context['difficulties'] = Exercise.DIFFICULTY_CHOICES
 
-        # Сохраняем параметры фильтрации
         context['filter_params'] = {
             'q': self.request.GET.get('q', ''),
             'exercise_type': self.request.GET.get('exercise_type', ''),
             'difficulty': self.request.GET.get('difficulty', ''),
             'muscle': self.request.GET.get('muscle', ''),
-            'equipment': self.request.GET.get('equipment', ''),
         }
         return context
 
@@ -59,11 +56,21 @@ class ExerciseListView(ListView):
         self.object_list = self.get_queryset()
         context = self.get_context_data()
 
-        # HTMX поддержка
         if request.headers.get('HX-Request'):
-            return TemplateResponse(request, 'exercises/exercise_grid.html', context)
+            # Для HTMX запросов возвращаем только сетку
+            page = request.GET.get('page', 1)
+            paginator = Paginator(self.object_list, self.paginate_by)
+            try:
+                exercises = paginator.page(page)
+            except EmptyPage:
+                exercises = []
 
-        return TemplateResponse(request, self.template_name, context)
+            context['exercises'] = exercises
+            context['has_next'] = exercises.has_next() if exercises else False
+            context['next_page'] = page + 1 if exercises.has_next() else None
+            return render(request, 'exercises/partials/exercise_grid_items.html', context)
+
+        return render(request, self.template_name, context)
 
 
 class ExerciseDetailView(DetailView):
@@ -77,39 +84,49 @@ class ExerciseDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         exercise = self.get_object()
 
-        # Похожие упражнения
         context['similar_exercises'] = Exercise.objects.filter(
             primary_muscles__in=exercise.primary_muscles.all()
         ).exclude(id=exercise.id).filter(is_active=True).distinct()[:4]
 
         return context
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        context = self.get_context_data()
+def htmx_load_more_exercises(request):
+    """HTMX: Загрузка порций упражнений для бесконечного скролла"""
+    queryset = Exercise.objects.filter(is_active=True)
 
-        # HTMX поддержка
-        if request.headers.get('HX-Request'):
-            return TemplateResponse(request, 'exercises/exercise_detail_content.html', context)
+    # Фильтрация (должна совпадать с основной вьюхой)
+    q = request.GET.get('q')
+    if q:
+        queryset = queryset.filter(Q(name__icontains=q) | Q(description__icontains=q))
 
-        return TemplateResponse(request, self.template_name, context)
+    ex_type = request.GET.get('exercise_type')
+    if ex_type:
+        queryset = queryset.filter(exercise_type=ex_type)
 
+    difficulty = request.GET.get('difficulty')
+    if difficulty:
+        queryset = queryset.filter(difficulty=difficulty)
 
-class ExerciseSearchView(TemplateView):
-    """Быстрый поиск упражнений (для HTMX)"""
-    template_name = 'exercises/search_results.html'
+    muscle = request.GET.get('muscle')
+    if muscle:
+        queryset = queryset.filter(muscle_groups__slug=muscle)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        query = self.request.GET.get('q', '')
+    # Пагинация
+    paginator = Paginator(queryset.distinct(), 12)
+    page_number = int(request.GET.get('page', 1))
 
-        if query:
-            context['exercises'] = Exercise.objects.filter(
-                Q(name__icontains=query) |
-                Q(description__icontains=query)
-            ).filter(is_active=True)[:5]
-        else:
-            context['exercises'] = []
+    try:
+        page_obj = paginator.page(page_number)
+    except EmptyPage:
+        return render(request, 'exercises/partials/infinite_scroll_trigger.html', {'has_next': False})
 
-        context['query'] = query
-        return context
+    context = {
+        'exercises': page_obj,
+        'has_next': page_obj.has_next(),
+        'next_page': page_number + 1,
+        'filter_params': request.GET.dict(),
+    }
+
+    # Возвращаем только карточки и новый триггер
+    return render(request, 'exercises/partials/exercise_grid_items.html', context)
+

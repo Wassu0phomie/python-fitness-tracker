@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import ExerciseListView, ExerciseDetailView, ExerciseSearchView
+from . import views
 
 urlpatterns = [
-    path('', ExerciseListView.as_view(), name='exercise_list'),
-    path('search/', ExerciseSearchView.as_view(), name='exercise_search'),
-    path('<slug:slug>/', ExerciseDetailView.as_view(), name='exercise_detail'),
+    path('', views.ExerciseListView.as_view(), name='exercise_list'),
+    path('<slug:slug>/', views.ExerciseDetailView.as_view(), name='exercise_detail'),
+    path('htmx/load-more/', views.htmx_load_more_exercises, name='htmx_load_more_exercises'),
+
 ]

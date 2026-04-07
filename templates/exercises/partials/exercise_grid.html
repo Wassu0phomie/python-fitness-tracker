@@ -1,0 +1,13 @@
+<div id="exercise-grid-container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="exercises-grid">
+        {% for exercise in exercises %}
+            {% include 'exercises/partials/exercise_card.html' %}
+        {% endfor %}
+
+        {% include 'exercises/partials/infinite_scroll_trigger.html' %}
+    </div>
+
+    <div id="exercises-count" hx-swap-oob="true">
+        {{ exercises.paginator.count }}
+    </div>
+</div>

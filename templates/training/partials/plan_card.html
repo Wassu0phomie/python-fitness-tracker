@@ -1,0 +1,33 @@
+<div class="card border-0 shadow-sm mb-3" id="plan-card-{{ plan.id }}">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <h5 class="fw-bold mb-0">{{ plan.title }}</h5>
+                    <span class="badge {% if plan.is_active and plan.end_date >= today %}bg-success{% else %}bg-secondary{% endif %} rounded-pill">
+                        {% if plan.is_active and plan.end_date >= today %}Активен{% else %}Архив{% endif %}
+                    </span>
+                </div>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-calendar3"></i> {{ plan.start_date|date:"d.m.Y" }} — {{ plan.end_date|date:"d.m.Y" }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{% url 'plan_detail' plan.pk %}" class="btn btn-sm btn-outline-dark rounded-pill me-1">
+                    <i class="bi bi-eye"></i> Детали
+                </a>
+                <a href="{% url 'edit_plan' plan.pk %}" class="btn btn-sm btn-outline-warning rounded-pill me-1">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <button class="btn btn-sm btn-outline-danger rounded-pill"
+                        hx-delete="{% url 'delete_plan_htmx' plan.pk %}"
+                        hx-target="#plan-card-{{ plan.id }}"
+                        hx-confirm="Удалить план «{{ plan.title }}»?"
+                        hx-swap="outerHTML"
+                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

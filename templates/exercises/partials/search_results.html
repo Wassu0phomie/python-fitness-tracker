@@ -1,0 +1,25 @@
+{% for ex in exercises %}
+<div class="col-md-4">
+    <div class="card h-100 border-0 shadow-sm-hover cursor-pointer p-2 add-to-plan-btn"
+         style="border-radius: 15px;"
+         hx-get="{% url 'htmx_add_exercise_row' %}"
+         hx-vals='{"exercise_id": "{{ ex.id }}"}'
+         hx-swap="beforeend"
+         data-bs-dismiss="modal">
+
+        <div class="text-center mb-2">
+            <img src="{{ ex.main_image }}" class="img-fluid rounded" style="height: 80px; object-fit: contain;">
+        </div>
+        <div class="text-center">
+            <h6 class="small fw-bold mb-0">{{ ex.name }}</h6>
+            <div class="mt-1">
+                {% for m in ex.primary_muscles.all|slice:":1" %}
+                    <span class="badge bg-light text-muted" style="font-size: 0.55rem;">{{ m.name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="col-12 text-center text-muted py-3">Упражнения не найдены</div>
+{% endfor %}

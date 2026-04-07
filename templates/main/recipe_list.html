@@ -2,8 +2,21 @@
 
 {% block content %}
 <div class="container py-4">
-    <h2 class="fw-bold text-uppercase mb-4">Поиск рецептов</h2>
-
+    <div class="row mb-4 animate-fade-in">
+        <div class="col-12">
+            <div class="d-flex align-items-end justify-content-between">
+                <div>
+                    <h2 class="fw-black text-uppercase mb-0 profile-title">Полезные рецепты</h2>
+                    <div class="title-underline"></div>
+                </div>
+                <div class="text-end d-none d-sm-block">
+                    <div class="date-badge">
+                        <i class="bi bi-egg-fried me-2"></i>Питание
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <form method="GET" class="mb-5">
         <div class="input-group">
             <input type="text" name="q" class="form-control rounded-pill-start" placeholder="Найти рецепт (например, курица)..." value="{{ query }}">
@@ -18,7 +31,7 @@
                     <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}" style="height: 200px; object-fit: cover;">
                     <div class="card-body">
                         <h6 class="fw-bold">{{ recipe.title }}</h6>
-                        <a href="https://spoonacular.com/recipes/{{ recipe.title|slugify }}-{{ recipe.id }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill mt-2">
+                        <a href="https://spoonacular.com/recipes/{{ recipe.title|slugify }}-{{ recipe.id }}" target="_blank" hx-boost="false" class="btn btn-sm btn-outline-dark rounded-pill mt-2">
                             Смотреть рецепт
                         </a>
                     </div>

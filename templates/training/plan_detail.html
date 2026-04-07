@@ -41,21 +41,34 @@
 
             <div id="day{{ day.id }}" class="accordion-collapse collapse {% if plan.is_active and plan.end_date >= today_date.date and day.day_number == current_day_num %}show{% endif %}" data-bs-parent="#workoutDaysAccordion">
                 <div class="accordion-body bg-white p-0">
-
                     <div class="exercise-list">
                         {% for item in day.exercises.all %}
-                        <div class="exercise-card p-3 border-bottom d-flex align-items-center justify-content-between transition">
+                        <div class="exercise-card p-3 border-bottom d-flex align-items-center justify-content-between transition" data-exercise-id="{{ item.id }}">
                             <div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
-                                {% if plan.is_active and plan.end_date >= today_date.date %}
+                                {% if plan.is_active and plan.end_date >= today_date.date and day.day_number == current_day_num and not is_completed_today %}
                                 <div class="form-check mb-0 me-3">
-                                    <input class="form-check-input exercise-checkbox" type="checkbox" id="ex{{ item.id }}"
-                                           {% if day.day_number != current_day_num or is_completed_today %}disabled{% endif %}
-                                           {% if is_completed_today %}checked{% endif %}
+                                    <input class="form-check-input exercise-checkbox" type="checkbox"
+                                           id="ex{{ item.id }}"
+                                           data-exercise-id="{{ item.id }}"
                                            style="width: 1.5rem; height: 1.5rem; cursor: pointer;">
+                                </div>
+                                {% elif is_completed_today %}
+                                <div class="form-check mb-0 me-3">
+                                    <input class="form-check-input exercise-checkbox" type="checkbox"
+                                           id="ex{{ item.id }}"
+                                           checked disabled
+                                           style="width: 1.5rem; height: 1.5rem;">
+                                </div>
+                                {% else %}
+                                <div class="form-check mb-0 me-3">
+                                    <input class="form-check-input exercise-checkbox" type="checkbox"
+                                           id="ex{{ item.id }}"
+                                           disabled
+                                           style="width: 1.5rem; height: 1.5rem;">
                                 </div>
                                 {% endif %}
 
-                                <label class="flex-grow-1 mb-0 pe-2" for="ex{{ item.id }}" style="cursor: pointer; min-width: 0;">
+                                <label class="flex-grow-1 mb-0 pe-2" for="ex{{ item.id }}" style="cursor: {% if not is_completed_today and plan.is_active and plan.end_date >= today_date.date and day.day_number == current_day_num %}pointer{% else %}default{% endif %}; min-width: 0;">
                                     <div class="fw-bold name-text text-truncate">{{ item.exercise.name }}</div>
                                     <div class="d-flex gap-2 mt-1">
                                         <span class="badge bg-light text-dark border-0 fw-normal">{{ item.sets }} сета</span>
@@ -92,15 +105,27 @@
                                     <span class="fw-bold text-uppercase small">План на сегодня выполнен! Отдыхай</span>
                                 </div>
                             {% else %}
-                                <div class="mt-4 pt-3 border-top" id="complete-area-{{ day.id }}">
-                                    <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-sm transition-all"
-                                            style="letter-spacing: 1px;"
-                                            hx-post="{% url 'complete_workout' day.id %}"
-                                            hx-target="#complete-area-{{ day.id }}"
-                                            hx-swap="innerHTML"
-                                            hx-confirm="Все упражнения выполнены? Это добавит тренировку в твой прогресс!">
+                                <!-- Кнопка завершения - изначально скрыта -->
+                                <div class="mt-4 pt-3 border-top" id="complete-area-{{ day.id }}" style="display: none;">
+                                    <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-sm transition-all complete-workout-btn"
+                                            style="letter-spacing: 1px; background-color: #D7FD51; color: #000; border: none;"
+                                            data-day-id="{{ day.id }}"
+                                            data-plan-id="{{ plan.id }}">
                                         ЗАВЕРШИТЬ ТРЕНИРОВКУ
                                     </button>
+                                </div>
+
+                                <!-- Индикатор прогресса -->
+                                <div class="mt-3" id="progress-indicator-{{ day.id }}">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <span>Выполнено упражнений</span>
+                                        <span id="completed-count-{{ day.id }}">0</span>
+                                        <span>/</span>
+                                        <span id="total-count-{{ day.id }}">{{ day.exercises.count }}</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div id="progress-bar-{{ day.id }}" class="progress-bar bg-success" style="width: 0%"></div>
+                                    </div>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -112,7 +137,6 @@
     </div>
 
     <div class="mt-5 mb-5 d-flex flex-column align-items-center gap-4">
-
         {% if plan.status == 'expired' or plan.status == 'paused' %}
             <form action="{% url 'edit_plan' plan.pk %}" class="w-100 text-center">
                 {% csrf_token %}
@@ -122,7 +146,6 @@
                 </button>
             </form>
         {% else %}
-
             <a href="{% url 'edit_plan' plan.pk %}" class="btn btn-outline-dark px-5 py-2 fw-bold"
                style="border-radius: 12px; min-width: 280px;">
                 <i class="bi bi-pencil-square me-2"></i>РЕДАКТИРОВАТЬ СОСТАВ
@@ -150,6 +173,7 @@
     /* Стили карточек упражнений */
     .exercise-card {
         background-color: #fff;
+        transition: all 0.2s ease-in-out;
     }
 
     .exercise-card:last-child {
@@ -157,6 +181,11 @@
     }
 
     /* Эффект выполнения */
+    .completed-row {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+
     .exercise-checkbox:checked ~ label .name-text {
         text-decoration: line-through;
         color: #adb5bd;
@@ -166,15 +195,16 @@
         opacity: 0.5;
     }
 
-    .exercise-card.completed-row {
-        background-color: #f8f9fa;
-        opacity: 0.7;
-    }
-
     /* Кастомный чекбокс в стиле FitApp (Неон) */
     .exercise-checkbox:checked {
-        background-color: var(--accent-dark, #D7FD51) !important;
-        border-color: var(--accent-dark, #D7FD51) !important;
+        background-color: #D7FD51 !important;
+        border-color: #D7FD51 !important;
+    }
+
+    /* Disabled чекбокс */
+    .exercise-checkbox:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     .accordion-button:not(.collapsed) {
@@ -187,6 +217,17 @@
         transition: all 0.2s ease-in-out;
     }
 
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     @media (max-width: 768px) {
         .name-text { font-size: 1rem; }
         .badge { font-size: 0.75rem; }
@@ -195,21 +236,102 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Находим все чекбоксы упражнений
     const checkboxes = document.querySelectorAll('.exercise-checkbox');
 
-    function updateRowStyle(checkbox) {
-        const card = checkbox.closest('.exercise-card');
-        if (checkbox.checked) {
-            card.classList.add('completed-row');
-        } else {
-            card.classList.remove('completed-row');
-        }
-    }
+    // Для каждого дня своя логика
+    const dayBlocks = document.querySelectorAll('.accordion-item');
 
-    checkboxes.forEach(checkbox => {
-        updateRowStyle(checkbox);
-        checkbox.addEventListener('change', function() {
-            updateRowStyle(this);
+    dayBlocks.forEach(dayBlock => {
+        const collapseDiv = dayBlock.querySelector('.accordion-collapse');
+        if (!collapseDiv) return;
+
+        const dayId = collapseDiv.id.replace('day', '');
+        const dayCheckboxes = dayBlock.querySelectorAll('.exercise-checkbox:not(:disabled)');
+        const completeArea = document.getElementById(`complete-area-${dayId}`);
+        const completedCountSpan = document.getElementById(`completed-count-${dayId}`);
+        const progressBar = document.getElementById(`progress-bar-${dayId}`);
+        const totalCount = dayCheckboxes.length;
+
+        // Обновляем общее количество упражнений
+        const totalCountSpan = document.getElementById(`total-count-${dayId}`);
+        if (totalCountSpan) {
+            totalCountSpan.textContent = totalCount;
+        }
+
+        // Функция обновления прогресса
+        function updateProgress() {
+            const checkedCount = dayBlock.querySelectorAll('.exercise-checkbox:checked:not(:disabled)').length;
+
+            if (completedCountSpan) {
+                completedCountSpan.textContent = checkedCount;
+            }
+
+            if (progressBar) {
+                const percentage = totalCount > 0 ? (checkedCount / totalCount) * 100 : 0;
+                progressBar.style.width = percentage + '%';
+            }
+
+            // Показываем кнопку завершения только если все упражнения отмечены
+            if (completeArea) {
+                if (checkedCount === totalCount && totalCount > 0) {
+                    completeArea.style.display = 'block';
+                    completeArea.style.animation = 'fadeIn 0.5s ease-in-out';
+                } else {
+                    completeArea.style.display = 'none';
+                }
+            }
+
+            // Обновляем стиль карточки упражнения
+            dayBlock.querySelectorAll('.exercise-card').forEach(card => {
+                const checkbox = card.querySelector('.exercise-checkbox');
+                if (checkbox && checkbox.checked && !checkbox.disabled) {
+                    card.classList.add('completed-row');
+                } else if (checkbox && !checkbox.disabled) {
+                    card.classList.remove('completed-row');
+                }
+            });
+        }
+
+        // Добавляем обработчики на каждый чекбокс
+        dayCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateProgress);
+        });
+
+        // Инициализация
+        updateProgress();
+    });
+
+    // Обработка завершения тренировки через HTMX
+    document.querySelectorAll('.complete-workout-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const dayId = this.dataset.dayId;
+            const planId = this.dataset.planId;
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                             document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+
+            // Отправляем POST запрос на завершение тренировки
+            fetch(`/plan/complete-workout/${dayId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'csrfmiddlewaretoken': csrftoken
+                })
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Обновляем всю страницу после успешного завершения
+                // Это самый простой способ обновить состояние всех чекбоксов
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при завершении тренировки');
+            });
         });
     });
 });

@@ -26,13 +26,13 @@ def profile_view(request):
     total_workouts = WorkoutLog.objects.filter(user=user).count()
 
     # 2. Логика опыта (1 тренировка = 100 XP)
-    total_xp = total_workouts * 100
     xp_for_next_level = 1000
+    total_xp = total_workouts * 100
     user_level = (total_xp // xp_for_next_level) + 1
     xp_progress = total_xp % xp_for_next_level
     xp_percentage = (xp_progress / xp_for_next_level) * 100
 
-    # 3. Спортивные ранги (не аниме)
+    # 3. Спортивные ранги
     if total_workouts < 5:
         current_rank = "Новичок"
     elif total_workouts < 15:
@@ -47,8 +47,6 @@ def profile_view(request):
     # 4. Получаем данные профиля и фото
     active_plans = WorkoutPlan.objects.filter(user=user, is_active=True, end_date__gte=today)
     latest_progress = user.progress_logs.first()
-
-    # Берем последние 3 фото из ProgressEntry для превью
     recent_photos = ProgressEntry.objects.filter(user=user).exclude(image='').order_by('-created_at')[:3]
 
     context = {
@@ -60,8 +58,9 @@ def profile_view(request):
         'current_rank': current_rank,
         'xp_progress': xp_progress,
         'xp_percentage': xp_percentage,
+        'xp_for_next_level': xp_for_next_level,  # Добавлено!
         'recent_photos': recent_photos,
-        'date': timezone.now(),
+        'today': timezone.now(),  # Изменено с 'date' на 'today'
     }
     return render(request, 'users/profile.html', context)
 
