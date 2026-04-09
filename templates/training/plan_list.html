@@ -1,51 +1,12 @@
 {% extends request.headers.hx_request|yesno:"base_empty.html,base.html" %}
+{% load static %}
+
 {% block title %}Журнал тренировок | FitnessApp{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row mb-4 animate-fade-in">
-        <div class="col-12">
-            <div class="d-flex align-items-end justify-content-between">
-                <div>
-                    <h2 class="fw-black text-uppercase mb-0 profile-title">Мои тренировки</h2>
-                    <div class="title-underline"></div>
-                </div>
-                <div class="text-end">
-                    <a href="{% url 'create_plan' %}" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm">
-                        <i class="bi bi-plus-lg me-1"></i> <span class="small">НОВЫЙ ПЛАН</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- HTMX контейнер для динамической загрузки -->
-    <div id="plans-container"
-         hx-get="{% url 'plans_list_partial' %}?filter=active"
+    <div id="plans-list-container"
+         hx-get="{% url 'plans_list_content' %}?filter=active"
          hx-trigger="load"
-         hx-swap="outerHTML">
-        <div class="text-center py-5">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Загрузка...</span>
-            </div>
-        </div>
+         hx-swap="innerHTML">
     </div>
-</div>
-
-<style>
-    .hover-shadow:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
-    }
-    .transition {
-        transition: all 0.2s ease;
-    }
-    .animate-fade-in {
-        animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
 {% endblock %}

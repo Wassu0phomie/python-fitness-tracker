@@ -185,7 +185,11 @@
                             <span class="badge-muscle">{{ muscle.name }}</span>
                         {% endfor %}
                     </div>
-                    <a href="{% url 'exercise_detail' exercise.slug %}" class="btn btn-dark w-100 rounded-pill py-2 shadow-sm-hover-dark">
+                    <a href="{% url 'exercise_detail' exercise.slug %}"
+                       class="btn btn-dark w-100 rounded-pill py-2 shadow-sm-hover-dark"
+                       hx-get="{% url 'exercise_detail' exercise.slug %}"
+                       hx-target="#main-content"
+                       hx-push-url="true">
                         Подробнее →
                     </a>
                 </div>

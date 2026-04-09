@@ -1,0 +1,450 @@
+
+<div class="container py-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row mb-4 animate-fade-in">
+                <div class="col-12">
+                    <div class="d-flex align-items-end justify-content-between">
+                        <div>
+                            <h2 class="fw-black text-uppercase mb-0 profile-title">Конструктор плана</h2>
+                            <div class="title-underline"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-lg p-4" style="border-radius: 25px;">
+                <form method="POST" id="planForm"
+                      hx-post="{% url 'create_plan' %}"
+                      hx-target="#main-content"
+                      hx-push-url="true"
+                      hx-indicator="#loading-indicator">
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <label class="small text-muted fw-bold mb-2">НАЗВАНИЕ ПЛАНА</label>
+                            <input type="text" name="title" class="form-control border-0 bg-light p-3"
+                                   placeholder="Например: Набор массы" style="border-radius: 12px;" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="small text-muted fw-bold mb-2">ДАТА НАЧАЛА</label>
+                            <input type="date" name="start_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="small text-muted fw-bold mb-2">ДАТА ОКОНЧАНИЯ</label>
+                            <input type="date" name="end_date" class="form-control border-0 bg-light p-3" style="border-radius: 12px;" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="small text-muted fw-bold mb-3 d-block">ВЫБЕРИТЕ ДНИ ТРЕНИРОВОК</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            {% for num, label in day_choices %}
+                            <div class="day-selector">
+                                <input type="checkbox" class="btn-check" name="selected_days" id="day-{{ num }}" value="{{ num }}">
+                                <label class="btn btn-outline-dark rounded-circle shadow-sm d-flex align-items-center justify-content-center fw-bold"
+                                       for="day-{{ num }}"
+                                       style="width: 55px; height: 55px; border-width: 2px; transition: 0.3s;">
+                                    {{ label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div id="workout-days-container">
+                        <div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50">
+                            <i class="bi bi-calendar-check fs-1"></i>
+                            <p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-dark py-3 fw-bold shadow"
+                                style="background-color: #D7FD51; color: #000; border: none; border-radius: 15px;">
+                            СОХРАНИТЬ И ЗАПУСТИТЬ ПЛАН
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exerciseGallery" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">Выберите упражнение</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                    <span class="input-group-text border-0 bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="modalSearch" class="form-control border-0 p-3" placeholder="Поиск упражнения...">
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4" id="muscleFilters">
+                    <button class="btn btn-sm btn-dark rounded-pill px-3 filter-muscle-btn active" data-muscle="all">Все</button>
+                    {% for muscle in muscle_groups %}
+                        {% if muscle.is_group %}  {# <--- Добавьте это условие #}
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 filter-muscle-btn"
+                                    data-muscle="{{ muscle.slug }}">
+                                {{ muscle.name }}
+                            </button>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="row g-3" id="modalGrid">
+                    {% for ex in exercises %}
+                    <div class="col-md-4 modal-ex-card"
+                         data-name="{{ ex.name|lower }}"
+                         data-muscles="{% for m in ex.muscle_groups.all %}{{ m.slug }} {% endfor %}">
+                        <div class="card h-100 border-0 shadow-sm-hover cursor-pointer p-2"
+                             style="border-radius: 15px; transition: 0.3s;"
+                             onclick="addExerciseToDay('{{ ex.id }}', '{{ ex.name }}', '{{ ex.main_image }}')">
+                            <div class="text-center mb-2">
+                                <img src="{{ ex.main_image }}" class="img-fluid rounded" style="height: 100px; object-fit: contain;">
+                            </div>
+                            <div class="text-center">
+                                <h6 class="small fw-bold mb-0">{{ ex.name }}</h6>
+                                <div class="mt-1">
+                                    {% for m in ex.primary_muscles.all %}
+                                        <span class="badge bg-light text-muted" style="font-size: 0.55rem;">{{ m.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-check:checked + .btn-outline-dark {
+        background-color: #D7FD51 !important;
+        border-color: #D7FD51 !important;
+        color: #000 !important;
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(215, 253, 81, 0.5) !important;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
+</style>
+
+<script>
+let activeDayForSelection = null;
+let currentMuscleFilter = 'all';
+
+// ========== ФУНКЦИЯ УДАЛЕНИЯ БЛОКА ДНЯ (глобальная) ==========
+window.removeDayBlock = function(dayNum) {
+    const block = document.getElementById(`day-block-${dayNum}`);
+    if (block) {
+        block.remove();
+        const checkbox = document.getElementById(`day-${dayNum}`);
+        if (checkbox) {
+            checkbox.checked = false;
+        }
+        const container = document.getElementById('workout-days-container');
+        if (container && container.children.length === 0) {
+            container.innerHTML = '<div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50"><i class="bi bi-calendar-check fs-1"></i><p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p></div>';
+        }
+    }
+};
+
+// ========== ФУНКЦИЯ ДОБАВЛЕНИЯ УПРАЖНЕНИЯ (глобальная) ==========
+window.addExerciseToDay = function(id, name, img) {
+    if (!activeDayForSelection) {
+        console.warn('No active day selected');
+        return;
+    }
+
+    const listContainer = document.getElementById(`exercise-list-${activeDayForSelection}`);
+    if (!listContainer) {
+        console.warn('List container not found');
+        return;
+    }
+
+    // Проверка на дубликаты
+    const existingInputs = listContainer.querySelectorAll(`input[name="exercises_${activeDayForSelection}"]`);
+    for (let input of existingInputs) {
+        if (input.value === id.toString()) {
+            alert('Это упражнение уже добавлено в этот день!');
+            return;
+        }
+    }
+
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 align-items-center animate-fade-in';
+    row.innerHTML = `
+        <div class="col-md-6">
+            <div class="form-control border-0 bg-white p-2 fw-bold shadow-sm" style="border-radius: 10px;">
+                ${escapeHtml(name)}
+            </div>
+            <input type="hidden" name="exercises_${activeDayForSelection}" value="${id}">
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="sets_${activeDayForSelection}"
+                   class="form-control border-0 p-2 shadow-sm text-center"
+                   placeholder="Сеты" value="3" min="1" step="1"
+                   style="border-radius: 10px;">
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="reps_${activeDayForSelection}"
+                   class="form-control border-0 p-2 shadow-sm text-center"
+                   placeholder="Повторы" value="12" min="1" step="1"
+                   style="border-radius: 10px;">
+        </div>
+        <div class="col-md-1 text-center">
+            <button type="button" class="btn text-danger p-0" onclick="this.closest('.row').remove()">
+                <i class="bi bi-trash fs-5"></i>
+            </button>
+        </div>
+    `;
+
+    listContainer.appendChild(row);
+
+    // Закрываем модалку
+    const modalElement = document.getElementById('exerciseGallery');
+    if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) modal.hide();
+    }
+};
+
+// ========== ФУНКЦИЯ ЭКРАНИРОВАНИЯ HTML ==========
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ========== ФУНКЦИЯ ФИЛЬТРАЦИИ УПРАЖНЕНИЙ ==========
+function applyFilters() {
+    const searchInput = document.getElementById('modalSearch');
+    if (!searchInput) return;
+
+    const searchQuery = searchInput.value.toLowerCase();
+
+    document.querySelectorAll('.modal-ex-card').forEach(card => {
+        const name = card.dataset.name || '';
+        const muscles = (card.dataset.muscles || '').trim().split(' ');
+
+        const matchesSearch = name.includes(searchQuery);
+        const matchesMuscle = (currentMuscleFilter === 'all' || muscles.includes(currentMuscleFilter));
+
+        card.style.display = (matchesSearch && matchesMuscle) ? 'block' : 'none';
+    });
+}
+
+// ========== ДЕЛЕГИРОВАНИЕ СОБЫТИЙ ==========
+
+// 1. Обработка выбора дней (создание блоков дней)
+document.addEventListener('change', function(e) {
+    const checkbox = e.target;
+    if (checkbox.classList && checkbox.classList.contains('btn-check')) {
+        const dayNum = checkbox.value;
+        const label = document.querySelector(`label[for="${checkbox.id}"]`);
+        if (!label) return;
+
+        const dayLabel = label.innerText;
+        const container = document.getElementById('workout-days-container');
+        if (!container) return;
+
+        if (checkbox.checked) {
+            // Удаляем плейсхолдер если есть
+            const placeholder = container.querySelector('.text-center.py-5');
+            if (placeholder) placeholder.remove();
+
+            // Проверяем, нет ли уже такого блока
+            if (document.getElementById(`day-block-${dayNum}`)) return;
+
+            const dayBlock = document.createElement('div');
+            dayBlock.id = `day-block-${dayNum}`;
+            dayBlock.className = 'card mb-4 border-0 bg-light p-4 rounded-4 shadow-sm animate-fade-in';
+            dayBlock.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-uppercase">${escapeHtml(dayLabel)}</h5>
+                    <button type="button" class="btn-close" onclick="removeDayBlock(${dayNum})"></button>
+                </div>
+                <div class="exercise-list" id="exercise-list-${dayNum}"></div>
+                <button type="button" class="btn btn-link text-dark fw-bold text-decoration-none p-0 mt-2 open-gallery-btn"
+                        data-bs-toggle="modal" data-bs-target="#exerciseGallery" data-day="${dayNum}">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Добавить упражнение
+                </button>
+            `;
+            container.appendChild(dayBlock);
+        } else {
+            // Если чекбокс снят - удаляем блок дня
+            const blockToRemove = document.getElementById(`day-block-${dayNum}`);
+            if (blockToRemove) blockToRemove.remove();
+
+            // Если не осталось блоков, показываем плейсхолдер
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50"><i class="bi bi-calendar-check fs-1"></i><p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p></div>';
+            }
+        }
+    }
+});
+
+// 2. Запоминаем активный день при открытии модалки
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.open-gallery-btn');
+    if (btn && btn.dataset) {
+        activeDayForSelection = btn.dataset.day;
+        console.log('Selected day for adding exercise:', activeDayForSelection);
+    }
+});
+
+// 3. Фильтр по мышцам (делегирование)
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.filter-muscle-btn');
+    if (btn && btn.dataset) {
+        // Меняем активную кнопку визуально
+        document.querySelectorAll('.filter-muscle-btn').forEach(b => {
+            b.classList.remove('btn-dark', 'active');
+            b.classList.add('btn-outline-secondary');
+        });
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-dark', 'active');
+
+        // Устанавливаем текущий фильтр и запускаем функцию
+        currentMuscleFilter = btn.dataset.muscle;
+        applyFilters();
+    }
+});
+
+// 4. Живой поиск в модалке (с проверкой существования элемента)
+const modalSearch = document.getElementById('modalSearch');
+if (modalSearch) {
+    modalSearch.addEventListener('input', applyFilters);
+}
+
+// 5. Обработка отправки формы
+const planForm = document.getElementById('planForm');
+if (planForm) {
+    planForm.addEventListener('submit', function(e) {
+        const selectedDayCheckboxes = document.querySelectorAll('.btn-check:checked');
+
+        // Проверка: Выбран ли хотя бы один день
+        if (selectedDayCheckboxes.length === 0) {
+            e.preventDefault();
+            alert('Пожалуйста, выберите хотя бы один день недели!');
+            return;
+        }
+
+        let totalExercises = 0;
+        let emptyDays = [];
+
+        selectedDayCheckboxes.forEach(checkbox => {
+            const dayNum = checkbox.value;
+            const label = document.querySelector(`label[for="${checkbox.id}"]`);
+            const dayLabel = label ? label.innerText : dayNum;
+            const exercisesInDay = document.querySelectorAll(`#exercise-list-${dayNum} input[name^="exercises_"]`);
+
+            if (exercisesInDay.length === 0) {
+                emptyDays.push(dayLabel);
+            } else {
+                totalExercises += exercisesInDay.length;
+            }
+        });
+
+        // Проверка: Есть ли вообще хоть одно упражнение
+        if (totalExercises === 0) {
+            e.preventDefault();
+            alert('Добавьте хотя бы одно упражнение в выбранные дни!');
+            return;
+        }
+
+        // Логика для "пустых" дней
+        if (emptyDays.length > 0) {
+            const confirmEmpty = confirm(
+                `В следующих днях нет упражнений: ${emptyDays.join(', ')}.\n` +
+                `Эти дни НЕ будут сохранены. Продолжить?`
+            );
+
+            if (!confirmEmpty) {
+                e.preventDefault();
+                return;
+            } else {
+                // Снимаем checked с пустых дней
+                selectedDayCheckboxes.forEach(checkbox => {
+                    const dayNum = checkbox.value;
+                    const exercisesInDay = document.querySelectorAll(`#exercise-list-${dayNum} input[name^="exercises_"]`);
+                    if (exercisesInDay.length === 0) {
+                        checkbox.checked = false;
+                    }
+                });
+            }
+        }
+    });
+}
+
+// 6. Сброс фильтров при закрытии модалки
+const exerciseModal = document.getElementById('exerciseGallery');
+if (exerciseModal) {
+    exerciseModal.addEventListener('hidden.bs.modal', function() {
+        // Сбрасываем поле поиска
+        const searchInput = document.getElementById('modalSearch');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        // Сбрасываем фильтр по мышцам на "Все"
+        currentMuscleFilter = 'all';
+
+        // Обновляем активные классы кнопок
+        document.querySelectorAll('.filter-muscle-btn').forEach(btn => {
+            btn.classList.remove('btn-dark', 'active');
+            btn.classList.add('btn-outline-secondary');
+        });
+
+        // Активируем кнопку "Все"
+        const allButton = document.querySelector('.filter-muscle-btn[data-muscle="all"]');
+        if (allButton) {
+            allButton.classList.remove('btn-outline-secondary');
+            allButton.classList.add('btn-dark', 'active');
+        }
+
+        // Показываем все упражнения
+        document.querySelectorAll('.modal-ex-card').forEach(card => {
+            card.style.display = 'block';
+        });
+    });
+}
+
+// 7. Инициализация после HTMX загрузки
+document.addEventListener('htmx:afterSwap', function(event) {
+    // Переинициализация Bootstrap компонентов если нужно
+    if (typeof bootstrap !== 'undefined') {
+        // Закрываем модалку если она открыта
+        const modalElement = document.getElementById('exerciseGallery');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) modal.hide();
+        }
+    }
+
+    // Сбрасываем activeDayForSelection
+    activeDayForSelection = null;
+});
+
+// 8. Обработка динамически добавленных инпутов (сеты/повторы)
+document.addEventListener('input', function(e) {
+    if (e.target.type === 'number') {
+        let value = parseInt(e.target.value);
+        if (isNaN(value) || value < 1) {
+            e.target.value = '';
+        } else {
+            e.target.value = Math.floor(value);
+        }
+    }
+});
+
+console.log('JavaScript initialized with event delegation');
+</script>

@@ -8,10 +8,16 @@ from django.views.decorators.http import require_POST
 from datetime import date
 from django.contrib import messages
 from django.http import HttpResponse
+from django.urls import reverse
 
 
 @login_required
 def create_plan_view(request):
+    """Создание плана тренировок - с поддержкой HTMX"""
+    day_choices = WorkoutDay.DAYS_OF_WEEK
+    exercises = Exercise.objects.filter(is_active=True)
+    muscle_groups = MuscleGroup.objects.filter(is_group=True)
+
     if request.method == 'POST':
         # 1. Собираем все ID упражнений из всех выбранных дней
         selected_days = request.POST.getlist('selected_days')
@@ -24,15 +30,16 @@ def create_plan_view(request):
 
         # 3. ГЛАВНАЯ ПРОВЕРКА: Если валидных упражнений 0 — возвращаем ошибку
         if not valid_exercises:
-            day_choices = WorkoutDay.DAYS_OF_WEEK
-            exercises = Exercise.objects.filter(is_active=True)
-            muscle_groups = MuscleGroup.objects.all()
-            return render(request, 'training/create_plan.html', {
+            context = {
                 'day_choices': day_choices,
                 'exercises': exercises,
                 'muscle_groups': muscle_groups,
                 'error': "План не может быть пустым. Добавьте хотя бы одно упражнение!"
-            })
+            }
+
+            if request.headers.get('HX-Request'):
+                return render(request, 'training/partials/create_plan_content.html', context)
+            return render(request, 'training/create_plan.html', context)
 
         title = request.POST.get('title')
         start_date = request.POST.get('start_date')
@@ -70,7 +77,6 @@ def create_plan_view(request):
 
             for i in range(len(exercise_ids)):
                 if exercise_ids[i]:
-                    # Безопасное получение значений с проверкой длины списков
                     sets_value = sets_list[i] if i < len(sets_list) and sets_list[i] else 3
                     reps_value = reps_list[i] if i < len(reps_list) and reps_list[i] else 12
 
@@ -82,130 +88,64 @@ def create_plan_view(request):
                         order=i
                     )
 
+        # HTMX запрос - редирект на детальную страницу
+        if request.headers.get('HX-Request'):
+            return redirect('plan_detail', pk=plan.pk)
         return redirect('plan_detail', pk=plan.pk)
 
-    day_choices = WorkoutDay.DAYS_OF_WEEK
-    exercises = Exercise.objects.filter(is_active=True)
-    muscle_groups = MuscleGroup.objects.all()
-    return render(request, 'training/create_plan.html', {
+    # GET запрос
+    context = {
         'day_choices': day_choices,
         'exercises': exercises,
-        'muscle_groups': muscle_groups
-    })
-
-@login_required
-def plans_list_view(request):
-    WorkoutPlan.objects.filter(
-        user=request.user,
-        is_active=True,
-        end_date__lt=timezone.now().date()
-    ).update(is_active=False)
-
-    all_plans = WorkoutPlan.objects.filter(user=request.user).order_by('-created_at')
-    active_plans = all_plans.filter(is_active=True, end_date__gte=timezone.now().date())
-    archive_plans = all_plans.exclude(id__in=active_plans.values_list('id', flat=True))
-
-    context = {
-        'active_plans': active_plans,
-        'archive_plans': archive_plans,
+        'muscle_groups': muscle_groups,
     }
-    return render(request, 'training/plan_list.html', context)
 
 
-def plan_detail_view(request, pk):
-    from progress.models import WorkoutLog
-
-    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
-    days = plan.days.all().prefetch_related('exercises__exercise')
-
-    now = timezone.localtime(timezone.now())
-    today = now.date()
-    current_day_num = now.isoweekday()
-    is_completed_today = WorkoutLog.objects.filter(
-        user=request.user,
-        workout_day__plan=plan,
-        completed_at__date=today
-    ).exists()
-
-    return render(request, 'training/plan_detail.html', {
-        'plan': plan,
-        'days': days,
-        'today_date': timezone.now(),
-        'current_day_num': current_day_num,
-        'is_completed_today': is_completed_today,
-    })
-
-
-@login_required
-@require_POST
-def clear_archive_view(request):
-    archived_plans = WorkoutPlan.objects.filter(user=request.user, is_active=False)
-    count = archived_plans.count()
-
-    if count > 0:
-        archived_plans.delete()
-        messages.success(request, f"Архив очищен: удалено {count} программ.")
-    else:
-        messages.info(request, "В архиве нет программ для удаления.")
-
-    return redirect('show_plan')
-
-
-@login_required
-@require_POST
-def clear_active_view(request):
-    active_plans = WorkoutPlan.objects.filter(user=request.user, is_active=True)
-    count = active_plans.count()
-
-    if count > 0:
-        active_plans.delete()
-        messages.success(request, f"Все активные тренировки удалены ({count} шт.).")
-    else:
-        messages.info(request, "У вас нет активных тренировок.")
-
-    return redirect('show_plan')
-
-
-@login_required
-@require_POST
-def delete_plan_view(request, pk):
-    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
-    title = plan.title
-    plan.delete()
-
-    messages.success(request, f"План «{title}» успешно удален.")
-    return redirect('show_plan')
+    if request.headers.get('HX-Request'):
+        return render(request, 'training/partials/create_plan_content.html', context)
+    return render(request, 'training/create_plan.html', context)
 
 
 @login_required
 def edit_plan_view(request, pk):
-    # Получаем план, принадлежащий именно этому пользователю
     plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
 
     if request.method == 'POST':
-        # Логика сохранения
-        plan.title = request.POST.get('title')
-        plan.start_date = request.POST.get('start_date')
-        plan.end_date = request.POST.get('end_date')
+        # Проверяем, это реактивация или полное редактирование
+        if 'reactivate' in request.POST:
+            # Просто активируем план заново
+            WorkoutPlan.objects.filter(pk=plan.pk).update(is_active=True)
+            messages.success(request, f"План «{plan.title}» активирован!")
+            return redirect('plan_detail', pk=plan.pk)
+
+        # Полное редактирование плана
+        title = request.POST.get('title')
+        start_date = request.POST.get('start_date')
+        end_date_str = request.POST.get('end_date')
+
+        plan.title = title
+        plan.start_date = start_date
+        plan.end_date = end_date_str
         plan.is_active = True
         plan.save()
 
-        # Удаляем старые дни и упражнения, чтобы перезаписать их новыми
+        # Удаляем старые дни и упражнения
         plan.days.all().delete()
 
         selected_days = request.POST.getlist('selected_days')
 
         for day_num in selected_days:
-            workout_day = WorkoutDay.objects.create(plan=plan, day_number=day_num)
+            workout_day = WorkoutDay.objects.create(
+                plan=plan,
+                day_number=day_num
+            )
 
             exercise_ids = request.POST.getlist(f'exercises_{day_num}')
             sets_list = request.POST.getlist(f'sets_{day_num}')
             reps_list = request.POST.getlist(f'reps_{day_num}')
 
-            # Безопасное создание упражнений с проверкой длины списков
             for i in range(len(exercise_ids)):
                 if exercise_ids[i]:
-                    # Проверяем, что индекс существует в списках
                     sets_value = 3
                     reps_value = 12
 
@@ -222,31 +162,192 @@ def edit_plan_view(request, pk):
                         order=i
                     )
 
-        messages.success(request, f"План «{plan.title}» успешно обновлен и активирован!")
+        messages.success(request, f"План «{plan.title}» успешно обновлен!")
         return redirect('plan_detail', pk=plan.pk)
 
-    # Для GET-запроса: подготавливаем данные
-    day_choices = WorkoutDay.DAYS_OF_WEEK
-    exercises = Exercise.objects.filter(is_active=True)
-    muscle_groups = MuscleGroup.objects.all()
-
-    # Получаем уже выбранные дни и упражнения для JS
+    # GET запрос - показываем форму редактирования
     existing_days = plan.days.all().prefetch_related('exercises__exercise')
+    selected_day_numbers = [day.day_number for day in existing_days]
 
-    return render(request, 'training/edit_plan.html', {
+    context = {
         'plan': plan,
-        'day_choices': day_choices,
-        'exercises': exercises,
-        'muscle_groups': muscle_groups,
+        'day_choices': WorkoutDay.DAYS_OF_WEEK,
+        'exercises': Exercise.objects.filter(is_active=True),
+        'muscle_groups': MuscleGroup.objects.filter(is_group=True),
         'existing_days': existing_days,
-    })
+        'selected_day_numbers': selected_day_numbers,
+    }
+
+    return render(request, 'training/edit_plan.html', context)
+
+@login_required
+def plans_list_view(request):
+    """Список планов - обертка"""
+    from datetime import date
+
+    WorkoutPlan.objects.filter(
+        user=request.user,
+        is_active=True,
+        end_date__lt=timezone.now().date()
+    ).update(is_active=False)
+
+    today = date.today()
+    all_plans = WorkoutPlan.objects.filter(user=request.user).order_by('-created_at')
+    active_plans = all_plans.filter(is_active=True, end_date__gte=today)
+    archive_plans = all_plans.exclude(id__in=active_plans.values_list('id', flat=True))
+
+    context = {
+        'active_plans': active_plans,
+        'archive_plans': archive_plans,
+        'active_count': active_plans.count(),
+        'archive_count': archive_plans.count(),
+        'today': today,
+    }
+
+    return render(request, 'training/plan_list.html', context)
+
+
+@login_required
+def plans_list_content(request):
+    """HTMX контент списка планов"""
+    WorkoutPlan.objects.filter(
+        user=request.user,
+        is_active=True,
+        end_date__lt=timezone.now().date()
+    ).update(is_active=False)
+
+    today = date.today()
+    all_plans = WorkoutPlan.objects.filter(user=request.user).order_by('-created_at')
+    active_plans = all_plans.filter(is_active=True, end_date__gte=today)
+    archive_plans = all_plans.exclude(id__in=active_plans.values_list('id', flat=True))
+
+    filter_type = request.GET.get('filter', 'active')
+
+    context = {
+        'filter_type': filter_type,
+        'active_plans': active_plans,
+        'archive_plans': archive_plans,
+        'active_count': active_plans.count(),
+        'archive_count': archive_plans.count(),
+        'today': today,
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'training/partials/plan_list_content.html', context)
+    return render(request, 'training/plan_list.html', context)
+
+@login_required
+def plan_detail_view(request, pk):
+    """Детальная страница плана"""
+    from progress.models import WorkoutLog
+
+    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
+    days = plan.days.all().prefetch_related('exercises__exercise')
+
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    current_day_num = now.isoweekday()
+    is_completed_today = WorkoutLog.objects.filter(
+        user=request.user,
+        workout_day__plan=plan,
+        completed_at__date=today
+    ).exists()
+
+    context = {
+        'plan': plan,
+        'days': days,
+        'today_date': now,
+        'current_day_num': current_day_num,
+        'is_completed_today': is_completed_today,
+    }
+
+    return render(request, 'training/plan_detail.html', context)
+@login_required
+def plan_detail_content(request, pk):
+    """HTMX контент детальной страницы плана"""
+    from progress.models import WorkoutLog
+
+    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
+    days = plan.days.all().prefetch_related('exercises__exercise')
+
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    current_day_num = now.isoweekday()
+    is_completed_today = WorkoutLog.objects.filter(
+        user=request.user,
+        workout_day__plan=plan,
+        completed_at__date=today
+    ).exists()
+
+    context = {
+        'plan': plan,
+        'days': days,
+        'today_date': timezone.now(),
+        'current_day_num': current_day_num,
+        'is_completed_today': is_completed_today,
+    }
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'training/partials/plan_detail_content.html', context)
+    return render(request, 'training/plan_detail.html', context)
+
+
+@login_required
+@require_POST
+def clear_archive_view(request):
+    """Очистка архива"""
+    archived_plans = WorkoutPlan.objects.filter(user=request.user, is_active=False)
+    count = archived_plans.count()
+
+    if count > 0:
+        archived_plans.delete()
+        messages.success(request, f"Архив очищен: удалено {count} программ.")
+    else:
+        messages.info(request, "В архиве нет программ для удаления.")
+
+    if request.headers.get('HX-Request'):
+        return redirect('plans_list_content')
+    return redirect('show_plan')
+
+
+@login_required
+@require_POST
+def clear_active_view(request):
+    """Очистка активных планов"""
+    active_plans = WorkoutPlan.objects.filter(user=request.user, is_active=True)
+    count = active_plans.count()
+
+    if count > 0:
+        active_plans.delete()
+        messages.success(request, f"Все активные тренировки удалены ({count} шт.).")
+    else:
+        messages.info(request, "У вас нет активных тренировок.")
+
+    if request.headers.get('HX-Request'):
+        return redirect('plans_list_content')
+    return redirect('show_plan')
+
+
+@login_required
+@require_POST
+def delete_plan_view(request, pk):
+    """Удаление плана"""
+    plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
+    title = plan.title
+    plan.delete()
+
+    messages.success(request, f"План «{title}» успешно удален.")
+
+    if request.headers.get('HX-Request'):
+        return HttpResponse("")
+    return redirect('show_plan')
 
 
 @login_required
 @require_POST
 def complete_workout_view(request, day_id):
+    """Отметка выполнения тренировки (обычная)"""
     from progress.models import WorkoutLog
-    from .models import WorkoutDay
 
     day = get_object_or_404(WorkoutDay, id=day_id, plan__user=request.user)
     WorkoutLog.objects.create(user=request.user, workout_day=day)
@@ -258,8 +359,19 @@ def complete_workout_view(request, day_id):
     """)
 
 
-# ========== HTMX FUNCTIONS ==========
+@login_required
+def complete_workout_htmx(request, day_id):
+    """HTMX отметка выполнения тренировки"""
+    from progress.models import WorkoutLog
 
+    day = get_object_or_404(WorkoutDay, id=day_id, plan__user=request.user)
+    WorkoutLog.objects.get_or_create(user=request.user, workout_day=day)
+
+    # Возвращаем обновленный блок дня
+    return render(request, 'training/partials/day_card_detail.html', {'day': day})
+
+
+@login_required
 def htmx_add_day(request):
     """HTMX: Возвращает блок для нового тренировочного дня"""
     day_num = request.GET.get('day_num')
@@ -287,8 +399,7 @@ def htmx_add_day(request):
     return HttpResponse(html)
 
 
-
-
+@login_required
 def search_exercises_htmx(request):
     """HTMX: Поиск упражнений для модалки"""
     query = request.GET.get('q', '').lower()
@@ -339,48 +450,12 @@ def search_exercises_htmx(request):
 
 
 @login_required
-def complete_workout_htmx(request, day_id):
-    """HTMX отметка выполнения тренировки"""
-    from progress.models import WorkoutLog
-
-    day = get_object_or_404(WorkoutDay, id=day_id, plan__user=request.user)
-    WorkoutLog.objects.get_or_create(user=request.user, workout_day=day)
-
-    # Возвращаем обновленную карточку дня
-    return render(request, 'training/partials/day_card_detail.html', {'day': day})
-
-
-# training/views.py - добавьте в самый конец файла
-
-def plans_list_partial(request):
-    """HTMX версия списка планов с оригинальным видом"""
-    from datetime import date
-    today = date.today()
-
-    filter_type = request.GET.get('filter', 'active')
-
-    all_plans = WorkoutPlan.objects.filter(user=request.user).order_by('-created_at')
-    active_plans = all_plans.filter(is_active=True, end_date__gte=today)
-    archive_plans = all_plans.exclude(id__in=active_plans.values_list('id', flat=True))
-
-    context = {
-        'filter_type': filter_type,
-        'active_plans': active_plans if filter_type == 'active' else [],
-        'archive_plans': archive_plans if filter_type == 'archive' else [],
-        'active_count': active_plans.count(),
-        'archive_count': archive_plans.count(),
-        'today': today,
-    }
-    return render(request, 'training/partials/plans_tab_content.html', context)
-
-
-@login_required
 @require_POST
 def clear_active_htmx(request):
     """HTMX очистка активных планов"""
     active_plans = WorkoutPlan.objects.filter(user=request.user, is_active=True)
     active_plans.delete()
-    return redirect('plans_list_partial')
+    return HttpResponse("")
 
 
 @login_required
@@ -397,7 +472,8 @@ def clear_archive_htmx(request):
         end_date__lt=today
     )
     archived_plans.delete()
-    return redirect('plans_list_partial')
+    return HttpResponse("")
+
 
 @login_required
 @require_POST

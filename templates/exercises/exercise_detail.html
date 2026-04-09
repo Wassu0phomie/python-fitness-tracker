@@ -152,7 +152,14 @@
 
 <div class="container ex-wrapper mt-5">
     <div class="ex-header">
-        <h1 class="ex-name">{{ exercise.name }}</h1>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-link text-dark p-0 text-decoration-none back-button"
+                    onclick="history.back()"
+                    style="cursor: pointer;">
+                <i class="bi bi-arrow-left fs-1 fw-bold"></i>
+            </button>
+            <h1 class="ex-name mb-0">{{ exercise.name }}</h1>
+        </div>
     </div>
 
     <div class="media-container">
@@ -245,10 +252,22 @@
         <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-4">
             {% for similar in similar_exercises %}
             <div class="col">
-                <a href="{% url 'exercise_detail' similar.slug %}" class="similar-card h-100">
-                    <img src="{{ similar.main_image }}" class="similar-img" alt="{{ similar.name }}">
+                <div class="similar-card h-100 cursor-pointer"
+                     hx-get="{% url 'exercise_detail' similar.slug %}"
+                     hx-target="#main-content"
+                     hx-push-url="true"
+                     hx-swap="innerHTML show:top"
+                     hx-indicator="#loading-indicator"
+                     style="cursor: pointer;">
+                    {% if similar.main_image %}
+                        <img src="{{ similar.main_image }}" class="similar-img" alt="{{ similar.name }}" loading="lazy">
+                    {% else %}
+                        <div class="similar-img d-flex align-items-center justify-content-center bg-light">
+                            <i class="bi bi-camera-video text-muted fs-1"></i>
+                        </div>
+                    {% endif %}
                     <div class="similar-name text-truncate">{{ similar.name }}</div>
-                </a>
+                </div>
             </div>
             {% endfor %}
         </div>
