@@ -13,7 +13,19 @@
 
     <link rel="stylesheet" href="{% static 'css/welcome_style.css' %}">
     <link rel="stylesheet" href="{% static 'css/login_style.css' %}">
+        <style>
+        .full-screen-bg {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    </style>
 </head>
+
 <body>
     <div class="full-screen-bg"></div>
 

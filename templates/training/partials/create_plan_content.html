@@ -122,7 +122,335 @@
         </div>
     </div>
 </div>
+<style>
+    .btn-check:checked + .btn-outline-dark {
+        background-color: #D7FD51 !important;
+        border-color: #D7FD51 !important;
+        color: #000 !important;
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(215, 253, 81, 0.5) !important;
+    }
+    .border-dashed {
+        border-style: dashed !important;
+        border-width: 2px !important;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
+    /* Стили для тура */
+    .tour-create-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .tour-create-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+        border: 1px solid rgba(215, 253, 81, 0.3);
+        border-radius: 28px;
+        padding: 28px;
+        max-width: 380px;
+        width: 90%;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(215, 253, 81, 0.1);
+        animation: slideUp 0.3s ease-out;
+    }
+    .tour-create-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .tour-create-logo {
+        font-size: 20px;
+        font-weight: 900;
+        color: #D7FD51;
+    }
+    .tour-create-close {
+        background: none;
+        border: none;
+        color: #666;
+        font-size: 24px;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+    .tour-create-close:hover {
+        background: rgba(255,255,255,0.1);
+        color: #D7FD51;
+    }
+    .tour-create-progress {
+        margin-bottom: 24px;
+    }
+    .tour-create-progress-track {
+        height: 4px;
+        background: #2a2a2a;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+    .tour-create-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #D7FD51, #a3e635);
+        width: 16.66%;
+        transition: width 0.3s ease;
+    }
+    .tour-create-step-counter {
+        text-align: right;
+        font-size: 12px;
+        color: #888;
+    }
+    .tour-create-content {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    .tour-create-icon {
+        font-size: 56px;
+        margin-bottom: 16px;
+    }
+    .tour-create-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 12px;
+    }
+    .tour-create-desc {
+        font-size: 14px;
+        color: #aaa;
+        line-height: 1.5;
+    }
+    .tour-create-footer {
+        display: flex;
+        gap: 12px;
+    }
+    .tour-create-skip {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 12px;
+        border-radius: 40px;
+        color: #888;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .tour-create-skip:hover {
+        color: white;
+        background: rgba(255,255,255,0.05);
+    }
+    .tour-create-next {
+        flex: 1;
+        background: #D7FD51;
+        border: none;
+        padding: 12px;
+        border-radius: 40px;
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .tour-create-next:hover {
+        background: #c0e040;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(215, 253, 81, 0.3);
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% if show_create_plan_tour %}
+<div class="tour-create-overlay" id="createPlanTour">
+    <div class="tour-create-card" id="createPlanTourCard">
+        <div class="tour-create-header">
+            <div class="tour-create-logo">🎯 Конструктор плана</div>
+            <button class="tour-create-close" onclick="endCreatePlanTour()">✕</button>
+        </div>
+
+        <div class="tour-create-progress">
+            <div class="tour-create-progress-track">
+                <div id="createTourProgressFill" class="tour-create-progress-fill"></div>
+            </div>
+            <div class="tour-create-step-counter" id="createTourStepCounter">1 / 6</div>
+        </div>
+
+        <div class="tour-create-content">
+            <div class="tour-create-icon" id="createTourIcon">📋</div>
+            <h3 class="tour-create-title" id="createTourTitle">Создание плана</h3>
+            <p class="tour-create-desc" id="createTourDesc">Давай разберемся, как создать свой первый план тренировок!</p>
+        </div>
+
+        <div class="tour-create-footer">
+            <button class="tour-create-skip" onclick="endCreatePlanTour()">Пропустить</button>
+            <button class="tour-create-next" id="createTourNextBtn" onclick="nextCreateTourStep()">
+                Далее →
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentCreateStep = 0;
+let currentHighlightedElement = null;
+
+const createPlanTourSteps = [
+    { icon: "📋", title: "Создание плана", desc: "Давай разберемся, как создать свой первый план тренировок!", element: null, selector: null, position: "center" },
+    { icon: "📅", title: "Название и даты", desc: "Укажи название плана и период, на который он рассчитан.", element: "#tour-plan-dates", selector: "#tour-plan-dates", position: "bottom" },
+    { icon: "📆", title: "Выбери дни тренировок", desc: "Отметь дни недели, в которые будешь тренироваться.", element: "#tour-days-selection", selector: "#tour-days-selection", position: "bottom" },
+    { icon: "🏋️", title: "Добавь упражнения", desc: "После выбора дня нажми кнопку 'Добавить упражнение' и выбери из галереи.", element: "#workout-days-container", selector: "#workout-days-container", position: "top" },
+    { icon: "📊", title: "Настрой подходы", desc: "Для каждого упражнения укажи количество подходов и повторений.", element: null, selector: null, position: "center" },
+    { icon: "🚀", title: "Сохрани план", desc: "Нажми большую зеленую кнопку внизу — план будет сохранен и запущен!", element: "#tour-submit-btn", selector: "#tour-submit-btn", position: "top" }
+];
+
+function removeCreateHighlight() {
+    if (currentHighlightedElement) {
+        currentHighlightedElement.classList.remove('tour-highlight');
+        currentHighlightedElement = null;
+    }
+}
+
+function highlightCreateElement(selector, position) {
+    removeCreateHighlight();
+
+    if (selector) {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.classList.add('tour-highlight');
+            currentHighlightedElement = element;
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            const rect = element.getBoundingClientRect();
+            const tourCard = document.getElementById('createPlanTourCard');
+
+            if (tourCard) {
+                let top, left;
+                switch(position) {
+                    case 'right':
+                        top = rect.top + window.scrollY + (rect.height / 2) - 100;
+                        left = rect.right + window.scrollX + 20;
+                        break;
+                    case 'bottom':
+                        top = rect.bottom + window.scrollY + 20;
+                        left = rect.left + window.scrollX + (rect.width / 2) - 190;
+                        break;
+                    case 'top':
+                        top = rect.top + window.scrollY - 220;
+                        left = rect.left + window.scrollX + (rect.width / 2) - 190;
+                        break;
+                    default:
+                        top = window.scrollY + window.innerHeight / 2 - 150;
+                        left = window.innerWidth / 2 - 190;
+                }
+
+                const maxLeft = window.innerWidth - 400;
+                tourCard.style.top = Math.max(20, top) + 'px';
+                tourCard.style.left = Math.min(maxLeft, Math.max(20, left)) + 'px';
+                tourCard.style.transform = 'none';
+            }
+        }
+    } else {
+        const tourCard = document.getElementById('createPlanTourCard');
+        if (tourCard) {
+            tourCard.style.top = '50%';
+            tourCard.style.left = '50%';
+            tourCard.style.transform = 'translate(-50%, -50%)';
+        }
+    }
+}
+
+function updateCreateTour() {
+    const step = createPlanTourSteps[currentCreateStep];
+    const iconEl = document.getElementById('createTourIcon');
+    const titleEl = document.getElementById('createTourTitle');
+    const descEl = document.getElementById('createTourDesc');
+    const stepCounter = document.getElementById('createTourStepCounter');
+    const progressFill = document.getElementById('createTourProgressFill');
+    const nextBtn = document.getElementById('createTourNextBtn');
+
+    if (iconEl) iconEl.textContent = step.icon;
+    if (titleEl) titleEl.textContent = step.title;
+    if (descEl) descEl.textContent = step.desc;
+    if (stepCounter) stepCounter.textContent = `${currentCreateStep + 1} / ${createPlanTourSteps.length}`;
+
+    if (progressFill) {
+        const progress = ((currentCreateStep + 1) / createPlanTourSteps.length) * 100;
+        progressFill.style.width = `${progress}%`;
+    }
+
+    if (nextBtn) {
+        if (currentCreateStep === createPlanTourSteps.length - 1) {
+            nextBtn.innerHTML = 'Завершить 🎉';
+        } else {
+            nextBtn.innerHTML = 'Далее →';
+        }
+    }
+
+    highlightCreateElement(step.selector, step.position);
+}
+
+function nextCreateTourStep() {
+    if (currentCreateStep < createPlanTourSteps.length - 1) {
+        currentCreateStep++;
+        updateCreateTour();
+    } else {
+        endCreatePlanTour();
+    }
+}
+
+function endCreatePlanTour() {
+    const overlay = document.getElementById('createPlanTour');
+    if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s';
+        setTimeout(() => overlay.remove(), 300);
+    }
+    removeCreateHighlight();
+    localStorage.setItem('create_plan_tour_done', 'true');
+}
+
+// Запуск тура
+document.addEventListener('DOMContentLoaded', function() {
+    if (!localStorage.getItem('create_plan_tour_done') && {{ show_create_plan_tour|default:"true"|lower }}) {
+        setTimeout(() => {
+            updateCreateTour();
+        }, 500);
+    }
+});
+
+// Клавиатура
+document.addEventListener('keydown', function(e) {
+    const overlay = document.getElementById('createPlanTour');
+    if (!overlay) return;
+    if (e.key === 'ArrowRight') nextCreateTourStep();
+    if (e.key === 'ArrowLeft' && currentCreateStep > 0) {
+        currentCreateStep--;
+        updateCreateTour();
+    }
+    if (e.key === 'Escape') endCreatePlanTour();
+});
+</script>
+{% endif %}
 <style>
     .btn-check:checked + .btn-outline-dark {
         background-color: #D7FD51 !important;

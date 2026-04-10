@@ -21,7 +21,8 @@
                     hx-get="{% url 'plans_list_content' %}?filter=active"
                     hx-target="#plans-list-container"
                     hx-swap="outerHTML"
-                    hx-push-url="true">
+                    hx-push-url="true"
+                    hx-trigger="updateCounters from:body">
                 Активные <span class="badge bg-dark ms-1 opacity-50">{{ active_count }}</span>
             </button>
         </li>
@@ -35,7 +36,8 @@
                     hx-get="{% url 'plans_list_content' %}?filter=archive"
                     hx-target="#plans-list-container"
                     hx-swap="outerHTML"
-                    hx-push-url="true">
+                    hx-push-url="true"
+                    hx-trigger="updateCounters from:body">
                 Архив <span class="badge bg-secondary ms-1 opacity-50">{{ archive_count }}</span>
             </button>
         </li>
@@ -47,34 +49,37 @@
             {% if active_plans %}
                 <div class="row g-3 g-md-4">
                     {% for plan in active_plans %}
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card h-100 border-0 shadow-sm rounded-4 p-3 hover-shadow transition">
+                        <div class="col-md-6 col-lg-4" id="plan-card-{{ plan.pk }}"> <div class="card h-100 border-0 shadow-sm rounded-4 p-3 hover-shadow transition">
                                 <div class="card-body d-flex flex-column h-100 p-0">
                                     <div class="mb-2 d-flex justify-content-between align-items-start gap-2">
                                         <h5 class="fw-bold text-uppercase mb-0 text-truncate" style="flex: 1; min-width: 0;">{{ plan.title }}</h5>
                                         <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.65rem;">В ПРОЦЕССЕ</span>
                                     </div>
                                     <p class="text-muted small mb-3"><i class="bi bi-calendar3 me-2"></i>{{ plan.start_date|date:"d.m" }} — {{ plan.end_date|date:"d.m.Y" }}</p>
+
                                     <div class="mt-auto pt-3 border-top">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <div class="d-flex gap-1 overflow-auto pb-1" style="max-width: 80%;">
                                                 {% for day in plan.days.all %}
-                                                    <span class="badge bg-light text-dark border rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                                    <span class="badge bg-light text-dark border rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                                                           style="width: 28px; height: 28px; font-size: 10px;">
                                                         {{ day.get_day_number_display }}
                                                     </span>
                                                 {% endfor %}
                                             </div>
-                                            <form action="{% url 'delete_plan' plan.pk %}" method="POST" 
-                                                  onsubmit="return confirm('Удалить этот план?')" class="m-0">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-link text-danger p-0 shadow-none">
-                                                    <i class="bi bi-trash3 fs-5"></i>
-                                                </button>
-                                            </form>
+
+                                            <button class="btn btn-link text-danger p-0 shadow-none"
+                                                    hx-post="{% url 'delete_plan' plan.pk %}"
+                                                    hx-target="#plan-card-{{ plan.pk }}"
+                                                    hx-swap="outerHTML swap:0.4s"
+                                                    hx-confirm="Удалить этот план?"
+                                                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                                                <i class="bi bi-trash3 fs-5"></i>
+                                            </button>
                                         </div>
-                                        <a href="{% url 'plan_detail' plan.id %}" 
-                                           class="btn btn-dark w-100 rounded-pill py-2 fw-bold" 
+
+                                        <a href="{% url 'plan_detail' plan.id %}"
+                                           class="btn btn-dark w-100 rounded-pill py-2 fw-bold"
                                            style="background-color: #D7FD51; color: #000; border: none; font-size: 0.8rem;"
                                            hx-get="{% url 'plan_detail' plan.id %}"
                                            hx-target="#main-content"
@@ -187,4 +192,9 @@
             font-size: 0.8rem;
         }
     }
+    .htmx-swapping {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
 </style>

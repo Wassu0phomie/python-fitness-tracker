@@ -1,4 +1,3 @@
-
 <div class="container py-2">
     <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -53,6 +52,7 @@
                     </div>
 
                     <div id="workout-days-container">
+                        <!-- Блоки дней будут добавлены через JavaScript -->
                         <div class="text-center py-5 border rounded-4 border-dashed bg-light opacity-50" id="placeholder-days">
                             <i class="bi bi-calendar-check fs-1"></i>
                             <p class="mt-2">Выберите дни выше, чтобы добавить упражнения</p>
@@ -227,7 +227,6 @@ window.addExerciseToDay = function(id, name, img) {
         return;
     }
 
-    // Проверка на дубликаты
     const existingInputs = listContainer.querySelectorAll(`input[name="exercises_${activeDayForSelection}"]`);
     for (let input of existingInputs) {
         if (input.value === id.toString()) {
@@ -265,7 +264,6 @@ window.addExerciseToDay = function(id, name, img) {
     `;
     listContainer.appendChild(row);
 
-    // Закрываем модалку
     const modalElement = document.getElementById('exerciseGallery');
     const modal = bootstrap.Modal.getInstance(modalElement);
     if (modal) modal.hide();
@@ -292,10 +290,8 @@ function applyFilters() {
     });
 }
 
-// Живой поиск
 document.getElementById('modalSearch').addEventListener('input', applyFilters);
 
-// Фильтр по мышцам
 document.querySelectorAll('.filter-muscle-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-muscle-btn').forEach(b => {
@@ -310,7 +306,6 @@ document.querySelectorAll('.filter-muscle-btn').forEach(btn => {
     });
 });
 
-// Сброс фильтров при закрытии модалки
 const exerciseModal = document.getElementById('exerciseGallery');
 if (exerciseModal) {
     exerciseModal.addEventListener('hidden.bs.modal', function() {
@@ -336,12 +331,21 @@ if (exerciseModal) {
     });
 }
 
-// Загрузка существующих дней при загрузке страницы
+// ЗАГРУЗКА СУЩЕСТВУЮЩИХ ДНЕЙ
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('workout-days-container');
     const placeholder = document.getElementById('placeholder-days');
     
+    // Очищаем контейнер, но сохраняем плейсхолдер
+    if (placeholder) {
+        // Если есть плейсхолдер, оставляем его
+    } else {
+        // Если нет плейсхолдера, очищаем контейнер
+        container.innerHTML = '';
+    }
+    
     {% for day in existing_days %}
+        console.log('Загружаем день:', {{ day.day_number }});
         (function() {
             const dayNum = "{{ day.day_number }}";
             const checkbox = document.getElementById('day-' + dayNum);
@@ -373,6 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const listContainer = document.getElementById(`exercise-list-${dayNum}`);
                 if (listContainer) {
                     {% for de in day.exercises.all %}
+                        console.log('Добавляем упражнение:', "{{ de.exercise.name }}");
                         const row = document.createElement('div');
                         row.className = 'row g-2 mb-2 align-items-center';
                         row.innerHTML = `

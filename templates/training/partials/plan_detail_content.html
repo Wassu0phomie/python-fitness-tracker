@@ -136,14 +136,10 @@
 
     <div class="mt-5 mb-5 d-flex flex-column align-items-center gap-4">
         {% if plan.status == 'expired' or plan.status == 'paused' %}
-            <form method="POST" action="{% url 'edit_plan' plan.pk %}" class="w-100 text-center">
-                {% csrf_token %}
-                <input type="hidden" name="reactivate" value="true">
-                <button type="submit" class="btn btn-dark px-5 py-3 fw-bold shadow w-100 text-center"
-                        style="background-color: #D7FD51; color: #000; border: none; border-radius: 15px; min-width: 280px;">
-                    <i class="bi bi-play-fill me-2"></i>ЗАПУСТИТЬ ЗАНОВО
-                </button>
-            </form>
+            <a href="{% url 'edit_plan' plan.pk %}" class="btn btn-dark px-5 py-3 fw-bold shadow w-100 text-center"
+               style="background-color: #D7FD51; color: #000; border: none; border-radius: 15px; min-width: 280px;">
+                <i class="bi bi-play-fill me-2"></i>ЗАПУСТИТЬ ЗАНОВО
+            </a>
         {% else %}
             <a href="{% url 'edit_plan' plan.pk %}" class="btn btn-outline-dark px-5 py-2 fw-bold"
                style="border-radius: 12px; min-width: 280px;">

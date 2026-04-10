@@ -18,6 +18,14 @@ def create_plan_view(request):
     exercises = Exercise.objects.filter(is_active=True)
     muscle_groups = MuscleGroup.objects.filter(is_group=True)
 
+    has_existing_plans = WorkoutPlan.objects.filter(user=request.user).exists()
+
+    # Если есть планы - тур не показываем
+    if has_existing_plans:
+        show_create_plan_tour = False
+    else:
+        show_create_plan_tour = request.session.get('show_create_plan_tour', True)
+
     if request.method == 'POST':
         # 1. Собираем все ID упражнений из всех выбранных дней
         selected_days = request.POST.getlist('selected_days')
@@ -34,7 +42,7 @@ def create_plan_view(request):
                 'day_choices': day_choices,
                 'exercises': exercises,
                 'muscle_groups': muscle_groups,
-                'error': "План не может быть пустым. Добавьте хотя бы одно упражнение!"
+                'error': "План не может быть пустым. Добавьте хотя бы одно упражнение!",
             }
 
             if request.headers.get('HX-Request'):
@@ -87,6 +95,7 @@ def create_plan_view(request):
                         reps=int(reps_value),
                         order=i
                     )
+        request.session['show_create_plan_tour'] = False
 
         # HTMX запрос - редирект на детальную страницу
         if request.headers.get('HX-Request'):
@@ -98,6 +107,8 @@ def create_plan_view(request):
         'day_choices': day_choices,
         'exercises': exercises,
         'muscle_groups': muscle_groups,
+        'show_create_plan_tour': show_create_plan_tour,
+        'has_existing_plans': has_existing_plans,
     }
 
 
@@ -113,15 +124,20 @@ def edit_plan_view(request, pk):
     if request.method == 'POST':
         # Проверяем, это реактивация или полное редактирование
         if 'reactivate' in request.POST:
-            # Просто активируем план заново
             WorkoutPlan.objects.filter(pk=plan.pk).update(is_active=True)
             messages.success(request, f"План «{plan.title}» активирован!")
+            if request.headers.get('HX-Request'):
+                return redirect('plan_detail', pk=plan.pk)
             return redirect('plan_detail', pk=plan.pk)
 
         # Полное редактирование плана
         title = request.POST.get('title')
         start_date = request.POST.get('start_date')
         end_date_str = request.POST.get('end_date')
+
+        if not title or not start_date or not end_date_str:
+            messages.error(request, "Все поля должны быть заполнены!")
+            return redirect('edit_plan', pk=plan.pk)
 
         plan.title = title
         plan.start_date = start_date
@@ -163,24 +179,29 @@ def edit_plan_view(request, pk):
                     )
 
         messages.success(request, f"План «{plan.title}» успешно обновлен!")
+        if request.headers.get('HX-Request'):
+            return redirect('plan_detail', pk=plan.pk)
         return redirect('plan_detail', pk=plan.pk)
 
     # GET запрос - показываем форму редактирования
     existing_days = plan.days.all().prefetch_related('exercises__exercise')
     selected_day_numbers = [day.day_number for day in existing_days]
 
+    # Добавляем exercises и muscle_groups для модалки
+    exercises = Exercise.objects.filter(is_active=True)
+    muscle_groups = MuscleGroup.objects.filter(is_group=True)
+
     context = {
         'plan': plan,
         'day_choices': WorkoutDay.DAYS_OF_WEEK,
-        'exercises': Exercise.objects.filter(is_active=True),
-        'muscle_groups': MuscleGroup.objects.filter(is_group=True),
+        'exercises': exercises,
+        'muscle_groups': muscle_groups,
         'existing_days': existing_days,
         'selected_day_numbers': selected_day_numbers,
     }
 
     return render(request, 'training/edit_plan.html', context)
 
-@login_required
 def plans_list_view(request):
     """Список планов - обертка"""
     from datetime import date
@@ -331,16 +352,16 @@ def clear_active_view(request):
 @login_required
 @require_POST
 def delete_plan_view(request, pk):
-    """Удаление плана"""
     plan = get_object_or_404(WorkoutPlan, pk=pk, user=request.user)
-    title = plan.title
     plan.delete()
 
-    messages.success(request, f"План «{title}» успешно удален.")
-
     if request.headers.get('HX-Request'):
-        return HttpResponse("")
-    return redirect('show_plan')
+        response = HttpResponse("")
+        # Отправляем сигнал "updateCounters"
+        response['HX-Trigger'] = 'updateCounters'
+        return response
+
+    return redirect('plans_list')
 
 
 @login_required

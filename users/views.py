@@ -22,6 +22,10 @@ def profile_view(request):
     user = request.user
     today = timezone.now().date()
 
+    # Проверка первого визита
+    is_first_visit = request.session.get('is_first_visit', True)
+    show_welcome_tour = False
+
     # 1. Считаем реальные тренировки из лога
     total_workouts = WorkoutLog.objects.filter(user=user).count()
 
@@ -58,9 +62,10 @@ def profile_view(request):
         'current_rank': current_rank,
         'xp_progress': xp_progress,
         'xp_percentage': xp_percentage,
-        'xp_for_next_level': xp_for_next_level,  # Добавлено!
+        'xp_for_next_level': xp_for_next_level,
         'recent_photos': recent_photos,
-        'today': timezone.now(),  # Изменено с 'date' на 'today'
+        'today': timezone.now(),
+        'show_welcome_tour': show_welcome_tour,
     }
     return render(request, 'users/profile.html', context)
 

@@ -122,7 +122,11 @@
             #sidebar { display: none !important; }
             #main-content { margin-left: 0; padding: 20px 15px calc(var(--bottom-nav-height) + 20px) 15px; }
         }
-
+        @media (min-width: 992px) {
+            .active-mobile::after {
+                display: none !important;
+            }
+        }
         @media (min-width: 992px) { .mobile-nav { display: none !important; } }
 
         .htmx-indicator { display:none; }
@@ -134,10 +138,10 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
     </style>
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-
     <div class="d-flex flex-column flex-shrink-0 p-4 bg-white" id="sidebar">
         <a href="{% url 'profile' %}"
            hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
@@ -148,76 +152,110 @@
         <hr class="mb-4" style="opacity: 0.1;">
 
         <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item">
-                <a href="{% url 'profile' %}"
-                   hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
-                   class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <i class="bi bi-person-fill me-2"></i> Профиль
-                </a>
-            </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a href="{% url 'profile' %}"
+                       hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
+                       class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                        <i class="bi bi-person-fill me-2"></i> Профиль
+                    </a>
+                </li>
+            {% endif %}
+
             <li>
                 <a href="{% url 'exercise_list' %}"
-           hx-get="{% url 'exercise_list' %}"
-           hx-target="#main-content"
-           hx-push-url="true"
-           hx-on::after-request="setTimeout(() => { if(window.initExerciseList) window.initExerciseList(); }, 50)"
-           class="nav-link {% if 'exercise' in request.path %}active{% endif %}">
-            <i class="bi bi-fire me-2"></i> Упражнения
-        </a>
+                   hx-get="{% url 'exercise_list' %}"
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="nav-link {% if 'exercise' in request.path %}active{% endif %}">
+                    <i class="bi bi-fire me-2"></i> Упражнения
+                </a>
+            </li>
 
-            </li>
+            <!-- Кнопка рецептов - доступна всем -->
             <li>
-                <a href="{% url 'create_plan' %}"
-                   hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true"
-                   class="nav-link {% if request.resolver_match.url_name == 'create_plan' %}active{% endif %}">
-                    <i class="bi bi-plus-circle-fill me-2"></i> Новая тренировка
+                <a href="{% url 'recipe_list' %}"
+                   hx-get="{% url 'recipe_list' %}"
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="nav-link {% if 'recipe' in request.path %}active{% endif %}">
+                    <i class="bi bi-book me-2"></i> Рецепты
                 </a>
             </li>
-            <li>
-                <a href="{% url 'show_plan' %}"
-                   hx-get="{% url 'show_plan' %}" hx-target="#main-content" hx-push-url="true"
-                   class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active{% endif %}">
-                    <i class="bi bi-calendar-heart me-2"></i> Журнал
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'progress' %}"
-                   hx-get="{% url 'progress' %}" hx-target="#main-content" hx-push-url="true"
-                   class="nav-link">
-                    <i class="bi bi-graph-up-arrow me-2"></i> Прогресс
-                </a>
-            </li>
+
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'create_plan' %}"
+                       hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true"
+                       class="nav-link {% if request.resolver_match.url_name == 'create_plan' %}active{% endif %}">
+                        <i class="bi bi-plus-circle-fill me-2"></i> Новая тренировка
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'show_plan' %}"
+                       hx-get="{% url 'show_plan' %}" hx-target="#main-content" hx-push-url="true"
+                       class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active{% endif %}">
+                        <i class="bi bi-calendar-heart me-2"></i> Журнал
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'progress' %}"
+                       hx-get="{% url 'progress' %}" hx-target="#main-content" hx-push-url="true"
+                       class="nav-link">
+                        <i class="bi bi-graph-up-arrow me-2"></i> Прогресс
+                    </a>
+                </li>
+            {% endif %}
         </ul>
-
         <hr style="opacity: 0.1;">
-        <a class="dropdown-item py-2" href="{% url 'edit_profile' %}" hx-get="{% url 'edit_profile' %}" hx-target="#main-content" hx-push-url="true">Настройки</a>
+
+        {% if user.is_authenticated %}
+            <a class="dropdown-item py-2" href="{% url 'edit_profile' %}" hx-get="{% url 'edit_profile' %}" hx-target="#main-content" hx-push-url="true">Настройки</a>
+        {% else %}
+            <a class="dropdown-item py-2" href="{% url 'login' %}">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Войти
+            </a>
+        {% endif %}
     </div>
 
+    <!-- Мобильная навигация -->
     <nav class="mobile-nav fixed-bottom d-flex justify-content-around align-items-center d-lg-none">
-        <a href="{% url 'profile' %}" hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
-           class="nav-link {% if request.resolver_match.url_name == 'profile' %}active-mobile{% endif %}">
-            <i class="bi bi-person-circle"></i>
-        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'profile' %}" hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
+               class="nav-link {% if request.resolver_match.url_name == 'profile' %}active-mobile{% endif %}">
+                <i class="bi bi-person-circle"></i>
+            </a>
+        {% endif %}
+
         <a href="{% url 'exercise_list' %}" hx-get="{% url 'exercise_list' %}" hx-target="#main-content" hx-push-url="true"
            class="nav-link {% if 'exercise' in request.path %}active-mobile{% endif %}">
             <i class="bi bi-fire"></i>
         </a>
 
-        <a href="{% url 'create_plan' %}" hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true" class="nav-link p-0">
-            <div class="plus-btn-mobile">
-                <i class="bi bi-plus-lg"></i>
-            </div>
-        </a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'create_plan' %}" hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true" class="nav-link p-0">
+                <div class="plus-btn-mobile">
+                    <i class="bi bi-plus-lg"></i>
+                </div>
+            </a>
 
-        <a href="{% url 'show_plan' %}" hx-get="{% url 'show_plan' %}" hx-target="#main-content" hx-push-url="true"
-           class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active-mobile{% endif %}">
-            <i class="bi bi-calendar-check"></i>
-        </a>
-        <a href="{% url 'progress' %}" hx-get="{% url 'progress' %}" hx-target="#main-content" hx-push-url="true" class="nav-link">
-           <i class="bi bi-graph-up-arrow me-2"></i>
-        </a>
+            <a href="{% url 'show_plan' %}" hx-get="{% url 'show_plan' %}" hx-target="#main-content" hx-push-url="true"
+               class="nav-link {% if request.resolver_match.url_name == 'show_plan' or request.resolver_match.url_name == 'plan_detail' %}active-mobile{% endif %}">
+                <i class="bi bi-calendar-check"></i>
+            </a>
+            <a href="{% url 'progress' %}" hx-get="{% url 'progress' %}" hx-target="#main-content" hx-push-url="true" class="nav-link">
+               <i class="bi bi-graph-up-arrow"></i>
+            </a>
+        {% else %}
+            <a href="{% url 'login' %}" class="nav-link">
+                <i class="bi bi-box-arrow-in-right"></i>
+            </a>
+            <a href="{% url 'recipe_list' %}" hx-get="{% url 'recipe_list' %}" hx-target="#main-content" hx-push-url="true"
+               class="nav-link {% if 'recipe' in request.path %}active-mobile{% endif %}">
+                <i class="bi bi-book"></i>
+            </a>
+        {% endif %}
     </nav>
-
     <main id="main-content">
         <div class="container-fluid">
             <div class="htmx-indicator position-fixed top-0 end-0 m-4" style="z-index: 2000;">
@@ -231,7 +269,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Твои JS скрипты для анимации и обновления классов (уже настроены правильно)
         document.body.addEventListener('htmx:beforeRequest', function() {
             document.getElementById('main-content').style.opacity = '0.6';
         });
@@ -243,8 +280,6 @@
         document.body.addEventListener('htmx:afterSwap', function(event) {
             if (event.detail.target.id === 'main-content') {
                 const currentPath = window.location.pathname;
-
-                // Обновление активных ссылок
                 document.querySelectorAll('.nav-link').forEach(link => {
                     const href = link.getAttribute('href');
                     if (href === currentPath) {

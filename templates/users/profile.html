@@ -19,9 +19,7 @@
     .letter-spacing-1 { letter-spacing: 1px; }
 
     /* Анимации */
-    .animate-fade-in {
-        animation: fadeIn 0.6s ease-out;
-    }
+    .animate-fade-in { animation: fadeIn 0.6s ease-out; }
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -36,61 +34,30 @@
     .profile-main-card { background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
     .card-cover { height: 100px; background: linear-gradient(45deg, #1a1a1a, #333); }
 
-    /* Аватар и контейнер */
-    .avatar-container {
-        margin-top: -60px;
-        position: relative;
-        display: inline-block;
-    }
-
-    .profile-avatar {
-        width: 130px;
-        height: 130px;
-        border: 5px solid white;
-        border-radius: 30px;
-        object-fit: cover;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
+    .avatar-container { margin-top: -60px; position: relative; display: inline-block; }
+    .profile-avatar { width: 130px; height: 130px; border: 5px solid white; border-radius: 30px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 
     .level-float {
-        position: absolute;
-        bottom: 5px;
-        right: -5px;
-        background: var(--fit-green);
-        color: black;
-        font-weight: 900;
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: absolute; bottom: 5px; right: -5px; background: var(--fit-green); color: black; font-weight: 900;
+        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    /* Ранг */
+    /* Ранг и Прогресс */
     .rank-badge { background: #000; color: var(--fit-green); display: inline-block; padding: 6px 16px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-
-    /* XP Progress */
     .xp-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
     .xp-percent { font-size: 0.75rem; font-weight: 900; color: var(--fit-dark); }
     .custom-progress { height: 8px; background: #eee; border-radius: 10px; overflow: hidden; }
     .custom-progress .progress-bar { background: var(--fit-green); border-radius: 10px; box-shadow: 0 0 15px rgba(215, 253, 81, 0.6); }
     .xp-detail { font-size: 0.65rem; color: var(--text-muted); margin-top: 5px; }
 
-    /* Кнопки */
+    /* Кнопки и Статистика */
     .btn-edit-profile { background: #f0f0f0; color: #444; font-weight: 700; font-size: 0.8rem; border: none; transition: 0.3s; }
     .btn-edit-profile:hover { background: var(--fit-dark); color: white; }
-
-    /* Боксы статистики */
     .stat-box { background: white; padding: 20px; border-radius: 20px; text-align: center; border: 1px solid #f0f0f0; transition: 0.3s; }
-    .stat-box i { display: block; font-size: 1.2rem; color: var(--text-muted); margin-bottom: 5px; }
     .stat-value { display: block; font-size: 1.4rem; font-weight: 900; color: var(--fit-dark); }
     .stat-unit { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
     .stat-box.highlight { background: var(--fit-green); border-color: var(--fit-green); }
-    .stat-box.highlight i, .stat-box.highlight .stat-unit { color: rgba(0,0,0,0.5); }
 
     /* Быстрые действия */
     .quick-action-card { display: flex; align-items: center; padding: 15px; border-radius: 20px; border: none; transition: 0.3s; color: var(--fit-dark); font-weight: 700; font-size: 0.9rem; text-decoration: none;}
@@ -100,57 +67,25 @@
     .bg-green { background: #f1f8e9; color: #7cb342; }
     .bg-orange { background: #fff3e0; color: #fb8c00; }
 
-    /* --- Стили таблицы и обрезка текста --- */
+    /* Таблица планов */
     .header-indicator { width: 4px; height: 20px; background: var(--fit-green); border-radius: 10px; }
-    .custom-table thead th { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; border: none; padding: 20px; }
     .custom-table tbody td { padding: 18px 20px; vertical-align: middle; border-color: #f8f8f8; }
-
-    .plan-title-cell {
-        max-width: 280px; /* Ограничение ширины для десктопа */
-    }
-
-    .text-truncate-custom {
-        display: inline-block;
-        max-width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        vertical-align: middle;
-    }
-
+    .text-truncate-custom { display: inline-block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
     .btn-table-action { width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: #f8f9fa; color: #1a1a1a; transition: 0.2s; text-decoration: none; }
     .btn-table-action:hover { background: var(--fit-green); transform: translateX(3px); }
-
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
     .status-dot.active { background: #7cb342; box-shadow: 0 0 8px rgba(124, 179, 66, 0.5); }
 
+    /* Скролл */
+    .plans-scrollable, .plans-scrollable-mobile { max-height: 420px; overflow-y: auto; scroll-behavior: smooth; }
+    .plans-scrollable::-webkit-scrollbar { width: 6px; }
+    .plans-scrollable::-webkit-scrollbar-thumb { background: var(--fit-green); border-radius: 10px; }
+    .sticky-top { position: sticky; top: 0; z-index: 10; background-color: white; }
+
     /* Опасная зона */
     .danger-zone-wrapper { background: white; border: 1px solid #feeceb; }
-    .logout-link { background: none; border: none; font-weight: 700; color: #888; font-size: 0.85rem; padding: 0; transition: 0.2s; }
+    .logout-link { background: none; border: none; font-weight: 700; color: #888; font-size: 0.85rem; transition: 0.2s; }
     .logout-link:hover { color: #000; }
-
-    /* Стили для мобильных карточек */
-    .mobile-plan-card {
-        transition: all 0.2s ease;
-        border: 1px solid transparent !important;
-    }
-    .mobile-plan-card h6 {
-        max-width: 180px; /* Ограничение ширины названия на мобилках */
-    }
-    .mobile-plan-card:active {
-        transform: scale(0.97);
-        background-color: #eee !important;
-    }
-    .mobile-action-circle {
-        width: 32px;
-        height: 32px;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
 
     @media (max-width: 992px) {
         .profile-wrapper { padding-left: 15px !important; padding-right: 15px !important; }
@@ -176,7 +111,7 @@
 
     <div class="row g-4">
         <div class="col-xl-4 col-lg-5">
-            <div class="card profile-main-card border-0 mb-4 rounded-4 overflow-hidden">
+            <div class="card profile-main-card border-0 mb-4 rounded-4 overflow-hidden shadow-sm">
                 <div class="card-cover"></div>
                 <div class="card-body pt-0 text-center position-relative">
                     <div class="avatar-container">
@@ -190,7 +125,6 @@
 
                     <h4 class="fw-bold mt-3 mb-1 text-dark">{{ user.get_full_name|default:user.username }}</h4>
                     <p class="text-muted small mb-3 letter-spacing-1">{{ user.email|upper }}</p>
-
                     <div class="rank-badge mb-4">{{ current_rank|default:"НОВИЧОК" }}</div>
 
                     {% widthratio xp_progress xp_for_next_level 100 as percentage %}
@@ -206,7 +140,8 @@
                     </div>
 
                     <div class="d-grid mt-4">
-                        <a href="{% url 'edit_profile' %}" class="btn btn-edit-profile rounded-pill">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-edit-profile rounded-pill"
+                           hx-get="{% url 'edit_profile' %}" hx-target="#main-content" hx-push-url="true">
                             <i class="bi bi-sliders2-vertical me-2"></i>Настройки профиля
                         </a>
                     </div>
@@ -236,19 +171,22 @@
         <div class="col-xl-8 col-lg-7">
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
-                    <a href="{% url 'exercise_list' %}" class="quick-action-card bg-white shadow-sm">
+                    <a href="{% url 'exercise_list' %}" class="quick-action-card bg-white shadow-sm"
+                       hx-get="{% url 'exercise_list' %}" hx-target="#main-content" hx-push-url="true">
                         <div class="action-icon bg-blue"><i class="bi bi-collection"></i></div>
                         <span>База упражнений</span>
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="{% url 'create_plan' %}" class="quick-action-card bg-white shadow-sm">
+                    <a href="{% url 'create_plan' %}" class="quick-action-card bg-white shadow-sm"
+                        hx-get="{% url 'create_plan' %}" hx-target="#main-content" hx-push-url="true">
                         <div class="action-icon bg-green"><i class="bi bi-trophy"></i></div>
                         <span>Новый план</span>
                     </a>
                 </div>
                 <div class="col-md-4">
-                    <a href="{% url 'recipe_list' %}" class="quick-action-card bg-white shadow-sm">
+                    <a href="{% url 'recipe_list' %}" class="quick-action-card bg-white shadow-sm"
+                        hx-get="{% url 'recipe_list' %}" hx-target="#main-content" hx-push-url="true">
                         <div class="action-icon bg-orange"><i class="bi bi-fire"></i></div>
                         <span>Полезные рецепты</span>
                     </a>
@@ -256,34 +194,38 @@
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-white border-0 p-4 d-flex align-items-center">
-                    <div class="header-indicator me-3"></div>
-                    <h5 class="fw-bold mb-0">Мои программы</h5>
+                <div class="card-header bg-white border-0 p-4 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="header-indicator me-3"></div>
+                        <h5 class="fw-bold mb-0">Мои программы</h5>
+                    </div>
+                    {% if active_plans.count > 6 %}
+                        <span class="badge bg-light text-dark rounded-pill">
+                            <i class="bi bi-card-list me-1"></i> {{ active_plans.count }} программ
+                        </span>
+                    {% endif %}
                 </div>
                 <div class="card-body p-0">
                     {% if active_plans %}
-                        <div class="table-responsive d-none d-md-block">
+                        <div class="table-responsive d-none d-md-block plans-scrollable">
                             <table class="table table-hover custom-table mb-0">
-                                <thead>
+                                <thead class="sticky-top bg-white">
                                     <tr>
                                         <th>Программа</th>
                                         <th>Старт</th>
                                         <th>Статус</th>
-                                        <th class="text-end">Подробнее</th>
+                                        <th class="text-end"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for plan in active_plans %}
                                     <tr>
-                                        <td class="plan-title-cell">
-                                            <span class="fw-bold text-dark text-truncate-custom" title="{{ plan.title }}">
-                                                {{ plan.title }}
-                                            </span>
-                                        </td>
+                                        <td><span class="fw-bold text-dark text-truncate-custom">{{ plan.title }}</span></td>
                                         <td><span class="text-muted small">{{ plan.start_date|date:"d.m.Y" }}</span></td>
                                         <td><span class="status-dot active"></span> <small>Активна</small></td>
-                                        <td class="text-end">
-                                            <a href="{% url 'plan_detail' plan.id %}" class="btn-table-action">
+                                        <td class="text-end pe-4">
+                                            <a href="{% url 'plan_detail' plan.id %}" class="btn-table-action"
+                                               hx-get="{% url 'plan_detail' plan.id %}" hx-target="#main-content" hx-push-url="true">
                                                 <i class="bi bi-arrow-right"></i>
                                             </a>
                                         </td>
@@ -293,26 +235,17 @@
                             </table>
                         </div>
 
-                        <div class="d-md-none p-3">
+                        <div class="d-md-none plans-scrollable-mobile p-2">
                             {% for plan in active_plans %}
-                            <a href="{% url 'plan_detail' plan.id %}" class="text-decoration-none">
-                                <div class="mobile-plan-card mb-3 p-3 rounded-4 bg-light border-0">
+                            <a href="{% url 'plan_detail' plan.id %}" class="text-decoration-none"
+                               hx-get="{% url 'plan_detail' plan.id %}" hx-target="#main-content" hx-push-url="true">
+                                <div class="mobile-plan-card p-3 bg-light m-2 rounded-4">
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <div style="min-width: 0;">
-                                            <h6 class="fw-bold text-dark mb-1 text-truncate-custom" title="{{ plan.title }}">
-                                                {{ plan.title }}
-                                            </h6>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="badge bg-white text-dark border-0 shadow-sm px-2 py-1" style="font-size: 0.65rem;">
-                                                    <i class="bi bi-calendar3 me-1"></i> {{ plan.start_date|date:"d.m.y" }}
-                                                </span>
-                                                <span class="status-dot active"></span>
-                                                <small class="text-muted" style="font-size: 0.7rem;">Тренируюсь</small>
-                                            </div>
+                                        <div class="text-truncate">
+                                            <h6 class="fw-bold text-dark mb-1 text-truncate">{{ plan.title }}</h6>
+                                            <small class="text-muted">{{ plan.start_date|date:"d.m.y" }}</small>
                                         </div>
-                                        <div class="mobile-action-circle">
-                                            <i class="bi bi-chevron-right text-dark"></i>
-                                        </div>
+                                        <div class="mobile-action-circle ms-2"><i class="bi bi-chevron-right text-dark"></i></div>
                                     </div>
                                 </div>
                             </a>
@@ -320,25 +253,22 @@
                         </div>
                     {% else %}
                         <div class="text-center py-5">
-                            <i class="bi bi-plus-circle-dotted display-4 text-light-gray mb-3 d-block"></i>
-                            <p class="text-muted small px-4">Здесь появятся ваши планы тренировок.</p>
+                            <p class="text-muted small">Здесь появятся ваши планы.</p>
                             <a href="{% url 'create_plan' %}" class="btn btn-dark btn-sm rounded-pill px-4">Создать</a>
                         </div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="danger-zone-wrapper mt-5 p-4 rounded-4">
+            <div class="danger-zone-wrapper mt-4 p-4 rounded-4 shadow-sm">
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <h6 class="fw-bold text-dark mb-1">Управление аккаунтом</h6>
-                        <p class="text-muted small mb-0">Вы можете временно выйти или навсегда удалить данные.</p>
+                        <p class="text-muted small mb-0">Выход или безвозвратное удаление данных.</p>
                     </div>
                     <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <div class="d-flex justify-content-md-end gap-3 align-items-center">
-                            <button type="button" class="logout-link" data-bs-toggle="modal" data-bs-target="#logoutModal">Выход</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Удалить</button>
-                        </div>
+                        <button type="button" class="logout-link me-3" data-bs-toggle="modal" data-bs-target="#logoutModal">Выйти</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">Удалить</button>
                     </div>
                 </div>
             </div>
@@ -346,20 +276,18 @@
     </div>
 </div>
 
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true" data-bs-focus="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow-lg">
             <div class="modal-body p-4 text-center">
-                <div class="warning-icon mx-auto mb-3">
-                    <i class="bi bi-box-arrow-right display-1 text-warning"></i>
-                </div>
-                <h4 class="fw-bold mb-2">Выход из аккаунта</h4>
-                <p class="text-muted mb-4">Вы уверены, что хотите выйти?</p>
-                <div class="d-flex gap-3 justify-content-center">
+                <i class="bi bi-box-arrow-right display-1 text-warning mb-3"></i>
+                <h4 class="fw-bold">Выход</h4>
+                <p class="text-muted">Вы уверены, что хотите выйти?</p>
+                <div class="d-flex gap-3 justify-content-center mt-4">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Отмена</button>
-                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-warning rounded-pill px-4">Выйти</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-4">Да, выйти</button>
                     </form>
                 </div>
             </div>
@@ -367,21 +295,17 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true" data-bs-focus="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 shadow-lg">
             <div class="modal-body p-4 text-center">
-                <div class="warning-icon mx-auto mb-3">
-                    <i class="bi bi-exclamation-triangle display-1 text-danger"></i>
-                </div>
-                <h4 class="fw-bold mb-2 text-danger">Удаление аккаунта</h4>
-                <p class="text-muted mb-3">Это действие НЕЛЬЗЯ отменить!</p>
-                <div class="mb-4">
-                    <input type="text" id="deleteConfirmInput" class="form-control rounded-pill text-center" placeholder="Введите УДАЛИТЬ">
-                </div>
+                <i class="bi bi-exclamation-triangle display-1 text-danger mb-3"></i>
+                <h4 class="fw-bold text-danger">Удаление аккаунта</h4>
+                <p class="text-muted mb-4">Это действие нельзя отменить.</p>
+                <input type="text" id="deleteConfirmInput" class="form-control rounded-pill text-center mb-4" placeholder="Введите УДАЛИТЬ">
                 <div class="d-flex gap-3 justify-content-center">
                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Отмена</button>
-                    <form action="{% url 'delete_profile' %}" method="POST" id="deleteAccountForm" class="d-inline">
+                    <form action="{% url 'delete_profile' %}" method="POST">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger rounded-pill px-4" id="confirmDeleteBtn" disabled>Удалить</button>
                     </form>
@@ -391,18 +315,289 @@
     </div>
 </div>
 
+<!-- Welcome Tour -->
+{% if show_welcome_tour and not request.headers.hx_request %}
+<div class="tour-overlay" id="welcomeTour">
+    <div class="tour-container">
+        <div class="tour-card">
+            <div class="tour-header">
+                <div class="tour-logo">
+                    <span class="logo-text">FIT</span><span class="logo-accent">APP</span>
+                </div>
+                <button class="tour-close" onclick="endTour()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="tour-progress">
+                <div class="progress-track">
+                    <div id="tourProgressFill" class="progress-fill"></div>
+                </div>
+                <div class="step-indicator" id="stepIndicator">1 / 6</div>
+            </div>
+
+            <div class="tour-content" id="tourContent">
+                <div class="tour-icon" id="tourIcon">🚀</div>
+                <h3 id="tourTitle" class="tour-title">Добро пожаловать в FITAPP!</h3>
+                <p id="tourDesc" class="tour-desc">Твой личный помощник в мире фитнеса и здорового образа жизни.</p>
+            </div>
+
+            <div class="tour-footer">
+                <button class="btn-skip" onclick="endTour()">Пропустить</button>
+                <button class="btn-next" id="nextBtn" onclick="nextStep()">
+                    Далее <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tour-container {
+    max-width: 400px;
+    width: 90%;
+}
+.tour-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+    border: 1px solid rgba(215, 253, 81, 0.3);
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(215, 253, 81, 0.1);
+    animation: slideUp 0.4s ease-out;
+}
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.tour-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.tour-logo {
+    font-size: 24px;
+    font-weight: 900;
+}
+.logo-text {
+    color: white;
+}
+.logo-accent {
+    color: #D7FD51;
+    text-shadow: 0 0 10px rgba(215, 253, 81, 0.5);
+}
+.tour-close {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+.tour-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #D7FD51;
+}
+.tour-progress {
+    margin-bottom: 24px;
+}
+.progress-track {
+    height: 4px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #D7FD51, #a3e635);
+    width: 16.66%;
+    transition: width 0.3s ease;
+}
+.step-indicator {
+    text-align: right;
+    font-size: 12px;
+    color: #888;
+}
+.tour-content {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.tour-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+.tour-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 12px;
+}
+.tour-desc {
+    font-size: 15px;
+    color: #aaa;
+    line-height: 1.5;
+}
+.tour-footer {
+    display: flex;
+    gap: 12px;
+}
+.btn-skip {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px;
+    border-radius: 40px;
+    color: #888;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-skip:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+}
+.btn-next {
+    flex: 1;
+    background: #D7FD51;
+    border: none;
+    padding: 12px;
+    border-radius: 40px;
+    color: #000;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-next:hover {
+    background: #c0e040;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(215, 253, 81, 0.3);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+const tourSteps = [
+    { icon: "🚀", title: "Добро пожаловать в FITAPP!", desc: "Твой личный помощник в мире фитнеса и здорового образа жизни." },
+    { icon: "📍", title: "Навигация", desc: "Используй боковое меню или нижнюю панель на телефоне для быстрого перехода между разделами." },
+    { icon: "🏆", title: "Система уровней", desc: "Каждая тренировка приносит опыт. Чем больше занимаешься — тем выше твой ранг!" },
+    { icon: "⚡", title: "Быстрый старт", desc: "Создавай планы тренировок, изучай упражнения и находи полезные рецепты в один клик." },
+    { icon: "📊", title: "Отслеживай прогресс", desc: "Следи за весом, делай фото трансформации и анализируй свою статистику." },
+    { icon: "🎯", title: "Готов начать?", desc: "Создай свой первый план тренировок и начни путь к лучшей версии себя!" }
+];
+
+let currentStep = 0;
+
+function updateTour() {
+    const step = tourSteps[currentStep];
+    document.getElementById('tourIcon').textContent = step.icon;
+    document.getElementById('tourTitle').textContent = step.title;
+    document.getElementById('tourDesc').textContent = step.desc;
+    document.getElementById('stepIndicator').textContent = `${currentStep + 1} / ${tourSteps.length}`;
+
+    const progress = ((currentStep + 1) / tourSteps.length) * 100;
+    document.getElementById('tourProgressFill').style.width = `${progress}%`;
+
+    const nextBtn = document.getElementById('nextBtn');
+    if (currentStep === tourSteps.length - 1) {
+        nextBtn.innerHTML = 'Завершить 🎉';
+    } else {
+        nextBtn.innerHTML = 'Далее →';
+    }
+}
+
+function nextStep() {
+    if (currentStep < tourSteps.length - 1) {
+        currentStep++;
+        updateTour();
+    } else {
+        launchConfetti();
+        endTour();
+    }
+}
+
+function launchConfetti() {
+    const colors = ['#D7FD51', '#a3e635', '#ffffff', '#000000'];
+    for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+            confetti({
+                particleCount: 15,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: colors,
+                startVelocity: 20,
+                decay: 0.9
+            });
+        }, i * 15);
+    }
+}
+
+function endTour() {
+    const overlay = document.getElementById('welcomeTour');
+    if (overlay) {
+        overlay.remove();  // ← МГНОВЕННОЕ УДАЛЕНИЕ
+    }
+    localStorage.setItem('fitapp_tour_completed', 'true');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (!localStorage.getItem('fitapp_tour_completed')) {
+        setTimeout(() => {
+            updateTour();
+        }, 500);
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('welcomeTour')) return;
+    if (e.key === 'ArrowRight') nextStep();
+    if (e.key === 'ArrowLeft' && currentStep > 0) {
+        currentStep--;
+        updateTour();
+    }
+    if (e.key === 'Escape') endTour();
+});
+</script>
+{% endif %}
+
 <script>
     const deleteInput = document.getElementById('deleteConfirmInput');
     const confirmBtn = document.getElementById('confirmDeleteBtn');
 
     if (deleteInput && confirmBtn) {
         deleteInput.addEventListener('input', function() {
-            if (this.value === 'УДАЛИТЬ') {
-                confirmBtn.disabled = false;
-            } else {
-                confirmBtn.disabled = true;
-            }
+            confirmBtn.disabled = (this.value !== 'УДАЛИТЬ');
         });
     }
 </script>
+
 {% endblock %}

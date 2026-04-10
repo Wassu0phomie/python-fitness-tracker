@@ -289,15 +289,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// Функция инициализации графиков
+function initCharts() {
+    console.log('Initializing charts...');
+
     const activityLabels = {{ labels_json|safe|default:"[]" }};
     const activityData = {{ data_json|safe|default:"[]" }};
     const muscleLabels = {{ muscle_labels_json|safe|default:"[]" }};
     const muscleData = {{ muscle_data_json|safe|default:"[]" }};
 
+    // График активности
     const activityEl = document.getElementById('activityChart');
-    if (activityEl) {
-        new Chart(activityEl.getContext('2d'), {
+    if (activityEl && activityLabels && activityLabels.length > 0) {
+        // Уничтожаем существующий график, если есть
+        if (activityEl.chart) {
+            activityEl.chart.destroy();
+        }
+        activityEl.chart = new Chart(activityEl.getContext('2d'), {
             type: 'line',
             data: {
                 labels: activityLabels,
@@ -314,11 +322,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 scales: { x: { display: false }, y: { display: false, beginAtZero: true } }
             }
         });
+        console.log('Activity chart created');
     }
 
+    // График мышц
     const muscleEl = document.getElementById('muscleChart');
-    if (muscleEl && muscleLabels.length > 0) {
-        new Chart(muscleEl.getContext('2d'), {
+    if (muscleEl && muscleLabels && muscleLabels.length > 0) {
+        if (muscleEl.chart) {
+            muscleEl.chart.destroy();
+        }
+        muscleEl.chart = new Chart(muscleEl.getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: muscleLabels,
@@ -333,15 +346,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: { legend: { position: 'right', labels: { usePointStyle: true, font: { size: 10, weight: '600' } } } }
             }
         });
+        console.log('Muscle chart created');
     }
+}
 
+// Функция инициализации модалки
+function initModal() {
     const imageModal = document.getElementById('imageModal');
-    if (imageModal) {
+    if (imageModal && !imageModal.hasListener) {
         imageModal.addEventListener('show.bs.modal', function (event) {
             const trigger = event.relatedTarget;
-            imageModal.querySelector('#modalImage').src = trigger.getAttribute('data-bs-img');
-            imageModal.querySelector('#modalCaption').textContent = trigger.getAttribute('data-bs-caption');
+            const modalImage = imageModal.querySelector('#modalImage');
+            const modalCaption = imageModal.querySelector('#modalCaption');
+            if (modalImage && trigger) {
+                modalImage.src = trigger.getAttribute('data-bs-img') || '';
+                modalCaption.textContent = trigger.getAttribute('data-bs-caption') || '';
+            }
         });
+        imageModal.hasListener = true;
+    }
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+    initModal();
+});
+
+// ПОВТОРНАЯ ИНИЦИАЛИЗАЦИЯ ПОСЛЕ HTMX ЗАГРУЗКИ
+document.addEventListener('htmx:afterSwap', function(event) {
+    // Проверяем, что обновился контейнер с прогрессом
+    if (event.detail.target.id === 'main-content' ||
+        event.detail.target.closest('#main-content')) {
+        setTimeout(function() {
+            initCharts();
+            initModal();
+        }, 100);
+    }
+});
+
+// Также обрабатываем успешную загрузку фото
+document.addEventListener('htmx:afterRequest', function(event) {
+    if (event.detail.pathInfo.requestPath.includes('upload_progress')) {
+        setTimeout(function() {
+            // Закрываем форму
+            const uploadForm = document.getElementById('uploadForm');
+            if (uploadForm) {
+                const collapse = bootstrap.Collapse.getInstance(uploadForm);
+                if (collapse) collapse.hide();
+            }
+            // Сбрасываем форму
+            const form = document.querySelector('#uploadForm form');
+            if (form) form.reset();
+        }, 100);
     }
 });
 </script>

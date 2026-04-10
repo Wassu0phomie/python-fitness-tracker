@@ -32,9 +32,23 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '192.168.0.10',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    'fitapppro.ru',
+    'www.fitapppro.ru'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://fitapppro.ru',
+    'https://www.fitapppro.ru',
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 
@@ -153,7 +167,7 @@ LOGIN_URL = 'login'
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mail.ru'
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True  # Для порта 465 ставим True
@@ -164,3 +178,7 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # Отображение отправителя в письме
 DEFAULT_FROM_EMAIL = 'FITAPP <fitapp-project@mail.ru>'
+
+# Сессии (для авторизации)
+SESSION_COOKIE_AGE = 86400  # 30 дней (в секундах)
+SESSION_SAVE_EVERY_REQUEST = True  # Обновлять сессию при каждом запросе
