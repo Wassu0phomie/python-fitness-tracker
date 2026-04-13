@@ -114,7 +114,6 @@ def edit_profile_view(request):
 # ========== РЕГИСТРАЦИЯ И АКТИВАЦИЯ ==========
 
 def register(request):
-    """Регистрация нового пользователя"""
     if request.user.is_authenticated:
         return redirect('profile')
 
@@ -122,9 +121,28 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = True  # Для разработки активация сразу, в продакшене лучше через email
+            # 1. ОБЯЗАТЕЛЬНО: делаем пользователя неактивным до клика по ссылке
+            user.is_active = False 
             user.save()
-            messages.success(request, "Регистрация прошла успешно! Теперь вы можете войти.")
+
+            # 2. Логика отправки письма
+            current_site = get_current_site(request)
+            mail_subject = 'Активация аккаунта FITAPP'
+            message = render_to_string('acc_active_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            to_email = form.cleaned_data.get('email')
+            email = EmailMessage(mail_subject, message, to=[to_email])
+            
+            try:
+                email.send()
+                messages.success(request, 'Письмо с подтверждением отправлено на ваш email. Пожалуйста, подтвердите регистрацию.')
+            except Exception as e:
+                messages.error(request, f'Ошибка при отправке письма: {e}')
+            
             return redirect('login')
     else:
         form = CustomUserCreationForm()
