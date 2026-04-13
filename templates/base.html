@@ -143,8 +143,8 @@
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     <div class="d-flex flex-column flex-shrink-0 p-4 bg-white" id="sidebar">
-        <a href="{% url 'profile' %}"
-           hx-get="{% url 'profile' %}" hx-target="#main-content" hx-push-url="true"
+        <a href="{% url 'welcome' %}"
+           hx-get="{% url 'welcome' %}" hx-target="#main-content" hx-push-url="true"
            class="sidebar-logo mb-4 d-block text-center">
             FIT<span>APP</span>
         </a>
