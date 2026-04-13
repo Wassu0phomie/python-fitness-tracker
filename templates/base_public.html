@@ -53,15 +53,15 @@
     {% block content %}{% endblock %}
 
     {% block extra_js %}{% endblock %}
+    <script>
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.transition = "opacity 0.6s ease";
+                    alert.style.opacity = "0";
+                    setTimeout(() => alert.remove(), 600);
+                });
+            }, 5000); // Исчезнет через 5 секунд
+    </script>
 </body>
 </html>
-<script>
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.transition = "opacity 0.6s ease";
-                alert.style.opacity = "0";
-                setTimeout(() => alert.remove(), 600);
-            });
-        }, 5000); // Исчезнет через 5 секунд
-</script>
