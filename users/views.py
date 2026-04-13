@@ -136,7 +136,7 @@ def register(request):
             # 2. Логика отправки письма
             current_site = get_current_site(request)
             mail_subject = 'Активация аккаунта FITAPP'
-            message = render_to_string('acc_active_email.html', {
+            message = render_to_string('registration/acc_active_email.html', {
                 'user': user,
                 'domain': current_site.domain,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
