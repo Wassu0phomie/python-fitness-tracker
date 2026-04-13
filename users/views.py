@@ -2,10 +2,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
+
+# Инструменты для генерации ссылки активации
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 
+# Инструменты для отправки почты
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+
+# Твои модели и формы
 from .models import CustomUser, UserProgress
 from .forms import CustomUserCreationForm, CustomUserUpdateForm, UserProgressUpdateForm
 from django.utils import timezone
