@@ -170,8 +170,8 @@ def activate(request, uidb64, token):
         user.is_active = True
         user.save()
         login(request, user)
-        messages.success(request, "Ваш аккаунт успешно активирован!")
-        return redirect('profile')
+        messages.success(request, f"Круто, {user.first_name}! Твой аккаунт активирован. Погнали тренироваться?")
+        return redirect('profile') 
     else:
-        messages.error(request, "Ссылка активации недействительна.")
-        return redirect('welcome')
+        messages.error(request, "Эта ссылка больше не работает.")
+        return redirect('login')
